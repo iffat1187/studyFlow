@@ -1,10 +1,354 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+
+
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+
+    <title>
+        Edit Subject | StudyFlow
+    </title>
+
 </head>
+
+
 <body>
 
+
+<div th:replace="~{layout :: layout(~{::section})}">
+
+
+    <section>
+
+
+        <!-- ============================
+             Page Header
+        ============================= -->
+
+        <div class="page-header">
+
+
+            <div>
+
+                <h1>
+
+                    <i class="bi bi-pencil-square"></i>
+
+                    Edit Subject
+
+                </h1>
+
+
+                <p>
+
+                    Update your subject information.
+
+                </p>
+
+
+            </div>
+
+
+        </div>
+
+
+
+
+
+        <!-- ============================
+             Edit Form Card
+        ============================= -->
+
+
+        <div class="card form-card">
+
+
+            <form
+
+                    th:action="@{/subjects/update}"
+
+                    th:object="${subjectDto}"
+
+                    method="post">
+
+
+
+                <!-- Hidden ID -->
+
+                <input
+
+                        type="hidden"
+
+                        th:field="*{id}">
+
+
+
+
+
+
+                <!-- Subject Name -->
+
+
+                <div class="form-group">
+
+
+                    <label>
+
+                        Subject Name
+
+                    </label>
+
+
+
+                    <input
+
+                            type="text"
+
+                            class="form-control"
+
+                            th:field="*{name}"
+
+                            placeholder="Enter subject name">
+
+
+
+                    <small
+
+                            class="error-message"
+
+                            th:if="${#fields.hasErrors('name')}"
+
+                            th:errors="*{name}">
+
+                    </small>
+
+
+                </div>
+
+
+
+
+
+
+
+
+                <!-- Description -->
+
+
+                <div class="form-group">
+
+
+                    <label>
+
+                        Description
+
+                    </label>
+
+
+
+                    <textarea
+
+                            class="form-control"
+
+                            rows="4"
+
+                            th:field="*{description}"
+
+                            placeholder="Write description">
+
+                </textarea>
+
+
+
+                    <small
+
+                            class="error-message"
+
+                            th:if="${#fields.hasErrors('description')}"
+
+                            th:errors="*{description}">
+
+                    </small>
+
+
+                </div>
+
+
+
+
+
+
+
+
+                <!-- Color Picker -->
+
+
+                <!-- ============================
+      Subject Color Picker
+ ============================= -->
+
+                <div class="form-group">
+
+                    <label>
+                        Choose Subject Color
+                    </label>
+
+                    <!-- Hidden field bound to SubjectDto -->
+                    <input
+                            type="hidden"
+                            th:field="*{color}"
+                            id="selectedColor">
+
+                    <div class="color-picker">
+
+                        <button
+                                type="button"
+                                class="color-circle purple"
+                                data-color="Purple"
+                                title="Purple">
+                        </button>
+
+                        <button
+                                type="button"
+                                class="color-circle blue"
+                                data-color="Blue"
+                                title="Blue">
+                        </button>
+
+                        <button
+                                type="button"
+                                class="color-circle green"
+                                data-color="Green"
+                                title="Green">
+                        </button>
+
+                        <button
+                                type="button"
+                                class="color-circle orange"
+                                data-color="Orange"
+                                title="Orange">
+                        </button>
+
+                        <button
+                                type="button"
+                                class="color-circle red"
+                                data-color="Red"
+                                title="Red">
+                        </button>
+
+                    </div>
+
+                    <small
+                            class="error-message"
+                            th:if="${#fields.hasErrors('color')}"
+                            th:errors="*{color}">
+                    </small>
+
+                </div>
+
+
+
+
+
+                <!-- Buttons -->
+
+
+                <div class="form-actions">
+
+
+
+                    <a
+
+                            th:href="@{/subjects}"
+
+                            class="btn-secondary">
+
+
+                        <i class="bi bi-arrow-left"></i>
+
+                        Cancel
+
+
+                    </a>
+
+
+
+
+
+                    <button
+
+                            type="submit"
+
+                            class="btn-primary">
+
+
+                        <i class="bi bi-check-circle"></i>
+
+                        Update Subject
+
+
+                    </button>
+
+
+
+                </div>
+
+
+
+            </form>
+
+
+        </div>
+
+
+
+    </section>
+
+
+
+</div>
+
+
+
+<script>
+
+
+    /*
+    =====================================================
+     Edit Page Color Selection
+    =====================================================
+    */
+
+
+    function selectColor(button){
+
+
+        const buttons =
+            document.querySelectorAll(".color-circle");
+
+
+        buttons.forEach(btn => {
+
+            btn.classList.remove("selected");
+
+        });
+
+
+
+        button.classList.add("selected");
+
+
+
+        document.getElementById("selectedColor").value =
+            button.dataset.color;
+
+
+    }
+
+</script>
+
+
+
 </body>
+
+
 </html>

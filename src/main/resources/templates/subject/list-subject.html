@@ -1,10 +1,252 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org">
+
+
 <body>
 
+
+<div th:replace="~{layout :: layout(~{::section})}">
+
+
+    <section>
+
+
+        <!-- ============================
+             Page Header
+        ============================= -->
+
+        <div class="page-header">
+
+
+            <div>
+
+                <h1>
+                    <i class="bi bi-book-half"></i>
+                    My Subjects
+                </h1>
+
+
+                <p>
+                    Manage your subjects and organize your learning.
+                </p>
+
+
+            </div>
+
+
+
+            <a th:href="@{/subjects/new}"
+               class="btn-primary">
+
+
+                <i class="bi bi-plus-circle"></i>
+
+                Add Subject
+
+
+            </a>
+
+
+        </div>
+
+
+
+
+
+        <!-- ============================
+             Search Section
+        ============================= -->
+
+
+        <div class="search-container">
+
+
+            <i class="bi bi-search"></i>
+
+
+            <input
+
+                    type="text"
+
+                    id="subjectSearch"
+
+                    placeholder="Search subject...">
+
+
+        </div>
+
+
+
+
+
+
+        <!-- ============================
+             Empty State
+        ============================= -->
+
+
+        <div class="empty-state"
+
+             th:if="${#lists.isEmpty(subjects)}">
+
+
+            <i class="bi bi-journal-plus"></i>
+
+
+            <h3>
+
+                No Subjects Added Yet
+
+            </h3>
+
+
+            <p>
+
+                Start by adding your first subject.
+
+            </p>
+
+
+
+            <a th:href="@{/subjects/new}"
+
+               class="btn-primary">
+
+
+                Create Subject
+
+
+            </a>
+
+
+        </div>
+
+
+
+
+
+
+
+
+        <!-- ============================
+             Subject Cards
+        ============================= -->
+
+
+        <div class="subject-grid"
+
+             th:unless="${#lists.isEmpty(subjects)}">
+
+
+            <div class="subject-card"
+
+                 th:each="subject : ${subjects}">
+
+
+
+                <!-- Color Indicator -->
+
+                <div class="subject-color"
+                     th:classappend="${#strings.toLowerCase(subject.color)}">
+
+                </div>
+
+
+
+
+
+                <!-- Content -->
+
+                <div class="subject-content">
+
+
+                    <h3 th:text="${subject.name}">
+                        Database
+                    </h3>
+
+
+
+                    <p th:text="${subject.description}">
+                        Description
+                    </p>
+
+
+
+
+
+                    <span class="subject-badge"
+
+                          th:text="${subject.color}">
+
+                    Purple
+
+                </span>
+
+
+                </div>
+
+
+
+
+
+
+
+                <!-- Actions -->
+
+
+                <div class="subject-actions">
+
+
+                    <a th:href="@{/subjects/edit/{id}(id=${subject.id})}"
+
+                       class="action-btn edit"
+
+                       title="Edit">
+
+
+                        <i class="bi bi-pencil-square"></i>
+
+
+                    </a>
+
+
+
+
+
+
+                    <a th:href="@{/subjects/delete/{id}(id=${subject.id})}"
+
+                       class="action-btn delete"
+
+                       title="Delete">
+
+
+                        <i class="bi bi-trash3"></i>
+
+
+                    </a>
+
+
+
+                </div>
+
+
+
+
+            </div>
+
+
+        </div>
+
+
+
+    </section>
+
+
+</div>
+
+
 </body>
+
+
 </html>

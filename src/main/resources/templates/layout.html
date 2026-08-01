@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(content)">
+
+<head>
+
+    <!-- ==========================================
+         Meta Information
+    =========================================== -->
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+
+    <!-- ==========================================
+         Page Title
+    =========================================== -->
+
+    <title>
+        StudyFlow | Smart Study Planner
+    </title>
+
+
+    <!-- ==========================================
+         Bootstrap Icons
+    =========================================== -->
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+
+    <!-- ==========================================
+         StudyFlow Main Stylesheet
+    =========================================== -->
+
+    <link rel="stylesheet"
+          th:href="@{/css/style.css}">
+
+</head>
+
+<body>
+
+
+<!-- ==========================================
+     Application Layout
+=========================================== -->
+
+<div class="app-layout">
+
+
+    <!-- ==========================================
+         Sidebar
+    =========================================== -->
+
+    <aside class="sidebar-wrapper">
+
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    </aside>
+
+
+
+    <!-- ==========================================
+         Main Content Area
+    =========================================== -->
+
+    <div class="main-content">
+
+
+        <!-- ==========================================
+             Navbar
+        =========================================== -->
+
+        <header class="navbar-wrapper">
+
+            <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+        </header>
+
+
+
+        <!-- ==========================================
+             Dynamic Page Content
+        =========================================== -->
+
+        <main class="page-content">
+
+            <div class="page-container">
+
+                <div th:replace="${content}"></div>
+
+            </div>
+
+        </main>
+
+
+
+        <!-- ==========================================
+             Footer
+        =========================================== -->
+
+        <footer class="footer-wrapper">
+
+            <div th:replace="~{fragments/footer :: footer}"></div>
+
+        </footer>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- ==========================================
+     Toast Notification Container
+=========================================== -->
+
+<div class="toast-container">
+
+</div>
+
+
+
+<!-- ==========================================
+     StudyFlow Main JavaScript
+=========================================== -->
+
+<script th:src="@{/js/script.js}"></script>
+
+</body>
+
+</html>

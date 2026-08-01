@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!--
+=========================================================
+    Top Navbar Fragment
+    Reusable across the entire StudyFlow application.
+=========================================================
+-->
+
+<div th:fragment="navbar">
+
+    <header class="top-navbar">
+
+        <!-- ==========================
+             Left Section
+        =========================== -->
+        <div class="navbar-left">
+
+            <!-- Sidebar Toggle -->
+            <button class="menu-toggle" id="menuToggle" title="Toggle Sidebar">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <!-- Current Page Title -->
+            <div class="page-heading">
+
+                <h2 class="page-title">
+                    Dashboard
+                </h2>
+
+                <p class="page-subtitle">
+                    Stay organized and achieve your study goals.
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- ==========================
+             Right Section
+        =========================== -->
+        <div class="navbar-right">
+
+            <!-- Search Box -->
+            <div class="search-box">
+
+                <i class="bi bi-search"></i>
+
+                <input
+                        type="text"
+                        id="globalSearch"
+                        placeholder="Search subjects, tasks, exams..."
+                        autocomplete="off">
+
+            </div>
+
+            <!-- Notification -->
+            <button class="icon-button" title="Notifications">
+
+                <i class="bi bi-bell"></i>
+
+                <span class="notification-badge">
+                    0
+                </span>
+
+            </button>
+
+            <!-- Theme Toggle (Future Feature) -->
+            <button
+                    class="icon-button"
+                    id="themeToggle"
+                    title="Dark / Light Mode">
+
+                <i class="bi bi-moon-stars"></i>
+
+            </button>
+
+            <!-- User Menu (Authentication Ready) -->
+            <div class="profile-menu">
+
+                <button
+                        class="profile-button"
+                        type="button">
+
+                    <div class="profile-avatar">
+
+                        <i class="bi bi-person-circle"></i>
+
+                    </div>
+
+                    <div class="profile-details">
+
+                        <span class="profile-name">
+
+                            Welcome
+
+                        </span>
+
+                        <small class="profile-role">
+
+                            Guest User
+
+                        </small>
+
+                    </div>
+
+                    <i class="bi bi-chevron-down profile-arrow"></i>
+
+                </button>
+
+                <!--
+                    After implementing authentication,
+                    this dropdown can contain:
+
+                    - My Profile
+                    - Settings
+                    - Logout
+                -->
+
+            </div>
+
+        </div>
+
+    </header>
+
+</div>
+
+</html>
