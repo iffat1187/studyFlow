@@ -194,3 +194,22 @@ function showToast(message, type = "success") {
     }, 3000);
 
 }
+
+/* ==========================
+   Scroll Progress
+========================== */
+
+const progress = document.getElementById("scrollProgress");
+
+window.addEventListener("scroll", () => {
+
+    const total =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+    const percent =
+        (window.scrollY / total) * 100;
+
+    progress.style.width = percent + "%";
+
+});

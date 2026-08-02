@@ -1,17 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<!--
-=========================================================
-    StudyFlow Sidebar Fragment
-    Reusable Sidebar Navigation
-=========================================================
--->
+<!-- =========================================================
+     StudyFlow Sidebar Fragment
+========================================================= -->
 
 <div th:fragment="sidebar">
 
     <aside class="sidebar">
-
 
         <!-- ==========================================
              Logo
@@ -23,7 +19,7 @@
 
                 <i class="bi bi-book-half logo-icon"></i>
 
-                <div>
+                <div class="logo-text">
 
                     <h2>
                         Study<span>Flow</span>
@@ -39,207 +35,200 @@
 
         </div>
 
-
-
         <!-- ==========================================
-             MAIN
+             Sidebar Body
         =========================================== -->
 
-        <div class="menu-title">
+        <div class="sidebar-body">
 
-            MAIN
+            <!-- ==========================
+                 MAIN
+            =========================== -->
+
+            <div class="menu-title">
+                MAIN
+            </div>
+
+            <nav class="sidebar-menu">
+
+                <ul>
+
+                    <li>
+
+                        <a th:href="@{/}">
+
+                            <i class="bi bi-grid-fill"></i>
+
+                            <span>Dashboard</span>
+
+                        </a>
+
+                    </li>
+
+                    <li>
+
+                        <!-- Active Page -->
+
+                        <a th:href="@{/subjects}" class="active">
+
+                            <i class="bi bi-book-half"></i>
+
+                            <span>Subjects</span>
+
+                        </a>
+
+                    </li>
+
+                    <li>
+
+                        <a href="#">
+
+                            <i class="bi bi-journal-text"></i>
+
+                            <span>Topics</span>
+
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            </nav>
+
+
+
+            <!-- ==========================
+                 PLANNING
+            =========================== -->
+
+            <div class="menu-title">
+                PLANNING
+            </div>
+
+            <nav class="sidebar-menu">
+
+                <ul>
+
+                    <li>
+
+                        <a href="#">
+
+                            <i class="bi bi-list-check"></i>
+
+                            <span>Tasks</span>
+
+                        </a>
+
+                    </li>
+
+                    <li>
+
+                        <a href="#">
+
+                            <i class="bi bi-stopwatch"></i>
+
+                            <span>Study Sessions</span>
+
+                        </a>
+
+                    </li>
+
+                    <li>
+
+                        <a href="#">
+
+                            <i class="bi bi-calendar-event"></i>
+
+                            <span>Exams</span>
+
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            </nav>
+
+
+
+            <!-- ==========================
+                 INSIGHTS
+            =========================== -->
+
+            <div class="menu-title">
+                INSIGHTS
+            </div>
+
+            <nav class="sidebar-menu">
+
+                <ul>
+
+                    <li>
+
+                        <a href="#">
+
+                            <i class="bi bi-bar-chart-line"></i>
+
+                            <span>Analytics</span>
+
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            </nav>
+
+
+
+            <!-- ==========================
+                 SYSTEM
+            =========================== -->
+
+            <div class="menu-title">
+                SYSTEM
+            </div>
+
+            <nav class="sidebar-menu">
+
+                <ul>
+
+                    <li>
+
+                        <a href="#">
+
+                            <i class="bi bi-gear"></i>
+
+                            <span>Settings</span>
+
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            </nav>
 
         </div>
 
-        <nav class="sidebar-menu">
-
-            <ul>
-
-                <li>
-
-                    <a th:href="@{/}">
-
-                        <i class="bi bi-grid-fill"></i>
-
-                        <span>Dashboard</span>
-
-                    </a>
-
-                </li>
-
-                <li>
-
-                    <a th:href="@{/subjects}">
-
-                        <i class="bi bi-book-half"></i>
-
-                        <span>Subjects</span>
-
-                    </a>
-
-                </li>
-
-                <li>
-
-                    <a href="#">
-
-                        <i class="bi bi-journal-text"></i>
-
-                        <span>Topics</span>
-
-                    </a>
-
-                </li>
-
-            </ul>
-
-        </nav>
-
-
 
 
         <!-- ==========================================
-             PLANNING
-        =========================================== -->
-
-        <div class="menu-title">
-
-            PLANNING
-
-        </div>
-
-        <nav class="sidebar-menu">
-
-            <ul>
-
-                <li>
-
-                    <a href="#">
-
-                        <i class="bi bi-list-check"></i>
-
-                        <span>Tasks</span>
-
-                    </a>
-
-                </li>
-
-                <li>
-
-                    <a href="#">
-
-                        <i class="bi bi-stopwatch"></i>
-
-                        <span>Study Sessions</span>
-
-                    </a>
-
-                </li>
-
-                <li>
-
-                    <a href="#">
-
-                        <i class="bi bi-calendar-event"></i>
-
-                        <span>Exams</span>
-
-                    </a>
-
-                </li>
-
-            </ul>
-
-        </nav>
-
-
-
-
-
-        <!-- ==========================================
-             INSIGHTS
-        =========================================== -->
-
-        <div class="menu-title">
-
-            INSIGHTS
-
-        </div>
-
-        <nav class="sidebar-menu">
-
-            <ul>
-
-                <li>
-
-                    <a href="#">
-
-                        <i class="bi bi-bar-chart-line"></i>
-
-                        <span>Analytics</span>
-
-                    </a>
-
-                </li>
-
-            </ul>
-
-        </nav>
-
-
-
-
-
-        <!-- ==========================================
-             SYSTEM
-        =========================================== -->
-
-        <div class="menu-title">
-
-            SYSTEM
-
-        </div>
-
-        <nav class="sidebar-menu">
-
-            <ul>
-
-                <li>
-
-                    <a href="#">
-
-                        <i class="bi bi-gear"></i>
-
-                        <span>Settings</span>
-
-                    </a>
-
-                </li>
-
-            </ul>
-
-        </nav>
-
-
-
-
-
-        <!-- ==========================================
-             Footer
+             Sidebar Footer
         =========================================== -->
 
         <div class="sidebar-footer">
 
+            <span class="version-badge">
+                Version 1.0
+            </span>
+
             <small>
-
-                StudyFlow v1.0
-
+                Spring Boot • JPA • MySQL
             </small>
 
             <small>
-
-                Spring Boot • JPA • MySQL
-
+                Crafted with ❤️ for students
             </small>
 
         </div>
