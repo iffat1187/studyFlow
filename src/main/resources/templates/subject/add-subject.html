@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-
 <head>
 
     <title>
@@ -10,30 +9,30 @@
 
 </head>
 
-
 <body>
-
 
 <div th:replace="~{layout :: layout(~{::section})}">
 
-
     <section>
-
 
         <!-- ============================
              Page Header
-        ============================= -->
+        ============================ -->
 
         <div class="page-header">
 
-            <h1>
-                <i class="bi bi-book-half"></i>
-                Add New Subject
-            </h1>
+            <div>
 
-            <p>
-                Create a subject to organize your study plan.
-            </p>
+                <h1>
+                    <i class="bi bi-book-half"></i>
+                    Add New Subject
+                </h1>
+
+                <p>
+                    Create a subject to organize your study plan.
+                </p>
+
+            </div>
 
         </div>
 
@@ -41,10 +40,9 @@
 
         <!-- ============================
              Subject Form Card
-        ============================= -->
+        ============================ -->
 
         <div class="card form-card">
-
 
             <form
                     th:action="@{/subjects/save}"
@@ -57,22 +55,22 @@
 
                 <div class="form-group">
 
-
-                    <label>
+                    <label for="name">
                         Subject Name
                     </label>
 
+                    <div class="input-with-icon">
 
-                    <input
+                        <i class="bi bi-book"></i>
 
-                            type="text"
+                        <input
+                                type="text"
+                                id="name"
+                                class="form-control"
+                                th:field="*{name}"
+                                placeholder="Example: Database Management System">
 
-                            class="form-control"
-
-                            th:field="*{name}"
-
-                            placeholder="Example: Database Management System">
-
+                    </div>
 
                     <!-- Validation Error -->
 
@@ -82,58 +80,42 @@
                             th:errors="*{name}">
                     </small>
 
-
                 </div>
-
 
 
 
                 <!-- Description -->
 
-
                 <div class="form-group">
 
-
-                    <label>
+                    <label for="description">
                         Description
                     </label>
 
-
                     <textarea
-
+                            id="description"
                             class="form-control"
-
                             rows="4"
-
                             th:field="*{description}"
-
                             placeholder="Write a short description...">
                     </textarea>
 
-
+                    <!-- Validation Error -->
 
                     <small
-
                             class="error-message"
-
                             th:if="${#fields.hasErrors('description')}"
-
                             th:errors="*{description}">
-
                     </small>
-
 
                 </div>
 
 
 
-
                 <!-- Color Selection -->
-
-
                 <!-- ============================
-      Subject Color Picker
- ============================= -->
+                     Subject Color Picker
+                ============================ -->
 
                 <div class="form-group">
 
@@ -141,133 +123,89 @@
                         Choose Subject Color
                     </label>
 
-
                     <!-- Hidden field connected with DTO -->
 
                     <input type="hidden"
                            th:field="*{color}"
                            id="selectedColor">
 
-
-
                     <div class="color-picker">
-
 
                         <button type="button"
                                 class="color-circle purple"
                                 data-color="Purple"
-                                title="Purple">
+                                title="Purple"
+                                aria-label="Select purple">
                         </button>
-
-
 
                         <button type="button"
                                 class="color-circle blue"
                                 data-color="Blue"
-                                title="Blue">
+                                title="Blue"
+                                aria-label="Select blue">
                         </button>
-
-
 
                         <button type="button"
                                 class="color-circle green"
                                 data-color="Green"
-                                title="Green">
+                                title="Green"
+                                aria-label="Select green">
                         </button>
-
-
 
                         <button type="button"
                                 class="color-circle orange"
                                 data-color="Orange"
-                                title="Orange">
+                                title="Orange"
+                                aria-label="Select orange">
                         </button>
-
-
 
                         <button type="button"
                                 class="color-circle red"
                                 data-color="Red"
-                                title="Red">
+                                title="Red"
+                                aria-label="Select red">
                         </button>
-
 
                     </div>
 
-
                 </div>
-
-
-
-
-
-
-
-
-
-
-
 
 
 
                 <!-- Buttons -->
 
-
                 <div class="form-actions">
 
-
                     <a
-
                             th:href="@{/subjects}"
-
-                            class="btn-secondary">
-
+                            class="btn btn-secondary">
 
                         <i class="bi bi-arrow-left"></i>
 
                         Back
 
-
                     </a>
 
-
-
-
                     <button
-
                             type="submit"
-
-                            class="btn-primary">
-
+                            class="btn btn-primary">
 
                         <i class="bi bi-save"></i>
 
                         Save Subject
 
-
                     </button>
-
-
 
                 </div>
 
-
-
             </form>
-
-
 
         </div>
 
-
-
     </section>
-
 
 </div>
 
-
 </body>
-
 
 </html>

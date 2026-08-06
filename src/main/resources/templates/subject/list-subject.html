@@ -10,13 +10,11 @@
 
     <section>
 
-
         <!-- ============================
              Page Header
         ============================= -->
 
         <div class="page-header">
-
 
             <div>
 
@@ -25,220 +23,132 @@
                     My Subjects
                 </h1>
 
-
                 <p>
-                    Manage your subjects and organize your learning.
+                    Manage your subjects and organize your learning journey.
                 </p>
-
 
             </div>
 
 
-
             <a th:href="@{/subjects/new}"
-               class="btn-primary">
+               class="btn btn-primary">
 
-
-                <i class="bi bi-plus-circle"></i>
+                <i class="bi bi-plus-lg"></i>
 
                 Add Subject
 
-
             </a>
 
-
         </div>
-
-
-
 
 
         <!-- ============================
-             Search Section
+             Search
         ============================= -->
-
 
         <div class="search-container">
 
-
             <i class="bi bi-search"></i>
 
-
             <input
-
                     type="text"
-
                     id="subjectSearch"
-
-                    placeholder="Search subject...">
-
+                    placeholder="Search subject..."
+                    autocomplete="off"
+                    aria-label="Search subjects">
 
         </div>
-
-
-
-
 
 
         <!-- ============================
              Empty State
         ============================= -->
 
-
-        <div class="empty-state"
-
+        <div class="empty-state fade-in"
              th:if="${#lists.isEmpty(subjects)}">
-
 
             <i class="bi bi-journal-plus"></i>
 
-
             <h3>
-
                 No Subjects Added Yet
-
             </h3>
 
-
             <p>
-
-                Start by adding your first subject.
-
+                Start by adding your first subject and take charge of your study plan.
             </p>
 
-
-
             <a th:href="@{/subjects/new}"
+               class="btn btn-primary">
 
-               class="btn-primary">
-
+                <i class="bi bi-plus-lg"></i>
 
                 Create Subject
 
-
             </a>
 
-
         </div>
-
-
-
-
-
-
 
 
         <!-- ============================
              Subject Cards
         ============================= -->
 
-
         <div class="subject-grid"
-
              th:unless="${#lists.isEmpty(subjects)}">
 
-
-            <div class="subject-card"
-
+            <div class="subject-card fade-in"
                  th:each="subject : ${subjects}">
 
-
-
                 <!-- Color Indicator -->
-
                 <div class="subject-color"
                      th:classappend="${#strings.toLowerCase(subject.color)}">
 
                 </div>
 
-
-
-
-
                 <!-- Content -->
-
                 <div class="subject-content">
-
 
                     <h3 th:text="${subject.name}">
                         Database
                     </h3>
 
-
-
                     <p th:text="${subject.description}">
                         Description
                     </p>
 
-
-
-
-
                     <span class="subject-badge"
-
                           th:text="${subject.color}">
-
-                    Purple
-
-                </span>
-
+                        Purple
+                    </span>
 
                 </div>
 
-
-
-
-
-
-
                 <!-- Actions -->
-
-
                 <div class="subject-actions">
 
-
                     <a th:href="@{/subjects/edit/{id}(id=${subject.id})}"
-
                        class="action-btn edit"
-
-                       title="Edit">
-
+                       title="Edit Subject"
+                       aria-label="Edit Subject">
 
                         <i class="bi bi-pencil-square"></i>
 
-
                     </a>
 
-
-
-
-
-
                     <a th:href="@{/subjects/delete/{id}(id=${subject.id})}"
-
                        class="action-btn delete"
-
-                       title="Delete">
-
+                       title="Delete Subject"
+                       aria-label="Delete Subject">
 
                         <i class="bi bi-trash3"></i>
 
-
                     </a>
-
-
 
                 </div>
 
-
-
-
             </div>
 
-
         </div>
-
-
 
     </section>
 
