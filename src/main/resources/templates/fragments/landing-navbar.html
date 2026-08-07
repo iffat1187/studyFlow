@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- =========================================================
+     StudyFlow Landing Navigation Fragment
+     Transparent initially, gains blur/background on scroll.
+========================================================== -->
+
+<div th:fragment="landingNavbar">
+
+    <header class="landing-navbar" id="landingNavbar">
+
+        <div class="landing-navbar__inner">
+
+            <!-- ==========================
+                 Logo
+            =========================== -->
+
+            <a href="#hero" class="landing-logo" aria-label="StudyFlow home">
+
+                <span class="landing-logo__icon">
+                    <i class="bi bi-book-half"></i>
+                </span>
+
+                <span class="landing-logo__text">
+                    Study<span>Flow</span>
+                </span>
+
+            </a>
+
+            <!-- ==========================
+                 Desktop Menu
+            =========================== -->
+
+            <nav class="landing-nav" id="landingNav" aria-label="Primary navigation">
+
+                <ul class="landing-menu">
+
+                    <li>
+                        <a href="#features" class="landing-menu__link">
+                            Features
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#benefits" class="landing-menu__link">
+                            Benefits
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#preview" class="landing-menu__link">
+                            Preview
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#faq" class="landing-menu__link">
+                            FAQ
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#contact" class="landing-menu__link">
+                            Contact
+                        </a>
+                    </li>
+
+                </ul>
+
+            </nav>
+
+            <!-- ==========================
+                 Actions
+            =========================== -->
+
+            <div class="landing-navbar__actions">
+
+                <a href="/login" class="landing-btn landing-btn--ghost">
+                    Sign In
+                </a>
+
+                <a href="/register" class="landing-btn landing-btn--primary">
+                    Register
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+
+            </div>
+
+            <!-- ==========================
+                 Mobile Toggle
+            =========================== -->
+
+            <button
+                    class="landing-hamburger"
+                    id="landingHamburger"
+                    type="button"
+                    aria-label="Toggle navigation menu"
+                    aria-expanded="false"
+                    aria-controls="landingNav">
+
+                <span class="landing-hamburger__bar"></span>
+                <span class="landing-hamburger__bar"></span>
+                <span class="landing-hamburger__bar"></span>
+
+            </button>
+
+        </div>
+
+    </header>
+
+</div>
+
+</html>
