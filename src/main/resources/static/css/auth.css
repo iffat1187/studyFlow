@@ -1,0 +1,275 @@
+/* =========================================================
+   StudyFlow — Authentication Pages Stylesheet (standalone)
+   Used by the registration page (login page will reuse it).
+   Matches the StudyFlow dark theme + purple gradient identity.
+========================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* =========================================================
+   1 · VARIABLES (StudyFlow palette)
+========================================================== */
+
+:root {
+  --a-bg: #0F172A;
+  --a-card: #1E293B;
+  --a-border: #334155;
+  --a-border-soft: rgba(148, 163, 184, 0.14);
+  --a-text: #F8FAFC;
+  --a-text-muted: #94A3B8;
+  --a-text-soft: #CBD5E1;
+  --a-primary: #8B5CF6;
+  --a-primary-dark: #6D28D9;
+  --a-red: #EF4444;
+  --a-green: #22C55E;
+  --a-gradient: linear-gradient(120deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%);
+  --a-radius: 14px;
+  --a-radius-sm: 10px;
+  --a-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* =========================================================
+   2 · BASE
+========================================================== */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.auth-page {
+  font-family: var(--a-font);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px 28px;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(124, 58, 237, 0.18), transparent 55%),
+    radial-gradient(ellipse at 90% 100%, rgba(139, 92, 246, 0.12), transparent 50%),
+    var(--a-bg);
+  color: var(--a-text);
+  overflow-x: hidden;
+  position: relative;
+}
+
+.auth-page ::selection {
+  background: rgba(139, 92, 246, 0.35);
+  color: var(--a-text);
+}
+
+.auth-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+}
+
+.auth-glow--one {
+  width: 420px;
+  height: 420px;
+  top: -160px;
+  left: -120px;
+  background: rgba(124, 58, 237, 0.2);
+}
+
+.auth-glow--two {
+  width: 360px;
+  height: 360px;
+  bottom: -140px;
+  right: -110px;
+  background: rgba(56, 189, 248, 0.1);
+}
+
+/* =========================================================
+   3 · CARD
+========================================================== */
+
+.auth-card {
+  position: relative;
+  width: min(460px, 100%);
+  background: var(--a-card);
+  border: 1px solid var(--a-border-soft);
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.7);
+}
+
+/* =========================================================
+   4 · LOGO + HEADING
+========================================================== */
+
+.auth-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--a-text);
+  text-decoration: none;
+}
+
+.auth-logo__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--a-gradient);
+  color: #fff;
+  font-size: 1.15rem;
+  box-shadow: 0 10px 24px -10px rgba(124, 58, 237, 0.8);
+}
+
+.auth-logo__text span {
+  color: var(--a-primary);
+}
+
+.auth-title {
+  margin-top: 26px;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+  margin-top: 8px;
+  color: var(--a-text-muted);
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   5 · FORM
+========================================================== */
+
+.auth-form {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auth-field label {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--a-text-soft);
+}
+
+.auth-field input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: var(--a-radius-sm);
+  border: 1px solid var(--a-border);
+  background: rgba(15, 23, 42, 0.55);
+  color: var(--a-text);
+  font-family: inherit;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-field input::placeholder {
+  color: #5b6b84;
+}
+
+.auth-field input:focus {
+  border-color: var(--a-primary);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.18);
+}
+
+.auth-field input.is-invalid {
+  border-color: var(--a-red);
+}
+
+.auth-error {
+  font-size: 0.82rem;
+  color: #fca5a5;
+}
+
+/* =========================================================
+   6 · BUTTON
+========================================================== */
+
+.auth-btn {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 50px;
+  border: none;
+  border-radius: var(--a-radius-sm);
+  background: var(--a-gradient);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 12px 30px -12px rgba(124, 58, 237, 0.8);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+}
+
+.auth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 38px -12px rgba(124, 58, 237, 0.9);
+}
+
+.auth-btn:active {
+  transform: translateY(0);
+}
+
+/* =========================================================
+   7 · ALT LINK + FOOTER
+========================================================== */
+
+.auth-alt {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--a-text-muted);
+}
+
+.auth-alt a {
+  color: var(--a-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-alt a:hover {
+  text-decoration: underline;
+}
+
+.auth-footer {
+  margin-top: 28px;
+  font-size: 0.8rem;
+  color: var(--a-text-muted);
+}
+
+/* =========================================================
+   8 · RESPONSIVE
+========================================================== */
+
+@media (max-width: 520px) {
+
+  .auth-card {
+    padding: 32px 24px;
+  }
+
+  .auth-title {
+    font-size: 1.4rem;
+  }
+
+}

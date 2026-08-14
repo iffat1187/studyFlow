@@ -45,6 +45,9 @@
                     th:object="${subjectDto}"
                     method="post">
 
+                <!-- CSRF token: required by Spring Security -->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
                 <!-- Hidden ID -->
 
                 <input
