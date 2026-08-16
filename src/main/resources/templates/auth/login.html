@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- =========================================================
+     StudyFlow — Login Page
+     Standalone public page (dark theme, purple gradient).
+     Reuses the registration page styling via auth.css.
+     Submits to Spring Security's form-login endpoint (/login)
+     using "email" as the username parameter.
+========================================================== -->
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sign in to your StudyFlow account.">
+
+    <title>Sign In · StudyFlow</title>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Authentication page styles (standalone) -->
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+
+</head>
+
+<body class="auth-page">
+
+    <!-- Decorative background glows -->
+    <div class="auth-glow auth-glow--one" aria-hidden="true"></div>
+    <div class="auth-glow auth-glow--two" aria-hidden="true"></div>
+
+    <main class="auth-card">
+
+        <!-- ==========================
+             Logo (links to landing page)
+        =========================== -->
+
+        <a th:href="@{/}" class="auth-logo" aria-label="StudyFlow home">
+
+            <span class="auth-logo__icon">
+                <i class="bi bi-book-half"></i>
+            </span>
+
+            <span class="auth-logo__text">
+                Study<span>Flow</span>
+            </span>
+
+        </a>
+
+        <h1 class="auth-title">Sign in to your account</h1>
+
+        <p class="auth-subtitle">
+            Organize subjects, plan tasks and track exams — all in one flow.
+        </p>
+
+        <!-- ==========================
+             Authentication error message
+             Shown when the URL contains ?error (failed login).
+             Generic message: never reveals whether the email exists.
+        =========================== -->
+
+        <div
+                class="auth-error auth-error--banner"
+                th:if="${param.error}"
+                role="alert"
+        >
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            Invalid email or password.
+        </div>
+
+        <!-- ==========================
+             Login Form
+             Posts to Spring Security's form-login processing URL (/login).
+             Field names must match SecurityConfig:
+             - "email" (usernameParameter)
+             - "password" (passwordParameter)
+        =========================== -->
+
+        <form class="auth-form" th:action="@{/login}" method="post">
+
+            <!-- CSRF token: required by Spring Security, kept enabled. -->
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <!-- Email -->
+
+            <div class="auth-field">
+
+                <label for="email">Email</label>
+
+                <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        required
+                        autofocus
+                >
+
+            </div>
+
+            <!-- Password -->
+
+            <div class="auth-field">
+
+                <label for="password">Password</label>
+
+                <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Your password"
+                        autocomplete="current-password"
+                        required
+                >
+
+            </div>
+
+            <!-- Submit -->
+
+            <button type="submit" class="auth-btn">
+                Sign In
+                <i class="bi bi-box-arrow-in-right"></i>
+            </button>
+
+        </form>
+
+        <!-- ==========================
+             Register link
+        =========================== -->
+
+        <p class="auth-alt">
+            Don't have an account?
+            <a th:href="@{/register}">Create one</a>
+        </p>
+
+    </main>
+
+    <footer class="auth-footer">
+        &copy; 2026 StudyFlow. All rights reserved.
+    </footer>
+
+</body>
+
+</html>

@@ -1,7 +1,10 @@
 package com.studyflow.studyflow.config;
 
+import com.studyflow.studyflow.security.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,17 +15,31 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 
 /**
- * Minimal Spring Security configuration for the public registration flow.
+ * Spring Security configuration for StudyFlow.
  *
- * NOTE: This is intentionally a PARTIAL configuration.
- * It only makes the landing page, registration page and static assets
- * publicly accessible while CSRF protection stays fully enabled.
- * Full authentication (login, logout, route protection, roles) will be
- * built out in a later authentication phase.
+ * Wires the existing authentication components together:
+ *
+ * AuthenticationProvider
+ *      ├── CustomUserDetailsService  (loads users by email)
+ *      └── PasswordEncoder           (BCrypt, handles password verification)
+ *
+ * The landing page, registration and login endpoints are public, while
+ * the application's feature routes are protected. Sessions are used for
+ * authentication. Logout is configured via Spring Security's built-in
+ * mechanism. CSRF protection remains enabled.
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final CustomUserDetailsService customUserDetailsService;
+
+    /**
+     * Constructor injection of the custom UserDetailsService.
+     */
+    public SecurityConfig(CustomUserDetailsService customUserDetailsService) {
+        this.customUserDetailsService = customUserDetailsService;
+    }
 
     /**
      * Password encoder used to hash user passwords before storing them.
@@ -37,9 +54,27 @@ public class SecurityConfig {
     }
 
     /**
-     * Minimal security filter chain.
+     * Authentication provider that combines the custom UserDetailsService
+     * with the application's PasswordEncoder.
+     *
+     * StudyFlow uses the user's EMAIL as the login identifier, and the
+     * CustomUserDetailsService resolves that email to a UserDetails object.
+     * The provider then validates the submitted password against the stored
+     * encoded password using the PasswordEncoder.
+     */
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(customUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    /**
+     * Security filter chain.
+     *
      * Public: landing page, registration, login, static assets, error page.
-     * Everything else remains authenticated.
+     * Protected: the application's feature routes (any request not listed
+     * as public requires authentication).
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -65,9 +100,16 @@ public class SecurityConfig {
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
                         .csrfTokenRepository(new HttpSessionCsrfTokenRepository())
                 )
-                .formLogin(Customizer.withDefaults())
-                .httpBasic(Customizer.withDefaults())
-                .logout(Customizer.withDefaults());
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
+                        .defaultSuccessUrl("/dashboard", true)
+                        .failureUrl("/login?error")
+                )
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/login")
+                );
 
         return http.build();
     }

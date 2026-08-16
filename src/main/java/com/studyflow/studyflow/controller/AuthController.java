@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 /**
- * Controller responsible for User registration.
+ * Controller responsible for the public authentication pages.
  *
- * Handles the public registration page and the registration
- * submission. Login, logout and route protection belong to
- * later authentication phases.
+ * Handles displaying the login and registration pages. Registration
+ * submission is processed here; login credentials are processed by
+ * Spring Security's form-login filter chain.
  */
 @Controller
 public class AuthController {
@@ -41,6 +41,18 @@ public class AuthController {
     public String showRegisterForm(Model model) {
         model.addAttribute("registerDto", new RegisterDto("", "", "", ""));
         return "auth/register";
+    }
+
+    /**
+     * Display the login page.
+     *
+     * Only renders the view. Spring Security processes the submitted
+     * credentials via the SecurityFilterChain, so no manual authentication
+     * happens here.
+     */
+    @GetMapping("/login")
+    public String showLoginForm() {
+        return "auth/login";
     }
 
     /**
