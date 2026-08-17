@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+
+<body>
+
+
+<div th:replace="~{layout :: layout(~{::section})}">
+
+
+    <section class="admin-dashboard">
+
+        <!-- ============================
+             Page Header
+        ============================= -->
+
+        <div class="page-header admin-page-header">
+
+            <div>
+
+                <h1>
+
+                    <i class="bi bi-shield-lock"></i>
+
+                    Admin Dashboard
+
+                </h1>
+
+                <p>
+                    Platform overview — what is happening across StudyFlow.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             KPI Summary Cards
+        ============================= -->
+
+        <div class="admin-kpi-grid">
+
+            <div class="admin-kpi">
+
+                <span class="admin-kpi__icon">
+                    <i class="bi bi-people-fill"></i>
+                </span>
+
+                <div class="admin-kpi__body">
+
+                    <span class="admin-kpi__label">Total Users</span>
+
+                    <strong class="admin-kpi__value"
+                            th:text="${data.totalUsers}">0</strong>
+
+                </div>
+
+            </div>
+
+            <div class="admin-kpi">
+
+                <span class="admin-kpi__icon admin-kpi__icon--accent">
+                    <i class="bi bi-book-half"></i>
+                </span>
+
+                <div class="admin-kpi__body">
+
+                    <span class="admin-kpi__label">Total Subjects</span>
+
+                    <strong class="admin-kpi__value"
+                            th:text="${data.totalSubjects}">0</strong>
+
+                </div>
+
+            </div>
+
+            <div class="admin-kpi">
+
+                <span class="admin-kpi__icon admin-kpi__icon--sky">
+                    <i class="bi bi-person-plus-fill"></i>
+                </span>
+
+                <div class="admin-kpi__body">
+
+                    <span class="admin-kpi__label">New This Month</span>
+
+                    <strong class="admin-kpi__value"
+                            th:text="${data.newUsersThisMonth}">0</strong>
+
+                </div>
+
+            </div>
+
+            <div class="admin-kpi">
+
+                <span class="admin-kpi__icon admin-kpi__icon--amber">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </span>
+
+                <div class="admin-kpi__body">
+
+                    <span class="admin-kpi__label">Admin Accounts</span>
+
+                    <strong class="admin-kpi__value"
+                            th:text="${data.adminCount}">0</strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Charts
+        ============================= -->
+
+        <div class="admin-chart-grid">
+
+            <div class="admin-card admin-chart">
+
+                <div class="admin-card__header">
+
+                    <h2 class="admin-card__title">
+
+                        <i class="bi bi-graph-up-arrow"></i>
+
+                        User Registration Trend
+
+                    </h2>
+
+                </div>
+
+                <div class="admin-chart__canvas">
+
+                    <canvas id="registrationTrendChart" aria-label="User registration trend chart" role="img"></canvas>
+
+                </div>
+
+            </div>
+
+            <div class="admin-card admin-chart">
+
+                <div class="admin-card__header">
+
+                    <h2 class="admin-card__title">
+
+                        <i class="bi bi-pie-chart-fill"></i>
+
+                        User Role Distribution
+
+                    </h2>
+
+                </div>
+
+                <div class="admin-chart__canvas">
+
+                    <canvas id="roleDistributionChart" aria-label="User role distribution chart" role="img"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Recent Users
+        ============================= -->
+
+        <div class="admin-card admin-recent">
+
+            <div class="admin-card__header">
+
+                <h2 class="admin-card__title">
+
+                    <i class="bi bi-clock-history"></i>
+
+                    Recent Users
+
+                </h2>
+
+            </div>
+
+            <div class="admin-table-wrap">
+
+                <table class="admin-table">
+
+                    <thead>
+
+                    <tr>
+
+                        <th>Name</th>
+
+                        <th>Email</th>
+
+                        <th>Role</th>
+
+                        <th>Registered</th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="user : ${data.recentUsers}">
+
+                        <td>
+
+                            <div class="admin-user">
+
+                                <span class="admin-avatar">
+                                    <i class="bi bi-person-fill"></i>
+                                </span>
+
+                                <span th:text="${user.name}">User Name</span>
+
+                            </div>
+
+                        </td>
+
+                        <td th:text="${user.email}">user@example.com</td>
+
+                        <td>
+
+                            <span class="admin-role-badge"
+                                  th:classappend="${#strings.equals(user.role.name(), 'ADMIN')}
+                                                  ? 'admin-role-badge--admin'
+                                                  : 'admin-role-badge--user'"
+                                  th:text="${user.role.name()}">USER</span>
+
+                        </td>
+
+                        <td
+                            th:text="${user.createdAt == null
+                                     ? '-'
+                                     : #temporals.format(user.createdAt, 'MMM d, yyyy')}">
+                            Jan 1, 2026
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+                <p class="admin-empty"
+                   th:if="${#lists.isEmpty(data.recentUsers)}">
+                    No registered users yet.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Quick Admin Actions
+        ============================= -->
+
+        <div class="admin-card admin-actions">
+
+            <div class="admin-card__header">
+
+                <h2 class="admin-card__title">
+
+                    <i class="bi bi-lightning-charge-fill"></i>
+
+                    Quick Admin Actions
+
+                </h2>
+
+            </div>
+
+            <div class="admin-actions__grid">
+
+                <a th:href="@{/subjects/new}" class="admin-action">
+
+                    <i class="bi bi-journal-plus"></i>
+
+                    <span>Add Subject</span>
+
+                </a>
+
+                <a th:href="@{/subjects}" class="admin-action">
+
+                    <i class="bi bi-journal-bookmark"></i>
+
+                    <span>View Subjects</span>
+
+                </a>
+
+                <a th:href="@{/dashboard}" class="admin-action">
+
+                    <i class="bi bi-grid"></i>
+
+                    <span>Student Dashboard</span>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Chart data transfer
+             Aggregated statistics only — no sensitive data.
+        =========================== -->
+
+        <script th:inline="javascript">
+            window.adminChartData = {
+                trendLabels: /*[[${data.trendLabels}]]*/ [],
+                trendCounts: /*[[${data.trendCounts}]]*/ [],
+                roleLabels: /*[[${data.roleLabels}]]*/ [],
+                roleCounts: /*[[${data.roleCounts}]]*/ []
+            };
+        </script>
+
+        <!-- Chart.js (CDN, consistent with the Bootstrap Icons CDN usage) -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+        <!-- Admin dashboard logic -->
+        <script th:src="@{/js/admin.js}"></script>
+
+    </section>
+
+
+</div>
+
+
+</body>
+
+</html>

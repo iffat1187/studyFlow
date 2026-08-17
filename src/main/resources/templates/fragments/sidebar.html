@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <!-- =========================================================
      StudyFlow Sidebar Fragment
@@ -178,6 +179,40 @@
                 </ul>
 
             </nav>
+
+
+
+            <!-- ==========================
+                 ADMIN (visible to ROLE_ADMIN only)
+            =========================== -->
+
+            <th:block sec:authorize="hasRole('ADMIN')">
+
+                <div class="menu-title">
+                    ADMIN
+                </div>
+
+                <nav class="sidebar-menu">
+
+                    <ul>
+
+                        <li>
+
+                            <a th:href="@{/admin/dashboard}">
+
+                                <i class="bi bi-shield-lock"></i>
+
+                                <span>Admin Dashboard</span>
+
+                            </a>
+
+                        </li>
+
+                    </ul>
+
+                </nav>
+
+            </th:block>
 
 
 

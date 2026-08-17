@@ -1,6 +1,7 @@
 package com.studyflow.studyflow.config;
 
 import com.studyflow.studyflow.security.CustomUserDetailsService;
+import com.studyflow.studyflow.security.RoleBasedAuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -33,12 +34,16 @@ import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
+    private final RoleBasedAuthenticationSuccessHandler authenticationSuccessHandler;
 
     /**
-     * Constructor injection of the custom UserDetailsService.
+     * Constructor injection of the custom UserDetailsService and the
+     * role-based authentication success handler.
      */
-    public SecurityConfig(CustomUserDetailsService customUserDetailsService) {
+    public SecurityConfig(CustomUserDetailsService customUserDetailsService,
+                          RoleBasedAuthenticationSuccessHandler authenticationSuccessHandler) {
         this.customUserDetailsService = customUserDetailsService;
+        this.authenticationSuccessHandler = authenticationSuccessHandler;
     }
 
     /**
@@ -117,7 +122,7 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .usernameParameter("email")
                         .passwordParameter("password")
-                        .defaultSuccessUrl("/dashboard", true)
+                        .successHandler(authenticationSuccessHandler)
                         .failureUrl("/login?error")
                 )
                 .logout(logout -> logout

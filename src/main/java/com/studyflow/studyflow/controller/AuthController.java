@@ -96,13 +96,12 @@ public class AuthController {
         String encodedPassword = passwordEncoder.encode(registerDto.password());
 
         // Backend assigns Role.USER. The form has no role field.
-        User user = new User(
-                null,
-                registerDto.name(),
-                registerDto.email(),
-                encodedPassword,
-                Role.USER
-        );
+        User user = User.builder()
+                .name(registerDto.name())
+                .email(registerDto.email())
+                .password(encodedPassword)
+                .role(Role.USER)
+                .build();
 
         userService.saveUser(user);
 

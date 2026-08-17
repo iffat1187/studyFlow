@@ -1,0 +1,309 @@
+/* =====================================================
+    StudyFlow Admin Dashboard Styles
+    admin.css — ADMIN dashboard specific styles.
+    The global design system lives in style.css; this file
+    only covers the admin dashboard grid, cards, charts,
+    recent-user table, quick actions and responsive layout.
+   ===================================================== */
+
+/* Admin page container */
+
+.admin-dashboard{
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+}
+
+/* ------------------------------------------------
+   Page Header
+------------------------------------------------ */
+
+.admin-page-header{
+    margin-bottom:0;
+}
+
+/* ------------------------------------------------
+   KPI Summary Cards
+------------------------------------------------ */
+
+.admin-kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:18px;
+}
+
+.admin-kpi{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:22px;
+    background:linear-gradient(135deg,rgba(30,41,59,.95),rgba(30,41,59,.78));
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:var(--radius-md);
+    transition:transform var(--transition),border-color var(--transition),box-shadow var(--transition);
+}
+
+.admin-kpi:hover{
+    transform:translateY(-4px);
+    border-color:rgba(139,92,246,.45);
+    box-shadow:0 12px 28px rgba(0,0,0,.28);
+}
+
+.admin-kpi__icon{
+    width:52px;
+    height:52px;
+    flex-shrink:0;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    color:#fff;
+    border-radius:var(--radius-md);
+    background:linear-gradient(135deg,#8B5CF6,#A78BFA);
+}
+
+.admin-kpi__icon--accent{
+    background:linear-gradient(135deg,#7C3AED,#38BDF8);
+}
+
+.admin-kpi__icon--sky{
+    background:linear-gradient(135deg,#0EA5E9,#38BDF8);
+}
+
+.admin-kpi__icon--amber{
+    background:linear-gradient(135deg,#8B5CF6,#6D28D9);
+}
+
+.admin-kpi__body{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:0;
+}
+
+.admin-kpi__label{
+    color:var(--text-muted);
+    font-size:12px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+}
+
+.admin-kpi__value{
+    color:#F8FAFC;
+    font-size:30px;
+    font-weight:800;
+    letter-spacing:-1px;
+    line-height:1.1;
+}
+
+/* ------------------------------------------------
+   Shared admin card
+------------------------------------------------ */
+
+.admin-card{
+    padding:22px;
+    background:linear-gradient(135deg,rgba(30,41,59,.95),rgba(30,41,59,.8));
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:var(--radius-md);
+    animation:fadeIn .5s ease;
+}
+
+.admin-card__header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    margin-bottom:18px;
+}
+
+.admin-card__title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:0;
+    color:#F8FAFC;
+    font-size:17px;
+    font-weight:700;
+    letter-spacing:-.3px;
+}
+
+.admin-card__title i{
+    color:var(--primary-light);
+    font-size:18px;
+}
+
+/* ------------------------------------------------
+   Charts
+------------------------------------------------ */
+
+.admin-chart-grid{
+    display:grid;
+    grid-template-columns:1.6fr 1fr;
+    gap:18px;
+}
+
+.admin-chart__canvas{
+    position:relative;
+    height:320px;
+}
+
+/* ------------------------------------------------
+   Recent Users table
+------------------------------------------------ */
+
+.admin-table-wrap{
+    overflow-x:auto;
+}
+
+.admin-table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:520px;
+}
+
+.admin-table th{
+    padding:12px 14px;
+    text-align:left;
+    font-size:11px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    color:var(--text-muted);
+    border-bottom:1px solid rgba(255,255,255,.08);
+    white-space:nowrap;
+}
+
+.admin-table td{
+    padding:13px 14px;
+    font-size:14px;
+    color:#F8FAFC;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    vertical-align:middle;
+    white-space:nowrap;
+}
+
+.admin-table tbody tr:last-child td{
+    border-bottom:none;
+}
+
+.admin-table tbody tr{
+    transition:background var(--transition);
+}
+
+.admin-table tbody tr:hover{
+    background:rgba(139,92,246,.06);
+}
+
+.admin-user{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.admin-avatar{
+    width:34px;
+    height:34px;
+    flex-shrink:0;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:15px;
+    color:#A78BFA;
+    background:rgba(139,92,246,.15);
+    border-radius:50%;
+}
+
+.admin-role-badge{
+    display:inline-flex;
+    align-items:center;
+    padding:4px 12px;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.4px;
+    border-radius:999px;
+}
+
+.admin-role-badge--admin{
+    color:#A78BFA;
+    background:rgba(139,92,246,.16);
+}
+
+.admin-role-badge--user{
+    color:#38BDF8;
+    background:rgba(56,189,248,.14);
+}
+
+.admin-empty{
+    padding:20px;
+    text-align:center;
+    color:var(--text-muted);
+    margin:0;
+}
+
+/* ------------------------------------------------
+   Quick Admin Actions
+------------------------------------------------ */
+
+.admin-actions__grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:14px;
+}
+
+.admin-action{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:16px 18px;
+    border-radius:var(--radius-md);
+    background:rgba(139,92,246,.08);
+    border:1px solid rgba(139,92,246,.25);
+    color:#F8FAFC;
+    text-decoration:none;
+    font-weight:500;
+    transition:all var(--transition);
+}
+
+.admin-action i{
+    color:var(--primary-light);
+    font-size:20px;
+}
+
+.admin-action:hover{
+    background:rgba(139,92,246,.16);
+    border-color:rgba(167,139,250,.5);
+    transform:translateY(-3px);
+}
+
+/* ------------------------------------------------
+   Responsive
+------------------------------------------------ */
+
+@media(max-width:992px){
+
+    .admin-chart-grid{
+        grid-template-columns:1fr;
+    }
+
+    .admin-chart__canvas{
+        height:300px;
+    }
+
+}
+
+@media(max-width:576px){
+
+    .admin-kpi-grid{
+        grid-template-columns:1fr;
+    }
+
+    .admin-chart__canvas{
+        height:250px;
+    }
+
+    .admin-card{
+        padding:18px;
+    }
+
+}

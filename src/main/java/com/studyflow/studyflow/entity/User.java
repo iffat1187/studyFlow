@@ -2,9 +2,12 @@ package com.studyflow.studyflow.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 /**
  * Entity class representing an authenticated application user.
@@ -14,8 +17,9 @@ import lombok.Setter;
 @Table(name = "users")
 @Getter
 @Setter
-@NoArgsConstructor // Required by JPA
-@AllArgsConstructor // Creates a constructor with all fields
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
     /**
@@ -54,4 +58,22 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    /**
+     * Registration timestamp of the user.
+     * Set automatically by JPA on first persist.
+     * Pre-existing rows are null until they have been re-saved.
+     */
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    /**
+     * Populates the registration timestamp on insert.
+     */
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 }
