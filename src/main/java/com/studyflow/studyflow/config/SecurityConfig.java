@@ -121,7 +121,8 @@ public class SecurityConfig {
                         .failureUrl("/login?error")
                 )
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/login")
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/")
                 );
 
         return http.build();

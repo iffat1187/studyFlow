@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <!-- =========================================================
      StudyFlow — Public Landing Page
@@ -67,8 +68,15 @@
 
                 <div class="landing-hero__actions reveal reveal--up">
 
-                    <a href="/register" class="landing-btn landing-btn--primary landing-btn--lg">
+                    <a href="/register" class="landing-btn landing-btn--primary landing-btn--lg"
+                       sec:authorize="isAnonymous()">
                         Get Started Free
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+
+                    <a href="/dashboard" class="landing-btn landing-btn--primary landing-btn--lg"
+                       sec:authorize="isAuthenticated()">
+                        Go to Dashboard
                         <i class="bi bi-arrow-right"></i>
                     </a>
 
@@ -848,7 +856,8 @@
 
                 <div class="landing-cta__actions">
 
-                    <a href="/register" class="landing-btn landing-btn--primary landing-btn--lg">
+                    <a href="/register" class="landing-btn landing-btn--primary landing-btn--lg"
+                       sec:authorize="isAnonymous()">
                         Create Free Account
                         <i class="bi bi-arrow-right"></i>
                     </a>

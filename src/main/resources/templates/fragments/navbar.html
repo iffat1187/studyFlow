@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <!--
 =========================================================
     Top Navbar Fragment
     Reusable across the entire StudyFlow application.
+    Authentication-aware: shows the signed-in user's
+    email and role plus a Spring Security logout control.
 =========================================================
 -->
 
@@ -76,12 +79,14 @@
 
             </button>
 
-            <!-- User Menu (Authentication Ready) -->
+            <!-- User Menu -->
             <div class="profile-menu">
 
                 <button
                         class="profile-button"
-                        type="button">
+                        type="button"
+                        aria-haspopup="true"
+                        aria-expanded="false">
 
                     <div class="profile-avatar">
 
@@ -91,15 +96,19 @@
 
                     <div class="profile-details">
 
-                        <span class="profile-name">
+                        <span class="profile-name"
 
-                            Welcome
+                              th:text="'Welcome, ' + ${#authentication.name}">
+
+                            Welcome, user@example.com
 
                         </span>
 
                         <small class="profile-role">
 
-                            Guest User
+                            <span sec:authorize="hasRole('ADMIN')">ADMIN</span>
+
+                            <span sec:authorize="hasRole('USER')">USER</span>
 
                         </small>
 
@@ -110,13 +119,36 @@
                 </button>
 
                 <!--
-                    After implementing authentication,
-                    this dropdown can contain:
-
-                    - My Profile
-                    - Settings
-                    - Logout
+                    Profile dropdown.
+                    Only Logout is functional in this phase.
                 -->
+
+                <div class="profile-dropdown">
+
+                    <form
+                            class="profile-dropdown__form"
+                            th:action="@{/logout}"
+                            method="post">
+
+                        <!-- CSRF token: required by Spring Security, kept enabled. -->
+                        <input
+                                type="hidden"
+                                th:name="${_csrf.parameterName}"
+                                th:value="${_csrf.token}"/>
+
+                        <button
+                                type="submit"
+                                class="profile-dropdown__link">
+
+                            <i class="bi bi-box-arrow-right"></i>
+
+                            <span>Logout</span>
+
+                        </button>
+
+                    </form>
+
+                </div>
 
             </div>
 

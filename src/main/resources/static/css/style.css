@@ -641,6 +641,63 @@ ol{
     font-size:12px;
 }
 
+.profile-menu{
+    position:relative;
+}
+
+.profile-dropdown{
+    position:absolute;
+    top:calc(100% + 8px);
+    right:0;
+    min-width:210px;
+    padding:8px;
+    background:var(--bg-card);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:var(--radius-md);
+    box-shadow:0 12px 32px rgba(0,0,0,.4);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(8px);
+    transition:all var(--transition);
+    z-index:1000;
+}
+
+.profile-menu:hover .profile-dropdown,
+.profile-menu:focus-within .profile-dropdown{
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+}
+
+.profile-dropdown__form{
+    margin:0;
+}
+
+.profile-dropdown__link{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    padding:10px 12px;
+    border:none;
+    background:none;
+    color:#fff;
+    font-size:14px;
+    font-weight:500;
+    border-radius:var(--radius-sm);
+    cursor:pointer;
+    transition:background var(--transition);
+}
+
+.profile-dropdown__link i{
+    font-size:16px;
+    color:var(--primary-light);
+}
+
+.profile-dropdown__link:hover{
+    background:rgba(139,92,246,.14);
+}
+
 
 /* =====================================================
    8. Typography
