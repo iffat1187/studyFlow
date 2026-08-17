@@ -60,6 +60,16 @@ public class User {
     private Role role;
 
     /**
+     * Account status. A disabled user cannot authenticate.
+     *
+     * New accounts are enabled by default. The DDL default keeps existing
+     * rows enabled when the column is added to an already populated table.
+     */
+    @Builder.Default
+    @Column(name = "enabled", columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private boolean enabled = true;
+
+    /**
      * Registration timestamp of the user.
      * Set automatically by JPA on first persist.
      * Pre-existing rows are null until they have been re-saved.

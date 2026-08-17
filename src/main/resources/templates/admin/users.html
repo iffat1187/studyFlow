@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+
+<body>
+
+
+<div th:replace="~{layout :: layout(~{::section})}">
+
+
+    <section class="admin-dashboard">
+
+        <!-- ============================
+             Page Header
+        ============================= -->
+
+        <div class="page-header admin-page-header">
+
+            <div>
+
+                <h1>
+                    <i class="bi bi-people-fill"></i>
+                    Manage Users
+                </h1>
+
+                <p>
+                    Search, filter and manage every StudyFlow account.
+                </p>
+
+            </div>
+
+            <a th:href="@{/admin/dashboard}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i>
+                Back to Dashboard
+            </a>
+
+        </div>
+
+
+        <!-- ============================
+             Search + Role Filter
+        ============================= -->
+
+        <form th:action="@{/admin/users}" method="get" class="admin-filter-bar">
+
+            <div class="admin-filter-field">
+
+                <label for="search">Search</label>
+
+                <div class="admin-filter-input">
+
+                    <i class="bi bi-search"></i>
+
+                    <input type="text" id="search" name="search"
+                           th:value="${search}"
+                           placeholder="Name or email...">
+
+                </div>
+
+            </div>
+
+            <div class="admin-filter-field">
+
+                <label for="role">Role</label>
+
+                <select id="role" name="role">
+
+                    <option value="">All roles</option>
+
+                    <option th:each="r : ${roles}"
+                            th:value="${r.name()}"
+                            th:text="${r.name()}"
+                            th:selected="${filterRole != null and filterRole.name() == r.name()}">
+                        USER
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="admin-filter-actions">
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel"></i>
+                    Filter
+                </button>
+
+                <a th:href="@{/admin/users}" class="btn btn-ghost">
+                    Clear
+                </a>
+
+            </div>
+
+        </form>
+
+
+        <!-- ============================
+             Users Table
+        ============================= -->
+
+        <div class="admin-card admin-recent">
+
+            <div class="admin-card__header">
+
+                <h2 class="admin-card__title">
+                    <i class="bi bi-person-lines-fill"></i>
+                    All Users
+                    <span class="admin-count-badge" th:text="${#lists.size(users)}">0</span>
+                </h2>
+
+            </div>
+
+            <div class="admin-table-wrap">
+
+                <table class="admin-table">
+
+                    <thead>
+
+                    <tr>
+
+                        <th>User</th>
+
+                        <th>Role</th>
+
+                        <th>Status</th>
+
+                        <th>Registered</th>
+
+                        <th class="admin-table__actions">Actions</th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="u : ${users}">
+
+                        <td>
+
+                            <a th:href="@{/admin/users/{id}(id=${u.id})}" class="admin-user">
+
+                                <span class="admin-avatar">
+                                    <i class="bi bi-person-fill"></i>
+                                </span>
+
+                                <span class="admin-user__text">
+
+                                    <span th:text="${u.name}">User Name</span>
+
+                                    <small th:text="${u.email}">user@example.com</small>
+
+                                </span>
+
+                            </a>
+
+                        </td>
+
+                        <td>
+
+                            <span class="admin-role-badge"
+                                  th:classappend="${#strings.equals(u.role.name(), 'ADMIN')}
+                                                  ? 'admin-role-badge--admin'
+                                                  : 'admin-role-badge--user'"
+                                  th:text="${u.role.name()}">USER</span>
+
+                        </td>
+
+                        <td>
+
+                            <span class="admin-status-badge"
+                                  th:classappend="${u.enabled}
+                                                  ? 'admin-status-badge--enabled'
+                                                  : 'admin-status-badge--disabled'">
+                                <i class="bi bi-circle-fill"></i>
+                                <span th:text="${u.enabled ? 'Active' : 'Disabled'}">Active</span>
+                            </span>
+
+                        </td>
+
+                        <td
+                            th:text="${u.createdAt == null
+                                     ? '-'
+                                     : #temporals.format(u.createdAt, 'MMM d, yyyy')}">
+                            Jan 1, 2026
+                        </td>
+
+                        <td class="admin-table__actions">
+
+                            <div class="admin-action-group">
+
+                                <a th:href="@{/admin/users/{id}(id=${u.id})}"
+                                   class="btn btn-sm btn-ghost"
+                                   title="View details">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                                <form th:action="@{/admin/users/{id}/enable(id=${u.id})}"
+                                      method="post" class="admin-inline-form">
+
+                                    <button type="submit" class="btn btn-sm"
+                                            th:classappend="${u.enabled
+                                                             ? 'btn-ghost'
+                                                             : 'btn-primary'}"
+                                            th:title="${u.enabled
+                                                       ? 'Disable account'
+                                                       : 'Enable account'}">
+                                        <i class="bi"
+                                           th:classappend="${u.enabled
+                                                            ? 'bi-pause-circle'
+                                                            : 'bi-play-circle'}"></i>
+                                    </button>
+
+                                </form>
+
+                                <form th:action="@{/admin/users/{id}/delete(id=${u.id})}"
+                                      method="post" class="admin-inline-form admin-delete-form"
+                                      th:attr="data-user-name=${u.name}">
+
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                            title="Delete user">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+                <p class="admin-empty"
+                   th:if="${#lists.isEmpty(users)}">
+                    No users match your filters.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Flash toasts (PRG feedback)
+        ============================= -->
+
+        <div th:replace="~{fragments/flash :: flashToasts}"></div>
+
+
+        <!-- User-management JS (delete confirmation) -->
+        <script th:src="@{/js/admin-users.js}"></script>
+
+    </section>
+
+
+</div>
+
+
+</body>
+
+</html>

@@ -49,6 +49,16 @@ public class AdminDashboardData {
     private long adminCount;
 
     /**
+     * Number of users with enabled accounts.
+     */
+    private long activeCount;
+
+    /**
+     * Number of users with disabled accounts.
+     */
+    private long disabledCount;
+
+    /**
      * Role labels ("USER", "ADMIN") for the role distribution chart.
      */
     private List<String> roleLabels;

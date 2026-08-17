@@ -75,4 +75,51 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return a list of at most five users, newest first
      */
     List<User> findTop5ByOrderByCreatedAtDesc();
+
+    /**
+     * All users, newest registered first. Backs the admin user list.
+     *
+     * @return all users
+     */
+    List<User> findAllByOrderByCreatedAtDesc();
+
+    /**
+     * Search users whose name or email contains the term (case-insensitive),
+     * newest registered first.
+     *
+     * @param nameTerm term matched against name
+     * @param emailTerm term matched against email
+     * @return matching users
+     */
+    List<User> findByEmailContainingIgnoreCaseOrNameContainingIgnoreCaseOrderByCreatedAtDesc(
+            String emailTerm, String nameTerm);
+
+    /**
+     * Users with the given role, newest registered first.
+     *
+     * @param role the role to filter by
+     * @return matching users
+     */
+    List<User> findByRoleOrderByCreatedAtDesc(Role role);
+
+    /**
+     * Users matching a role AND a name/email term (case-insensitive),
+     * newest registered first.
+     *
+     * @param role the role to filter by
+     * @param emailTerm term matched against email
+     * @param roleAgain the same role (Spring Data OR-expansion)
+     * @param nameTerm term matched against name
+     * @return matching users
+     */
+    List<User> findByRoleAndEmailContainingIgnoreCaseOrRoleAndNameContainingIgnoreCaseOrderByCreatedAtDesc(
+            Role role, String emailTerm, Role roleAgain, String nameTerm);
+
+    /**
+     * Count users by their account status.
+     *
+     * @param enabled whether the accounts are enabled
+     * @return the number of matching users
+     */
+    long countByEnabled(boolean enabled);
 }

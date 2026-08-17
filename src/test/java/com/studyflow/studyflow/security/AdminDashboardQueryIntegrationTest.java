@@ -34,9 +34,14 @@ class AdminDashboardQueryIntegrationTest {
         assertTrue(data.getNewUsersThisMonth() >= 0);
         assertTrue(data.getUserCount() >= 0);
         assertTrue(data.getAdminCount() >= 0);
+        assertTrue(data.getActiveCount() >= 0);
+        assertTrue(data.getDisabledCount() >= 0);
 
         // count() and the role GROUP BY must agree on the same pool.
         assertEquals(data.getTotalUsers(), data.getUserCount() + data.getAdminCount());
+
+        // Every account is either enabled or disabled.
+        assertEquals(data.getTotalUsers(), data.getActiveCount() + data.getDisabledCount());
 
         // Chart series must be aligned.
         assertEquals(data.getTrendLabels().size(), data.getTrendCounts().size());

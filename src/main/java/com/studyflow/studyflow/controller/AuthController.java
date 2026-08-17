@@ -101,6 +101,7 @@ public class AuthController {
                 .email(registerDto.email())
                 .password(encodedPassword)
                 .role(Role.USER)
+                .enabled(true)
                 .build();
 
         userService.saveUser(user);

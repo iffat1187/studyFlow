@@ -277,6 +277,327 @@
 }
 
 /* ------------------------------------------------
+   Buttons — admin extras (small / ghost / warning)
+----------------------------------------------- */
+
+.btn-sm{
+    padding:9px 12px;
+    font-size:13px;
+}
+
+.btn-sm i{
+    font-size:15px;
+}
+
+.btn-ghost{
+    color:#CBD5E1;
+    background:transparent;
+    border:1px solid var(--border);
+}
+
+.btn-ghost:hover{
+    background:rgba(255,255,255,.06);
+    border-color:rgba(255,255,255,.18);
+    color:#fff;
+    transform:translateY(-2px);
+}
+
+.btn-warning{
+    color:#1E1B4B;
+    background:linear-gradient(135deg,#FBBF24,#F59E0B);
+    box-shadow:0 8px 22px rgba(245,158,11,.30);
+}
+
+.btn-warning:hover{
+    transform:translateY(-3px);
+    box-shadow:0 12px 28px rgba(245,158,11,.45);
+}
+
+/* ------------------------------------------------
+   Admin User Management
+----------------------------------------------- */
+
+/* Filter bar */
+
+.admin-filter-bar{
+    display:flex;
+    align-items:flex-end;
+    gap:14px;
+    flex-wrap:wrap;
+    padding:18px;
+    background:linear-gradient(135deg,rgba(30,41,59,.95),rgba(30,41,59,.8));
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:var(--radius-md);
+}
+
+.admin-filter-field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    flex:1;
+    min-width:200px;
+}
+
+.admin-filter-field label{
+    font-size:11px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    color:var(--text-muted);
+}
+
+.admin-filter-input{
+    position:relative;
+}
+
+.admin-filter-input i{
+    position:absolute;
+    left:12px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--text-muted);
+    font-size:15px;
+    pointer-events:none;
+}
+
+.admin-filter-input input{
+    width:100%;
+    padding:11px 12px 11px 36px;
+    background:rgba(15,23,42,.6);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    color:#F8FAFC;
+    font-size:14px;
+    transition:border-color var(--transition);
+}
+
+.admin-filter-input input:focus{
+    outline:none;
+    border-color:var(--primary);
+}
+
+.admin-filter-field select{
+    padding:11px 12px;
+    background:rgba(15,23,42,.6);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    color:#F8FAFC;
+    font-size:14px;
+    cursor:pointer;
+}
+
+.admin-filter-field select:focus{
+    outline:none;
+    border-color:var(--primary);
+}
+
+.admin-filter-actions{
+    display:flex;
+    align-items:flex-end;
+    gap:10px;
+}
+
+/* Count badge */
+
+.admin-count-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:22px;
+    height:22px;
+    padding:0 7px;
+    font-size:12px;
+    font-weight:700;
+    color:#A78BFA;
+    background:rgba(139,92,246,.16);
+    border-radius:999px;
+}
+
+/* List table user cell */
+
+.admin-user__text{
+    display:flex;
+    flex-direction:column;
+    gap:1px;
+}
+
+.admin-user__text small{
+    color:var(--text-muted);
+    font-size:12px;
+}
+
+/* Status badge */
+
+.admin-status-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 12px;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.4px;
+    border-radius:999px;
+}
+
+.admin-status-badge i{
+    font-size:8px;
+}
+
+.admin-status-badge--enabled{
+    color:#4ADE80;
+    background:rgba(34,197,94,.14);
+}
+
+.admin-status-badge--disabled{
+    color:#94A3B8;
+    background:rgba(100,116,139,.16);
+}
+
+/* Actions column */
+
+.admin-table th.admin-table__actions,
+.admin-table td.admin-table__actions{
+    text-align:right;
+}
+
+.admin-action-group{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+}
+
+.admin-inline-form{
+    display:inline-flex;
+    margin:0;
+}
+
+/* Details page overview */
+
+.admin-user-overview{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    margin-bottom:22px;
+}
+
+.admin-avatar--large{
+    width:64px;
+    height:64px;
+    font-size:26px;
+}
+
+.admin-user-overview__text h2{
+    margin:0 0 2px;
+    color:#F8FAFC;
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:-.4px;
+}
+
+.admin-user-overview__text p{
+    margin:0 0 8px;
+    color:var(--text-muted);
+    font-size:14px;
+}
+
+.admin-user-overview__badges{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+/* Detail info rows */
+
+.admin-detail-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:14px;
+}
+
+.admin-detail-item{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    padding:14px 16px;
+    background:rgba(15,23,42,.5);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:var(--radius-sm);
+}
+
+.admin-detail-item__label{
+    font-size:11px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    color:var(--text-muted);
+}
+
+.admin-detail-item__value{
+    color:#F8FAFC;
+    font-size:16px;
+    font-weight:700;
+}
+
+/* Account management cards */
+
+.admin-management-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:16px;
+}
+
+.admin-management{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    padding:16px;
+    background:rgba(15,23,42,.5);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:var(--radius-sm);
+}
+
+.admin-management--danger{
+    border-color:rgba(239,68,68,.25);
+    background:rgba(127,29,29,.12);
+}
+
+.admin-management__title{
+    font-size:13px;
+    font-weight:700;
+    color:#F8FAFC;
+}
+
+.admin-management__hint{
+    margin:0;
+    font-size:13px;
+    color:var(--text-muted);
+    line-height:1.5;
+}
+
+.admin-management__form{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    align-items:stretch;
+}
+
+.admin-management select{
+    padding:11px 12px;
+    background:rgba(15,23,42,.6);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    color:#F8FAFC;
+    font-size:14px;
+    cursor:pointer;
+}
+
+.admin-management select:focus{
+    outline:none;
+    border-color:var(--primary);
+}
+
+/* ------------------------------------------------
    Responsive
 ------------------------------------------------ */
 

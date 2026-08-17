@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- =========================================================
+     StudyFlow Flash Toast Fragment
+     Renders server-side flash attributes (successMessage /
+     errorMessage, typically set via RedirectAttributes) into
+     the global toast system from static/js/script.js.
+     Each inline expression sits on its own line on purpose —
+     combined expressions triggered template parse errors before.
+========================================================= -->
+
+<div th:fragment="flashToasts">
+    <script th:inline="javascript">
+        window.addEventListener("DOMContentLoaded", function () {
+
+            var successMessage = /*[[${successMessage}]]*/ null;
+
+            var errorMessage = /*[[${errorMessage}]]*/ null;
+
+            if (successMessage) {
+                window.showToast(successMessage, "success");
+            }
+
+            if (errorMessage) {
+                window.showToast(errorMessage, "error");
+            }
+
+        });
+    </script>
+</div>
+
+</html>

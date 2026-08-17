@@ -62,4 +62,15 @@ class CustomUserDetailsServiceTest {
 
         assertTrue(details.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")));
     }
+
+    @Test
+    void loadUserByUsername_disabledUser_isMarkedDisabled() {
+        User disabled = user(3L, "disabled@example.com", "encoded", Role.USER);
+        disabled.setEnabled(false);
+        when(userRepository.findByEmail("disabled@example.com")).thenReturn(Optional.of(disabled));
+
+        UserDetails details = service.loadUserByUsername("disabled@example.com");
+
+        assertFalse(details.isEnabled());
+    }
 }

@@ -55,6 +55,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     public AdminDashboardData getDashboardData() {
 
         long totalUsers = userRepository.count();
+        long activeCount = userRepository.countByEnabled(true);
 
         Map<Role, Long> roleCounts = countUsersByRole();
 
@@ -73,6 +74,8 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 .newUsersThisMonth(userRepository.countUsersCreatedSince(monthStart))
                 .userCount(roleCounts.getOrDefault(Role.USER, 0L))
                 .adminCount(roleCounts.getOrDefault(Role.ADMIN, 0L))
+                .activeCount(activeCount)
+                .disabledCount(totalUsers - activeCount)
                 .roleLabels(roleLabels)
                 .roleCounts(roleCountValues)
                 .trendLabels(new ArrayList<>(registrations.keySet()))
