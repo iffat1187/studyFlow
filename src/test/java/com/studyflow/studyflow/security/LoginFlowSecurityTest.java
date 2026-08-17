@@ -20,6 +20,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+
 /**
  * End-to-end security integration test that exercises the real
  * SecurityFilterChain, AuthenticationProvider, CustomUserDetailsService
@@ -100,5 +102,35 @@ class LoginFlowSecurityTest {
     void loginPage_isPublic() throws Exception {
         mockMvc.perform(get("/login"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void user_cannotAccessAdminRoute() throws Exception {
+        mockMvc.perform(get("/admin/")
+                        .with(SecurityMockMvcRequestPostProcessors.user("test@example.com").roles("USER")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void admin_canPassAdminRouteAuthorization() throws Exception {
+        // A 404 (no admin controller) rather than 403 proves the ADMIN
+        // role passed the /admin/** authorization rule.
+        mockMvc.perform(get("/admin/")
+                        .with(SecurityMockMvcRequestPostProcessors.user("admin@example.com").roles("ADMIN")))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void user_canAccessAuthenticatedRoutes() throws Exception {
+        mockMvc.perform(get("/subjects")
+                        .with(SecurityMockMvcRequestPostProcessors.user("test@example.com").roles("USER")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void unauthenticated_adminRoute_redirectsToLogin() throws Exception {
+        mockMvc.perform(get("/admin/"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 }

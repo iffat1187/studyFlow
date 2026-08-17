@@ -21,6 +21,9 @@
     <!-- Register page styles (standalone) -->
     <link rel="stylesheet" th:href="@{/css/auth.css}">
 
+    <!-- Authentication page scripts -->
+    <script th:src="@{/js/auth.js}" defer></script>
+
 </head>
 
 <body class="auth-page">
@@ -105,14 +108,30 @@
 
                 <label for="password">Password</label>
 
-                <input
-                        type="password"
-                        id="password"
-                        th:field="*{password}"
-                        placeholder="At least 6 characters"
-                        autocomplete="new-password"
-                        th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
-                >
+                <div class="password-wrapper">
+
+                    <input
+                            type="password"
+                            id="password"
+                            th:field="*{password}"
+                            placeholder="At least 6 characters"
+                            autocomplete="new-password"
+                            th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                    >
+
+                    <button
+                            type="button"
+                            class="password-toggle"
+                            data-label-show="Show password"
+                            data-label-hide="Hide password"
+                            aria-label="Show password"
+                            aria-pressed="false"
+                            tabindex="0"
+                    >
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
+
+                </div>
 
                 <p class="auth-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
 
@@ -124,14 +143,30 @@
 
                 <label for="confirmPassword">Confirm Password</label>
 
-                <input
-                        type="password"
-                        id="confirmPassword"
-                        th:field="*{confirmPassword}"
-                        placeholder="Repeat your password"
-                        autocomplete="new-password"
-                        th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
-                >
+                <div class="password-wrapper">
+
+                    <input
+                            type="password"
+                            id="confirmPassword"
+                            th:field="*{confirmPassword}"
+                            placeholder="Repeat your password"
+                            autocomplete="new-password"
+                            th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
+                    >
+
+                    <button
+                            type="button"
+                            class="password-toggle"
+                            data-label-show="Show confirm password"
+                            data-label-hide="Hide confirm password"
+                            aria-label="Show confirm password"
+                            aria-pressed="false"
+                            tabindex="0"
+                    >
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
+
+                </div>
 
                 <p class="auth-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></p>
 

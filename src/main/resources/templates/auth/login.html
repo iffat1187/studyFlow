@@ -23,6 +23,9 @@
     <!-- Authentication page styles (standalone) -->
     <link rel="stylesheet" th:href="@{/css/auth.css}">
 
+    <!-- Authentication page scripts -->
+    <script th:src="@{/js/auth.js}" defer></script>
+
 </head>
 
 <body class="auth-page">
@@ -107,14 +110,30 @@
 
                 <label for="password">Password</label>
 
-                <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="Your password"
-                        autocomplete="current-password"
-                        required
-                >
+                <div class="password-wrapper">
+
+                    <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Your password"
+                            autocomplete="current-password"
+                            required
+                    >
+
+                    <button
+                            type="button"
+                            class="password-toggle"
+                            data-label-show="Show password"
+                            data-label-hide="Hide password"
+                            aria-label="Show password"
+                            aria-pressed="false"
+                            tabindex="0"
+                    >
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
+
+                </div>
 
             </div>
 

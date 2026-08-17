@@ -73,8 +73,11 @@ public class SecurityConfig {
      * Security filter chain.
      *
      * Public: landing page, registration, login, static assets, error page.
-     * Protected: the application's feature routes (any request not listed
-     * as public requires authentication).
+     * Authenticated: the application's feature routes (USER and ADMIN).
+     * Admin-only: /admin/** (requires ROLE_ADMIN).
+     *
+     * Order matters: the specific /admin/** rule is declared before the
+     * broad .anyRequest().authenticated() fallback.
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -91,6 +94,16 @@ public class SecurityConfig {
                                 "/favicon.ico",
                                 "/error"
                         ).permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers(
+                                "/dashboard/**",
+                                "/subjects/**",
+                                "/topics/**",
+                                "/tasks/**",
+                                "/exams/**",
+                                "/study-sessions/**",
+                                "/analytics/**"
+                        ).authenticated()
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf
