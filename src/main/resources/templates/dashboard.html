@@ -1,10 +1,603 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <body>
 
+<div th:replace="~{layout :: layout(~{::section})}">
+
+    <section class="user-dashboard">
+
+        <!-- ============================
+             Dashboard Header / Greeting
+        ============================= -->
+
+        <header class="dash-header fade-in">
+
+            <div class="dash-header__text">
+
+                <span class="dash-greeting">
+                    <span th:text="${data.greeting}">Good morning</span>,
+                    <strong th:text="${data.displayName}">Student</strong>
+                    <i class="bi bi-hand-thumbs-up dash-greeting__wave"></i>
+                </span>
+
+                <p class="dash-subtitle" th:text="${data.greetingMessage}">
+                    Let's make today's study plan count.
+                </p>
+
+                <div class="dash-date">
+
+                    <span class="dash-date__day" th:text="${data.dayLabel}">Tuesday</span>
+                    <span class="dash-date__dot">•</span>
+                    <span th:text="${data.dateLabel}">August 18, 2026</span>
+
+                </div>
+
+            </div>
+
+            <div class="dash-header__actions">
+
+                <a th:href="@{/subjects/new}" class="btn btn-primary">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                    Add Subject
+
+                </a>
+
+                <a th:href="@{/subjects}" class="btn btn-secondary">
+
+                    <i class="bi bi-book-half"></i>
+
+                    My Subjects
+
+                </a>
+
+            </div>
+
+        </header>
+
+
+        <!-- ============================
+             Getting Started / Setup
+        ============================= -->
+
+        <section class="dash-card setup-card fade-in" aria-labelledby="setupTitle">
+
+            <div class="setup-card__head">
+
+                <div class="setup-card__title">
+
+                    <span class="setup-card__icon">
+                        <i class="bi bi-rocket-takeoff"></i>
+                    </span>
+
+                    <div>
+
+                        <h2 id="setupTitle">
+                            Complete your StudyFlow setup
+                        </h2>
+
+                        <p>
+                            Get your study plan ready in a few quick steps.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="setup-card__count">
+
+                    <strong th:text="${data.setupCompleted} + ' of ' + ${data.setupTotal} + ' completed'">
+                        2 of 5 completed
+                    </strong>
+
+                </div>
+
+            </div>
+
+            <div class="setup-progress">
+
+                <div
+                        class="setup-progress__bar"
+                        role="progressbar"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-valuenow="0"
+                        th:attr="aria-valuenow=${data.setupPercent}"
+                        th:aria-label="'StudyFlow setup progress: ' + ${data.setupPercent} + '%'">
+
+                    <div
+                            class="setup-progress__fill"
+                            th:style="'width: ' + ${data.setupPercent} + '%'"
+                            th:attr="data-percent=${data.setupPercent}">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <ol class="setup-steps">
+
+                <li
+                        class="setup-step"
+                        th:each="step : ${data.setupSteps}"
+                        th:classappend="' setup-step--' + ${#strings.toLowerCase(step.status)}">
+
+                    <span class="setup-step__icon">
+
+                        <i th:class="'bi ' + ${step.icon}"></i>
+
+                    </span>
+
+                    <span class="setup-step__label" th:text="${step.label}">
+                        Add your first subject
+                    </span>
+
+                    <span class="setup-step__tag" th:if="${step.status.name() == 'COMPLETED'}">
+                        Done
+                    </span>
+
+                    <span class="setup-step__tag" th:if="${step.status.name() == 'UPCOMING'}">
+                        Soon
+                    </span>
+
+                    <a
+                            class="setup-step__link"
+                            th:if="${step.status.name() == 'CURRENT' and step.href != null}"
+                            th:href="@{${step.href}}">
+
+                        Start
+
+                        <i class="bi bi-arrow-right"></i>
+
+                    </a>
+
+                </li>
+
+            </ol>
+
+        </section>
+
+
+        <!-- ============================
+             Today's Focus | Upcoming Exams
+        ============================= -->
+
+        <div class="dash-grid dash-grid--2">
+
+            <!-- Today's Focus -->
+
+            <section class="dash-card fade-in" aria-labelledby="focusTitle">
+
+                <header class="dash-card__header">
+
+                    <h2 id="focusTitle">
+                        <i class="bi bi-bullseye"></i>
+                        Today's Focus
+                    </h2>
+
+                </header>
+
+                <div class="dash-card__body">
+
+                    <div class="dash-empty" th:if="${!data.hasSubjects}">
+
+                        <span class="dash-empty__icon">
+                            <i class="bi bi-pencil"></i>
+                        </span>
+
+                        <h3>
+                            No study plan yet
+                        </h3>
+
+                        <p>
+                            Add your first subject to start building today's focus.
+                        </p>
+
+                        <a th:href="@{/subjects/new}" class="btn btn-outline">
+                            <i class="bi bi-plus-lg"></i>
+                            Add your first subject
+                        </a>
+
+                    </div>
+
+                    <div class="dash-empty" th:unless="${!data.hasSubjects}">
+
+                        <span class="dash-empty__icon dash-empty__icon--success">
+                            <i class="bi bi-emoji-smile"></i>
+                        </span>
+
+                        <h3>
+                            You're all set for now
+                        </h3>
+
+                        <p>
+                            Pick a subject and make today's study time count.
+                        </p>
+
+                        <a th:href="@{/subjects}" class="btn btn-outline">
+                            <i class="bi bi-book-half"></i>
+                            Browse subjects
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- Upcoming Exams -->
+
+            <section class="dash-card fade-in" aria-labelledby="examsTitle">
+
+                <header class="dash-card__header">
+
+                    <h2 id="examsTitle">
+                        <i class="bi bi-calendar-event"></i>
+                        Upcoming Exams
+                    </h2>
+
+                    <span class="dash-card__soon">Soon</span>
+
+                </header>
+
+                <div class="dash-card__body">
+
+                    <div class="dash-empty">
+
+                        <span class="dash-empty__icon">
+                            <i class="bi bi-journal-x"></i>
+                        </span>
+
+                        <h3>
+                            No exams added yet
+                        </h3>
+
+                        <p>
+                            Exam tracking is coming soon. You'll manage your
+                            upcoming tests here.
+                        </p>
+
+                        <span class="chip chip--soon" aria-disabled="true">
+                            <i class="bi bi-hourglass-split"></i>
+                            Coming soon
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- ============================
+             Today's Tasks | Study Progress
+        ============================= -->
+
+        <div class="dash-grid dash-grid--2">
+
+            <!-- Today's Tasks -->
+
+            <section class="dash-card fade-in" aria-labelledby="tasksTitle">
+
+                <header class="dash-card__header">
+
+                    <h2 id="tasksTitle">
+                        <i class="bi bi-list-check"></i>
+                        Today's Tasks
+                    </h2>
+
+                    <span class="dash-card__soon">Soon</span>
+
+                </header>
+
+                <div class="dash-card__body">
+
+                    <div class="dash-empty">
+
+                        <span class="dash-empty__icon">
+                            <i class="bi bi-clipboard-check"></i>
+                        </span>
+
+                        <h3>
+                            No tasks for today
+                        </h3>
+
+                        <p>
+                            Tasks are coming soon. You'll structure your daily
+                            study work here.
+                        </p>
+
+                        <span class="chip chip--soon" aria-disabled="true">
+                            <i class="bi bi-hourglass-split"></i>
+                            Coming soon
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- Study Progress -->
+
+            <section class="dash-card fade-in" aria-labelledby="progressTitle">
+
+                <header class="dash-card__header">
+
+                    <h2 id="progressTitle">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        Study Progress
+                    </h2>
+
+                    <span class="dash-card__soon">Soon</span>
+
+                </header>
+
+                <div class="dash-card__body">
+
+                    <div class="dash-empty">
+
+                        <span class="dash-empty__icon">
+                            <i class="bi bi-stopwatch"></i>
+                        </span>
+
+                        <h3>
+                            Start your first study session
+                        </h3>
+
+                        <p>
+                            Track your study time and progress here once study
+                            sessions arrive.
+                        </p>
+
+                        <span class="chip chip--soon" aria-disabled="true">
+                            <i class="bi bi-hourglass-split"></i>
+                            Coming soon
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- ============================
+             My Subjects Snapshot
+        ============================= -->
+
+        <section class="dash-card fade-in" aria-labelledby="subjectsTitle">
+
+            <header class="dash-card__header">
+
+                <h2 id="subjectsTitle">
+                    <i class="bi bi-book-half"></i>
+                    My Subjects
+                </h2>
+
+                <a
+                        th:if="${data.subjectCount > 6}"
+                        th:href="@{/subjects}"
+                        class="dash-card__link">
+
+                    View all subjects
+
+                    <i class="bi bi-arrow-right"></i>
+
+                </a>
+
+            </header>
+
+            <div class="dash-card__body">
+
+                <!-- Empty state -->
+
+                <div class="dash-empty" th:if="${!data.hasSubjects}">
+
+                    <span class="dash-empty__icon">
+                        <i class="bi bi-journal-plus"></i>
+                    </span>
+
+                    <h3>
+                        No subjects yet
+                    </h3>
+
+                    <p>
+                        Add your first subject and take charge of your study plan.
+                    </p>
+
+                    <a th:href="@{/subjects/new}" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i>
+                        Add your first subject
+                    </a>
+
+                </div>
+
+                <!-- Subject snapshot grid -->
+
+                <div class="dash-subjects" th:unless="${!data.hasSubjects}">
+
+                    <div
+                            class="dash-subject fade-in"
+                            th:each="subject, stat : ${data.subjects}"
+                            th:if="${stat.index < 6}">
+
+                        <span class="dash-subject__bar"
+                              th:classappend="${#strings.toLowerCase(subject.color)}"></span>
+
+                        <div class="dash-subject__content">
+
+                            <h3 th:text="${subject.name}">Database</h3>
+
+                            <p th:text="${subject.description != null and !subject.description.isEmpty() ? subject.description : 'No description yet.'}">
+                                Description
+                            </p>
+
+                        </div>
+
+                        <span class="dash-subject__badge subject-badge"
+                              th:classappend="${#strings.toLowerCase(subject.color)}"
+                              th:text="${subject.color}">
+                            Purple
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ============================
+             Quick Study Tools
+        ============================= -->
+
+        <section class="dash-card fade-in" aria-labelledby="toolsTitle">
+
+            <header class="dash-card__header">
+
+                <h2 id="toolsTitle">
+                    <i class="bi bi-lightning-charge"></i>
+                    Quick Study Tools
+                </h2>
+
+            </header>
+
+            <div class="dash-card__body">
+
+                <div class="dash-tools">
+
+                    <a th:href="@{/subjects/new}" class="dash-tool">
+
+                        <span class="dash-tool__icon">
+                            <i class="bi bi-journal-plus"></i>
+                        </span>
+
+                        <div class="dash-tool__text">
+
+                            <strong>Add Subject</strong>
+
+                            <small>Start organizing your subjects</small>
+
+                        </div>
+
+                    </a>
+
+                    <a th:href="@{/subjects}" class="dash-tool">
+
+                        <span class="dash-tool__icon dash-tool__icon--accent">
+                            <i class="bi bi-book-half"></i>
+                        </span>
+
+                        <div class="dash-tool__text">
+
+                            <strong>My Subjects</strong>
+
+                            <small>Review your subject list</small>
+
+                        </div>
+
+                    </a>
+
+                    <div class="dash-tool dash-tool--soon" aria-disabled="true">
+
+                        <span class="dash-tool__icon dash-tool__icon--amber">
+                            <i class="bi bi-stopwatch"></i>
+                        </span>
+
+                        <div class="dash-tool__text">
+
+                            <strong>Focus Timer</strong>
+
+                            <small>Coming soon</small>
+
+                        </div>
+
+                        <span class="dash-tool__tag">Soon</span>
+
+                    </div>
+
+                    <div class="dash-tool dash-tool--soon" aria-disabled="true">
+
+                        <span class="dash-tool__icon dash-tool__icon--green">
+                            <i class="bi bi-clock-history"></i>
+                        </span>
+
+                        <div class="dash-tool__text">
+
+                            <strong>Study Sessions</strong>
+
+                            <small>Coming soon</small>
+
+                        </div>
+
+                        <span class="dash-tool__tag">Soon</span>
+
+                    </div>
+
+                    <div class="dash-tool dash-tool--soon" aria-disabled="true">
+
+                        <span class="dash-tool__icon dash-tool__icon--sky">
+                            <i class="bi bi-calendar-event"></i>
+                        </span>
+
+                        <div class="dash-tool__text">
+
+                            <strong>Exams</strong>
+
+                            <small>Coming soon</small>
+
+                        </div>
+
+                        <span class="dash-tool__tag">Soon</span>
+
+                    </div>
+
+                    <div class="dash-tool dash-tool--soon" aria-disabled="true">
+
+                        <span class="dash-tool__icon dash-tool__icon--pink">
+                            <i class="bi bi-calendar3"></i>
+                        </span>
+
+                        <div class="dash-tool__text">
+
+                            <strong>Calendar</strong>
+
+                            <small>Coming soon</small>
+
+                        </div>
+
+                        <span class="dash-tool__tag">Soon</span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ============================
+             Dashboard JavaScript
+             (UI interactions only — no fake data)
+        ============================= -->
+
+        <script th:src="@{/js/dashboard.js}"></script>
+
+    </section>
+
+</div>
+
 </body>
+
 </html>
