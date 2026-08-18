@@ -11,6 +11,12 @@
     <section class="admin-dashboard">
 
         <!-- ============================
+             Breadcrumb
+        ============================= -->
+
+        <nav th:replace="~{fragments/breadcrumb :: adminBreadcrumb('Admin Dashboard')}"></nav>
+
+        <!-- ============================
              Page Header
         ============================= -->
 
@@ -27,7 +33,7 @@
                 </h1>
 
                 <p>
-                    Platform overview — what is happening across StudyFlow.
+                    System overview and platform activity.
                 </p>
 
             </div>

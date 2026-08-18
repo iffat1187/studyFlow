@@ -277,6 +277,69 @@
 }
 
 /* ------------------------------------------------
+   Admin breadcrumb
+----------------------------------------------- */
+
+.admin-breadcrumb{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+}
+
+.admin-breadcrumb__link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    color:var(--text-muted);
+    text-decoration:none;
+    font-weight:600;
+    transition:color var(--transition);
+}
+
+.admin-breadcrumb__link i{
+    font-size:14px;
+}
+
+.admin-breadcrumb__link:hover{
+    color:var(--primary-light);
+}
+
+.admin-breadcrumb__sep{
+    display:inline-flex;
+    color:var(--text-muted);
+    font-size:12px;
+    opacity:.6;
+}
+
+.admin-breadcrumb__current{
+    color:var(--text-light);
+    font-weight:600;
+}
+
+/* ------------------------------------------------
+   Self-view notice (own account)
+----------------------------------------------- */
+
+.admin-self-note{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:14px 16px;
+    border-radius:var(--radius-sm);
+    background:rgba(56,189,248,.08);
+    border:1px solid rgba(56,189,248,.2);
+    color:#7DD3FC;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.admin-self-note i{
+    font-size:16px;
+    margin-top:1px;
+}
+
+/* ------------------------------------------------
    Buttons — admin extras (small / ghost / warning)
 ----------------------------------------------- */
 
@@ -611,6 +674,36 @@
         height:300px;
     }
 
+    .admin-kpi-grid{
+        grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    }
+
+}
+
+@media(max-width:768px){
+
+    .admin-filter-bar{
+        align-items:stretch;
+    }
+
+    .admin-filter-field{
+        flex-basis:100%;
+    }
+
+    .admin-filter-actions{
+        align-items:center;
+    }
+
+    .admin-user-overview{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:12px;
+    }
+
+    .admin-breadcrumb{
+        font-size:12px;
+    }
+
 }
 
 @media(max-width:576px){
@@ -625,6 +718,29 @@
 
     .admin-card{
         padding:18px;
+    }
+
+    .admin-detail-grid{
+        grid-template-columns:1fr;
+    }
+
+    .admin-management-grid{
+        grid-template-columns:1fr;
+    }
+
+    .admin-table th,
+    .admin-table td{
+        padding:10px 10px;
+    }
+
+    .admin-action-group{
+        flex-wrap:wrap;
+    }
+
+    .admin-page-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:14px;
     }
 
 }

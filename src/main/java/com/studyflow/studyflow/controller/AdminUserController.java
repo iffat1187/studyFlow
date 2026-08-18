@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -123,5 +124,17 @@ public class AdminUserController {
         } else {
             redirectAttributes.addFlashAttribute("successMessage", message);
         }
+    }
+
+    /**
+     * Expected business errors (e.g. a user id that no longer exists)
+     * are surfaced as a safe toast instead of a Whitelabel page.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public String handleExpectedError(IllegalArgumentException exception,
+                                      RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute(
+                "errorMessage", "Unable to complete the requested action.");
+        return "redirect:/admin/users";
     }
 }

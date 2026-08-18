@@ -11,6 +11,13 @@
     <section class="admin-dashboard">
 
         <!-- ============================
+             Breadcrumb
+        ============================= -->
+
+        <nav
+            th:replace="~{fragments/breadcrumb :: adminBreadcrumb('User Management')}"></nav>
+
+        <!-- ============================
              Page Header
         ============================= -->
 
@@ -119,7 +126,25 @@
 
             </div>
 
-            <div class="admin-management-grid">
+            <!-- ============================
+                 Self-view guard
+                 The currently signed-in admin must never be able to
+                 disable, demote or delete their own account. The
+                 backend service enforces this too; the UI simply
+                 surfaces a safe notice instead of the controls.
+            ============================= -->
+
+            <div class="admin-self-note"
+                 th:if="${#authentication.name != null and #authentication.name.equalsIgnoreCase(adminUser.email)}">
+                <i class="bi bi-info-circle"></i>
+                <span>
+                    This is your own account. You cannot disable, change the role of,
+                    or delete your own account.
+                </span>
+            </div>
+
+            <div class="admin-management-grid"
+                 th:unless="${#authentication.name != null and #authentication.name.equalsIgnoreCase(adminUser.email)}">
 
                 <!-- Role change -->
 
@@ -128,7 +153,8 @@
                     <span class="admin-management__title">Change Role</span>
 
                     <form th:action="@{/admin/users/{id}/role(id=${adminUser.id})}"
-                          method="post" class="admin-management__form">
+                          method="post" class="admin-management__form admin-confirm-form"
+                          th:attr="data-action='role',data-user-name=${adminUser.name}">
 
                         <select name="newRole">
 
@@ -166,7 +192,8 @@
                     </p>
 
                     <form th:action="@{/admin/users/{id}/enable(id=${adminUser.id})}"
-                          method="post">
+                          method="post" class="admin-confirm-form"
+                          th:attr="data-action=${adminUser.enabled ? 'disable' : 'enable'},data-user-name=${adminUser.name}">
 
                         <button type="submit" class="btn"
                                 th:classappend="${adminUser.enabled

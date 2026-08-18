@@ -319,7 +319,64 @@
 }
 
 /* =========================================================
-   8 · RESPONSIVE
+   8 · ERROR / ACCESS-DENIED PAGE
+========================================================== */
+
+.error-code {
+  font-size: 4.5rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  background: linear-gradient(120deg, #8B5CF6 0%, #A78BFA 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  line-height: 1;
+}
+
+.error-icon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin: 26px auto 0;
+  border-radius: 20px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #F87171;
+  font-size: 2.1rem;
+}
+
+.error-actions {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.error-actions .auth-btn {
+  margin-top: 0;
+}
+
+.error-actions .auth-btn--ghost {
+  background: transparent;
+  border: 1px solid var(--a-border);
+  color: var(--a-text-soft);
+  box-shadow: none;
+}
+
+.error-actions .auth-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.auth-card--error {
+  text-align: center;
+}
+
+/* =========================================================
+   9 · RESPONSIVE
 ========================================================== */
 
 @media (max-width: 520px) {

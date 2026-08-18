@@ -65,8 +65,8 @@ public class AdminUserServiceImpl implements AdminUserService {
         user.setEnabled(!user.isEnabled());
         userRepository.save(user);
         return user.isEnabled()
-                ? "User account enabled successfully."
-                : "User account disabled successfully.";
+                ? "User enabled successfully."
+                : "User disabled successfully.";
     }
 
     @Override
@@ -80,11 +80,11 @@ public class AdminUserServiceImpl implements AdminUserService {
             return null;
         }
         if (newRole == user.getRole()) {
-            return "Role is already set to " + newRole + ".";
+            return "User role is already set to " + newRole + ".";
         }
         user.setRole(newRole);
         userRepository.save(user);
-        return "Role updated successfully.";
+        return "User role updated successfully.";
     }
 
     @Override

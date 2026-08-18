@@ -11,6 +11,12 @@
     <section class="admin-dashboard">
 
         <!-- ============================
+             Breadcrumb
+        ============================= -->
+
+        <nav th:replace="~{fragments/breadcrumb :: adminBreadcrumb('User Management')}"></nav>
+
+        <!-- ============================
              Page Header
         ============================= -->
 
@@ -20,11 +26,11 @@
 
                 <h1>
                     <i class="bi bi-people-fill"></i>
-                    Manage Users
+                    User Management
                 </h1>
 
                 <p>
-                    Search, filter and manage every StudyFlow account.
+                    Manage StudyFlow accounts and roles.
                 </p>
 
             </div>
@@ -196,7 +202,9 @@
                                 </a>
 
                                 <form th:action="@{/admin/users/{id}/enable(id=${u.id})}"
-                                      method="post" class="admin-inline-form">
+                                      method="post"
+                                      class="admin-inline-form admin-confirm-form"
+                                      th:attr="data-action=${u.enabled ? 'disable' : 'enable'},data-user-name=${u.name}">
 
                                     <button type="submit" class="btn btn-sm"
                                             th:classappend="${u.enabled

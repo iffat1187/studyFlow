@@ -78,7 +78,7 @@ class AdminUserManagementTest {
         mockMvc.perform(get("/admin/users")
                         .with(user("admin@example.com").roles("ADMIN")))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Manage Users")))
+                .andExpect(content().string(containsString("User Management")))
                 .andExpect(content().string(containsString("Alice")))
                 .andExpect(content().string(containsString("bob@example.com")))
                 .andExpect(content().string(containsString("Active")))
@@ -249,5 +249,47 @@ class AdminUserManagementTest {
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?error"));
+    }
+
+    @Test
+    void admin_viewingOwnAccount_seesSelfProtectionNote() throws Exception {
+        when(userRepository.findById(1L))
+                .thenReturn(Optional.of(buildUser(1L, "Admin One", "admin@example.com", Role.ADMIN, true)));
+
+        mockMvc.perform(get("/admin/users/1")
+                        .with(user("admin@example.com").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("This is your own account")))
+                .andExpect(content().string(not(containsString("Danger Zone"))))
+                .andExpect(content().string(not(containsString("Update Role"))));
+    }
+
+    @Test
+    void admin_viewingAnotherAccount_seesManagementControls() throws Exception {
+        when(userRepository.findById(2L))
+                .thenReturn(Optional.of(buildUser(2L, "Alice", "alice@example.com", Role.USER, true)));
+
+        mockMvc.perform(get("/admin/users/2")
+                        .with(user("admin@example.com").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Danger Zone")))
+                .andExpect(content().string(containsString("Update Role")))
+                .andExpect(content().string(not(containsString("This is your own account"))));
+    }
+
+    @Test
+    void unknownUserId_redirectsInsteadOfWhitelabel() throws Exception {
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/admin/users/999")
+                        .with(user("admin@example.com").roles("ADMIN")))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/users"));
+
+        mockMvc.perform(post("/admin/users/999/enable")
+                        .with(user("admin@example.com").roles("ADMIN"))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/users"));
     }
 }

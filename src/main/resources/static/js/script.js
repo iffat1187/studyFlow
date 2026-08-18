@@ -185,7 +185,12 @@ Modules:
 
             const href = (link.getAttribute("href") || "").split("?")[0].replace(/\/+$/, "");
 
-            if (href && href === currentPath) {
+            // Exact match (e.g. /admin/dashboard) or child-page match
+            // (e.g. /admin/users/5 highlights the /admin/users link).
+            const isActive = href.length > 1 &&
+                (href === currentPath || currentPath.startsWith(href + "/"));
+
+            if (isActive) {
                 link.classList.add("active");
                 matched = true;
             } else {

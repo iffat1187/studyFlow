@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!-- =========================================================
+     StudyFlow Admin Breadcrumb Fragment
+     Simple "Admin / <current page>" indicator used at the top
+     of admin pages. Kept intentionally minimal — no framework.
+     Usage:
+       <nav th:replace="~{fragments/breadcrumb :: adminBreadcrumb('User Management')}"></nav>
+========================================================= -->
+
+<nav th:fragment="adminBreadcrumb(crumb)" class="admin-breadcrumb" aria-label="Breadcrumb">
+
+    <a th:href="@{/admin/dashboard}" class="admin-breadcrumb__link">
+        <i class="bi bi-shield-lock"></i>
+        <span>Admin</span>
+    </a>
+
+    <span class="admin-breadcrumb__sep" aria-hidden="true">
+        <i class="bi bi-chevron-right"></i>
+    </span>
+
+    <span class="admin-breadcrumb__current" th:text="${crumb}">Current Page</span>
+
+</nav>
+
+</html>
