@@ -13,6 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -124,7 +125,9 @@ class AdminAreaIntegrationTest {
 
     @Test
     void userRoute_doesNotShowAdminNavigation() throws Exception {
-        when(subjectRepository.findAll()).thenReturn(List.of());
+        when(userRepository.findByEmail("user@example.com"))
+                .thenReturn(Optional.of(buildUser(1L, "Regular User", "user@example.com", Role.USER)));
+        when(subjectRepository.findAllByUserOrderByIdAsc(any())).thenReturn(List.of());
 
         mockMvc.perform(get("/subjects")
                         .with(user("user@example.com").roles("USER")))

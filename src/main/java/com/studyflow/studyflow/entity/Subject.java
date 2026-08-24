@@ -9,6 +9,10 @@ import lombok.Setter;
 /**
  * Entity class representing a study subject.
  * Maps to the "subjects" table in the database.
+ *
+ * Every subject belongs to exactly one {@link User}. Ownership is enforced
+ * by the service layer through user-scoped repository lookups, so a
+ * subject can never be read or modified through another user's account.
  */
 @Entity
 @Table(name = "subjects")
@@ -46,4 +50,16 @@ public class Subject {
      */
     @Column(nullable = false)
     private String color;
+
+    /**
+     * The user who owns this subject.
+     *
+     * LAZY loading avoids pulling the owner when it is not needed. The
+     * column stays nullable in the database so pre-existing rows created
+     * before the relationship existed remain valid (they are simply not
+     * visible to any user until assigned an owner).
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }

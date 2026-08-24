@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Entity class representing an authenticated application user.
@@ -76,6 +78,17 @@ public class User {
      */
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    /**
+     * Subjects owned by this user.
+     *
+     * The owning side of the relationship is {@link Subject#getUser()},
+     * so this collection is populated from the inverse (mappedBy) side.
+     * No cascade is configured: deleting a subject never deletes its user,
+     * and deleting a user never cascades to their subjects.
+     */
+    @OneToMany(mappedBy = "user")
+    private List<Subject> subjects = new ArrayList<>();
 
     /**
      * Populates the registration timestamp on insert.

@@ -28,11 +28,11 @@ import java.util.Locale;
  *   (account creation always counts, subjects come from the subject module)
  * - steps that depend on not-yet-implemented modules (topics, tasks, exams)
  *   are marked as future rather than fabricated
- * - the subject snapshot reuses the existing {@link SubjectService}
+ * - the subject snapshot shows ONLY the authenticated user's subjects via
+ *   the ownership-aware {@link SubjectService}
  *
- * Subject data is currently global because the Subject entity has no
- * relationship to User yet; a per-user relationship is a future-phase
- * requirement.
+ * Subjects are user-owned: the subject service resolves the authenticated
+ * user from the security context email and returns only that user's data.
  */
 @Service
 public class DashboardServiceImpl implements DashboardService {
@@ -43,7 +43,6 @@ public class DashboardServiceImpl implements DashboardService {
             DateTimeFormatter.ofPattern("EEEE", Locale.ENGLISH);
 
     private static final int SETUP_TOTAL = 5;
-    private static final int MAX_SNAPSHOT_SUBJECTS = 6;
 
     private final UserRepository userRepository;
     private final SubjectService subjectService;
@@ -66,7 +65,8 @@ public class DashboardServiceImpl implements DashboardService {
 
         LocalDate today = LocalDate.now();
 
-        List<SubjectDto> subjects = subjectService.getAllSubjects();
+        // Only the authenticated user's subjects are shown on the dashboard.
+        List<SubjectDto> subjects = subjectService.getAllSubjects(userEmail);
         boolean hasSubjects = !subjects.isEmpty();
 
         List<SetupStep> setupSteps = buildSetupSteps(hasSubjects);

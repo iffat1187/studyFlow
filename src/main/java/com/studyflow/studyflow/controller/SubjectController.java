@@ -3,6 +3,7 @@ package com.studyflow.studyflow.controller;
 import com.studyflow.studyflow.dto.SubjectDto;
 import com.studyflow.studyflow.service.SubjectService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -10,6 +11,11 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * Controller responsible for handling all Subject related requests.
+ *
+ * The controller stays thin: it resolves the authenticated user's email
+ * from the security context and delegates every ownership-aware operation
+ * to {@link SubjectService}. No user identifier is ever read from the
+ * request payload or URL.
  */
 @Controller
 @RequestMapping("/subjects")
@@ -25,12 +31,13 @@ public class SubjectController {
     }
 
     /**
-     * Display all subjects.
+     * Display the subjects owned by the authenticated user.
      */
     @GetMapping
-    public String listSubjects(Model model) {
+    public String listSubjects(Authentication authentication, Model model) {
 
-        model.addAttribute("subjects", subjectService.getAllSubjects());
+        model.addAttribute("subjects",
+                subjectService.getAllSubjects(authentication.getName()));
 
         return "subject/list-subject";
     }
@@ -52,12 +59,13 @@ public class SubjectController {
     }
 
     /**
-     * Save a new Subject.
+     * Save a new Subject, assigned to the authenticated user.
      */
     @PostMapping("/save")
     public String saveSubject(
             @Valid @ModelAttribute("subjectDto") SubjectDto subjectDto,
-            BindingResult bindingResult
+            BindingResult bindingResult,
+            Authentication authentication
     ) {
 
         // If validation fails, return to the form.
@@ -65,52 +73,57 @@ public class SubjectController {
             return "subject/add-subject";
         }
 
-        subjectService.saveSubject(subjectDto);
+        subjectService.saveSubject(subjectDto, authentication.getName());
 
         return "redirect:/subjects";
     }
 
     /**
-     * Display Edit Subject form.
+     * Display Edit Subject form for a subject owned by the authenticated user.
      */
     @GetMapping("/edit/{id}")
     public String showEditForm(
             @PathVariable Long id,
-            Model model
+            Model model,
+            Authentication authentication
     ) {
 
         model.addAttribute("subjectDto",
-                subjectService.getSubjectById(id));
+                subjectService.getSubjectById(id, authentication.getName()));
 
         return "subject/edit-subject";
     }
 
     /**
-     * Update an existing Subject.
+     * Update an existing Subject, verifying ownership first.
      */
     @PostMapping("/update/{id}")
     public String updateSubject(
             @PathVariable Long id,
             @Valid @ModelAttribute("subjectDto") SubjectDto subjectDto,
-            BindingResult bindingResult
+            BindingResult bindingResult,
+            Authentication authentication
     ) {
 
         if (bindingResult.hasErrors()) {
             return "subject/edit-subject";
         }
 
-        subjectService.updateSubject(id, subjectDto);
+        subjectService.updateSubject(id, subjectDto, authentication.getName());
 
         return "redirect:/subjects";
     }
 
     /**
-     * Delete a subject.
+     * Delete a subject owned by the authenticated user.
      */
     @GetMapping("/delete/{id}")
-    public String deleteSubject(@PathVariable Long id) {
+    public String deleteSubject(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
 
-        subjectService.deleteSubject(id);
+        subjectService.deleteSubject(id, authentication.getName());
 
         return "redirect:/subjects";
     }

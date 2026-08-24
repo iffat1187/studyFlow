@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -70,7 +71,7 @@ class DashboardSecurityTest {
     void authenticatedUser_canAccessDashboard() throws Exception {
         when(userRepository.findByEmail("iffat@example.com"))
                 .thenReturn(Optional.of(buildUser("Iffat Jahan", "iffat@example.com")));
-        when(subjectRepository.findAll()).thenReturn(List.of());
+        when(subjectRepository.findAllByUserOrderByIdAsc(any())).thenReturn(List.of());
 
         mockMvc.perform(get("/dashboard")
                         .with(user("iffat@example.com").roles("USER")))
@@ -84,7 +85,7 @@ class DashboardSecurityTest {
     void dashboard_greetsAuthenticatedUserByName() throws Exception {
         when(userRepository.findByEmail("iffat@example.com"))
                 .thenReturn(Optional.of(buildUser("Iffat Jahan", "iffat@example.com")));
-        when(subjectRepository.findAll()).thenReturn(List.of());
+        when(subjectRepository.findAllByUserOrderByIdAsc(any())).thenReturn(List.of());
 
         mockMvc.perform(get("/dashboard")
                         .with(user("iffat@example.com").roles("USER")))
@@ -97,7 +98,7 @@ class DashboardSecurityTest {
     void dashboard_setupProgress_reflectsSubjects() throws Exception {
         when(userRepository.findByEmail("new@example.com"))
                 .thenReturn(Optional.of(buildUser("New Student", "new@example.com")));
-        when(subjectRepository.findAll()).thenReturn(List.of());
+        when(subjectRepository.findAllByUserOrderByIdAsc(any())).thenReturn(List.of());
 
         // No subjects yet → only account creation is completed.
         mockMvc.perform(get("/dashboard")
@@ -113,7 +114,7 @@ class DashboardSecurityTest {
     void dashboard_showsSubjectSnapshot() throws Exception {
         when(userRepository.findByEmail("student@example.com"))
                 .thenReturn(Optional.of(buildUser("Test Student", "student@example.com")));
-        when(subjectRepository.findAll()).thenReturn(List.of(
+        when(subjectRepository.findAllByUserOrderByIdAsc(any())).thenReturn(List.of(
                 buildSubject(1L, "Database", "Purple"),
                 buildSubject(2L, "Mathematics", "Green")
         ));
@@ -133,7 +134,7 @@ class DashboardSecurityTest {
     void dashboard_doesNotLeakUnauthorizedNames() throws Exception {
         when(userRepository.findByEmail("student@example.com"))
                 .thenReturn(Optional.of(buildUser("Another User", "student@example.com")));
-        when(subjectRepository.findAll()).thenReturn(List.of());
+        when(subjectRepository.findAllByUserOrderByIdAsc(any())).thenReturn(List.of());
 
         mockMvc.perform(get("/dashboard")
                         .with(user("student@example.com").roles("USER")))

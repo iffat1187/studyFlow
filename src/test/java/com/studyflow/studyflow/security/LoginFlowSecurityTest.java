@@ -122,6 +122,12 @@ class LoginFlowSecurityTest {
 
     @Test
     void user_canAccessAuthenticatedRoutes() throws Exception {
+        // The authenticated user must resolve to an account. A far-fetched id
+        // keeps the ownership-scoped subject query empty in the real database.
+        User existing = user("test@example.com", "password123", Role.USER);
+        existing.setId(999_999L);
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(existing));
+
         mockMvc.perform(get("/subjects")
                         .with(SecurityMockMvcRequestPostProcessors.user("test@example.com").roles("USER")))
                 .andExpect(status().isOk());
