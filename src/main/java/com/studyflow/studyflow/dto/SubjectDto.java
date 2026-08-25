@@ -31,7 +31,12 @@ public record SubjectDto(
          * Subject color is required.
          */
         @NotBlank(message = "Please select a subject color.")
-        String color
+        String color,
+
+        /**
+         * Number of topics in this subject (for display).
+         */
+        Long topicCount
 
 ) {
 }

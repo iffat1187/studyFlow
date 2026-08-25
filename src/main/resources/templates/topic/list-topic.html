@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+
+<body>
+
+
+<div th:replace="~{layout :: layout(~{::section})}">
+
+
+    <section>
+
+        <!-- ============================
+             Page Header
+        ============================= -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    <i class="bi bi-journal-text"></i>
+                    <span th:if="${subject != null}" th:text="${subject.name}">My Topics</span>
+                    <span th:if="${subject == null}">My Topics</span>
+                </h1>
+
+                <p th:if="${subject != null}">
+                    Topics for <strong th:text="${subject.name}">Subject</strong>.
+                </p>
+                <p th:if="${subject == null}">
+                    Manage your topics and organize your study content.
+                </p>
+
+            </div>
+
+
+            <div class="page-header-actions">
+
+<a th:if="${subject != null}"
+                   th:href="@{/topics/subject/{subjectId}/new(subjectId=${subject.id})}"
+                   class="btn btn-primary">
+
+                <i class="bi bi-plus-lg"></i>
+
+                Add Topic
+
+            </a>
+
+                <a th:href="@{/subjects}"
+                   class="btn btn-secondary">
+
+                    <i class="bi bi-arrow-left"></i>
+
+                    Back to Subjects
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Search
+        ============================= -->
+
+        <div class="search-container">
+
+            <i class="bi bi-search"></i>
+
+            <input
+                    type="text"
+                    id="topicSearch"
+                    placeholder="Search topic..."
+                    autocomplete="off"
+                    aria-label="Search topics">
+
+        </div>
+
+
+        <!-- ============================
+             Empty State
+        ============================= -->
+
+        <div class="empty-state fade-in"
+             th:if="${#lists.isEmpty(topics)}">
+
+            <i class="bi bi-journal-plus"></i>
+
+            <h3 th:if="${subject != null}">
+                No Topics in <span th:text="${subject.name}">this subject</span> Yet
+            </h3>
+            <h3 th:if="${subject == null}">
+                No Topics Added Yet
+            </h3>
+
+            <p th:if="${subject != null}">
+                Break this subject into smaller study topics to organize your learning.
+            </p>
+            <p th:if="${subject == null}">
+                Start by adding your first topic to organize your study material.
+            </p>
+
+<a th:if="${subject != null}"
+               th:href="@{/topics/subject/{subjectId}/new(subjectId=${subject.id})}"
+               class="btn btn-primary">
+
+            <i class="bi bi-plus-lg"></i>
+
+            Add Your First Topic
+
+        </a>
+            <a th:if="${subject == null}"
+               th:href="@{/subjects}"
+               class="btn btn-primary">
+
+                <i class="bi bi-book-half"></i>
+
+                Browse Subjects First
+
+            </a>
+
+        </div>
+
+
+        <!-- ============================
+             Topic Cards
+        ============================= -->
+
+        <div class="topic-grid"
+             th:unless="${#lists.isEmpty(topics)}">
+
+            <div class="topic-card fade-in"
+                 th:each="topic : ${topics}">
+
+                <!-- Subject Badge (only shown in global topics view) -->
+                <div class="topic-subject-badge"
+                     th:if="${subject == null}"
+                     th:text="${topic.subjectName != null ? topic.subjectName : 'Unknown Subject'}">
+                    Subject
+                </div>
+
+                <!-- Content -->
+                <div class="topic-content">
+
+                    <h3 th:text="${topic.name}">
+                        Topic Name
+                    </h3>
+
+                    <p th:text="${topic.description != null and !topic.description.isEmpty() ? topic.description : 'No description yet.'}">
+                        Description
+                    </p>
+
+                </div>
+
+                <!-- Actions -->
+                <div class="topic-actions">
+
+                    <a th:href="@{/topics/edit/{id}(id=${topic.id})}"
+                       class="action-btn edit"
+                       title="Edit Topic"
+                       aria-label="Edit Topic">
+
+                        <i class="bi bi-pencil-square"></i>
+
+                    </a>
+
+                    <a th:href="@{/topics/delete/{id}(id=${topic.id})}"
+                       class="action-btn delete"
+                       title="Delete Topic"
+                       aria-label="Delete Topic">
+
+                        <i class="bi bi-trash3"></i>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+</div>
+
+
+</body>
+
+
+</html>

@@ -129,6 +129,41 @@
     color:#F87171;
 }
 
+/* Subject Meta (topic count) */
+
+.subject-meta{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+    margin-top:16px;
+}
+
+.topic-count{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 10px;
+    border-radius:var(--radius-pill);
+    font-size:12px;
+    font-weight:600;
+    color:var(--text-muted);
+    background:rgba(255,255,255,.06);
+    border:1px solid var(--border);
+}
+
+.topic-count-empty{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 10px;
+    border-radius:var(--radius-pill);
+    font-size:12px;
+    font-weight:500;
+    color:var(--text-dim);
+    font-style:italic;
+}
+
 /* ==========================
    Subject Actions
 ========================== */
@@ -173,6 +208,20 @@
     background:var(--danger);
     border-color:transparent;
     box-shadow:0 8px 18px rgba(239,68,68,.40);
+}
+
+.action-btn.view:hover{
+    color:#fff;
+    background:var(--info);
+    border-color:transparent;
+    box-shadow:0 8px 18px rgba(14,165,233,.40);
+}
+
+.action-btn.add-topic:hover{
+    color:#fff;
+    background:var(--success);
+    border-color:transparent;
+    box-shadow:0 8px 18px rgba(34,197,94,.40);
 }
 
 /* ==========================

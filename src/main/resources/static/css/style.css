@@ -743,6 +743,13 @@ ol{
     font-size:15px;
 }
 
+.page-header-actions{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:12px;
+}
+
 /* Headings Scale */
 
 .heading-xl{ font-size:32px; font-weight:800; letter-spacing:-1px; }

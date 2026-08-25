@@ -116,15 +116,44 @@
                         Description
                     </p>
 
-                    <span class="subject-badge"
-                          th:text="${subject.color}">
-                        Purple
-                    </span>
+                    <div class="subject-meta">
+                        <span class="subject-badge"
+                              th:text="${subject.color}">
+                            Purple
+                        </span>
+                        <span class="topic-count"
+                              th:if="${subject.topicCount != null and subject.topicCount > 0}"
+                              th:text="${subject.topicCount + ' Topic' + (subject.topicCount > 1 ? 's' : '')}">
+                            0 Topics
+                        </span>
+                        <span class="topic-count-empty"
+                              th:if="${subject.topicCount == null or subject.topicCount == 0}">
+                            No topics yet
+                        </span>
+                    </div>
 
                 </div>
 
                 <!-- Actions -->
                 <div class="subject-actions">
+
+<a th:href="@{/topics/subject/{subjectId}(subjectId=${subject.id})}"
+                       class="action-btn view"
+                       title="View Topics"
+                       aria-label="View Topics">
+
+                    <i class="bi bi-journal-text"></i>
+
+                </a>
+
+                <a th:href="@{/topics/subject/{subjectId}/new(subjectId=${subject.id})}"
+                       class="action-btn add-topic"
+                       title="Add Topic"
+                       aria-label="Add Topic">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                </a>
 
                     <a th:href="@{/subjects/edit/{id}(id=${subject.id})}"
                        class="action-btn edit"

@@ -4,6 +4,7 @@ import com.studyflow.studyflow.dto.SubjectDto;
 import com.studyflow.studyflow.entity.Subject;
 import com.studyflow.studyflow.entity.User;
 import com.studyflow.studyflow.repository.SubjectRepository;
+import com.studyflow.studyflow.repository.TopicRepository;
 import com.studyflow.studyflow.repository.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 public class SubjectServiceImpl implements SubjectService {
 
     private final SubjectRepository subjectRepository;
+    private final TopicRepository topicRepository;
     private final UserRepository userRepository;
 
     /**
@@ -33,8 +35,10 @@ public class SubjectServiceImpl implements SubjectService {
      * Spring automatically injects the repositories.
      */
     public SubjectServiceImpl(SubjectRepository subjectRepository,
+                              TopicRepository topicRepository,
                               UserRepository userRepository) {
         this.subjectRepository = subjectRepository;
+        this.topicRepository = topicRepository;
         this.userRepository = userRepository;
     }
 
@@ -57,12 +61,13 @@ public class SubjectServiceImpl implements SubjectService {
         // Save Entity
         Subject savedSubject = subjectRepository.save(subject);
 
-        // Convert Entity back to DTO
+        // Convert Entity back to DTO (new subject has 0 topics)
         return new SubjectDto(
                 savedSubject.getId(),
                 savedSubject.getName(),
                 savedSubject.getDescription(),
-                savedSubject.getColor()
+                savedSubject.getColor(),
+                0L
         );
     }
 
@@ -81,7 +86,8 @@ public class SubjectServiceImpl implements SubjectService {
                         subject.getId(),
                         subject.getName(),
                         subject.getDescription(),
-                        subject.getColor()
+                        subject.getColor(),
+                        topicRepository.countBySubject(subject)
                 ))
                 .collect(Collectors.toList());
     }
@@ -99,7 +105,8 @@ public class SubjectServiceImpl implements SubjectService {
                 subject.getId(),
                 subject.getName(),
                 subject.getDescription(),
-                subject.getColor()
+                subject.getColor(),
+                topicRepository.countBySubject(subject)
         );
     }
 
@@ -122,18 +129,23 @@ public class SubjectServiceImpl implements SubjectService {
                 updatedSubject.getId(),
                 updatedSubject.getName(),
                 updatedSubject.getDescription(),
-                updatedSubject.getColor()
+                updatedSubject.getColor(),
+                topicRepository.countBySubject(updatedSubject)
         );
     }
 
     /**
      * Delete a subject, only after verifying ownership.
+     * If the subject has topics, they are deleted first to maintain referential integrity.
      */
     @Override
     @Transactional
     public void deleteSubject(Long id, String userEmail) {
 
         Subject subject = requireOwnedSubject(id, userEmail);
+
+        // Delete associated topics first to avoid foreign key constraint violations
+        topicRepository.deleteBySubject(subject);
 
         subjectRepository.delete(subject);
     }

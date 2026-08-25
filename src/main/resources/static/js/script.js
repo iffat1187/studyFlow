@@ -611,37 +611,36 @@ Modules:
     }
 
 
-    /*
-    =====================================================
-     10. Subject Search
-    =====================================================
-    */
+/*
+=====================================================
+     10. Subject & Topic Search
+=====================================================
+*/
 
-    function initializeSearch() {
+function initializeSearch() {
 
-        const searchInput = document.getElementById("subjectSearch");
+    const subjectSearchInput = document.getElementById("subjectSearch");
+    const topicSearchInput = document.getElementById("topicSearch");
 
-        if (!searchInput) {
+    function setupSearch(input, cardSelector) {
+        if (!input) {
             return;
         }
 
-        searchInput.addEventListener("keyup", function () {
-
+        input.addEventListener("keyup", function () {
             const keyword = this.value.toLowerCase();
-
-            const cards = document.querySelectorAll(".subject-card");
-
+            const cards = document.querySelectorAll(cardSelector);
             cards.forEach((card) => {
-
                 const text = card.innerText.toLowerCase();
-
                 card.style.display = text.includes(keyword) ? "" : "none";
-
             });
-
         });
-
     }
+
+    setupSearch(subjectSearchInput, ".subject-card");
+    setupSearch(topicSearchInput, ".topic-card");
+
+}
 
 
     /*

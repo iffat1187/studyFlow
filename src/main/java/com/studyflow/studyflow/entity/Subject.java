@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Entity class representing a study subject.
  * Maps to the "subjects" table in the database.
@@ -13,6 +16,11 @@ import lombok.Setter;
  * Every subject belongs to exactly one {@link User}. Ownership is enforced
  * by the service layer through user-scoped repository lookups, so a
  * subject can never be read or modified through another user's account.
+ *
+ * A subject can contain many {@link Topic} entries. The relationship is
+ * bidirectional via the {@code subject} field in Topic. Cascade is NOT
+ * configured for ALL to avoid unintended bulk deletions; topic lifecycle
+ * is managed explicitly.
  */
 @Entity
 @Table(name = "subjects")
@@ -62,4 +70,17 @@ public class Subject {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    /**
+     * Topics belonging to this subject.
+     *
+     * LAZY loading avoids pulling all topics when only the subject is needed.
+     * The owning side of the relationship is {@link Topic#getSubject()}.
+     * No cascade is configured: deleting a subject does NOT automatically
+     * delete its topics. Topic lifecycle is managed explicitly to prevent
+     * unintended data loss. The service layer handles subject deletion
+     * with appropriate checks or explicit topic removal.
+     */
+    @OneToMany(mappedBy = "subject", fetch = FetchType.LAZY)
+    private List<Topic> topics = new ArrayList<>();
 }
