@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Controller responsible for handling all Subject related requests.
@@ -66,7 +67,8 @@ public class SubjectController {
     public String saveSubject(
             @Valid @ModelAttribute("subjectDto") SubjectDto subjectDto,
             BindingResult bindingResult,
-            Authentication authentication
+            Authentication authentication,
+            RedirectAttributes redirectAttributes
     ) {
 
         // If validation fails, return to the form.
@@ -76,6 +78,7 @@ public class SubjectController {
 
         subjectService.saveSubject(subjectDto, authentication.getName());
 
+        redirectAttributes.addFlashAttribute("successMessage", "Subject created successfully!");
         return "redirect:/subjects";
     }
 
@@ -103,7 +106,8 @@ public class SubjectController {
             @PathVariable Long id,
             @Valid @ModelAttribute("subjectDto") SubjectDto subjectDto,
             BindingResult bindingResult,
-            Authentication authentication
+            Authentication authentication,
+            RedirectAttributes redirectAttributes
     ) {
 
         if (bindingResult.hasErrors()) {
@@ -112,6 +116,7 @@ public class SubjectController {
 
         subjectService.updateSubject(id, subjectDto, authentication.getName());
 
+        redirectAttributes.addFlashAttribute("successMessage", "Subject updated successfully!");
         return "redirect:/subjects";
     }
 
@@ -121,11 +126,13 @@ public class SubjectController {
     @GetMapping("/delete/{id}")
     public String deleteSubject(
             @PathVariable Long id,
-            Authentication authentication
+            Authentication authentication,
+            RedirectAttributes redirectAttributes
     ) {
 
         subjectService.deleteSubject(id, authentication.getName());
 
+        redirectAttributes.addFlashAttribute("successMessage", "Subject deleted successfully!");
         return "redirect:/subjects";
     }
 

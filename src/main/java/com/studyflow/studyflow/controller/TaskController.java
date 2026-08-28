@@ -150,8 +150,7 @@ public class TaskController {
 
         taskService.saveTask(taskDto, taskDto.subjectId(), userEmail);
 
-        redirectAttributes.addFlashAttribute("toastMessage", "Task created successfully.");
-        redirectAttributes.addFlashAttribute("toastType", "success");
+        redirectAttributes.addFlashAttribute("successMessage", "Task created successfully!");
 
         return "redirect:/tasks";
     }
@@ -199,8 +198,7 @@ public class TaskController {
 
         taskService.updateTask(id, taskDto, userEmail);
 
-        redirectAttributes.addFlashAttribute("toastMessage", "Task updated successfully.");
-        redirectAttributes.addFlashAttribute("toastType", "success");
+        redirectAttributes.addFlashAttribute("successMessage", "Task updated successfully!");
 
         return "redirect:/tasks";
     }
@@ -226,16 +224,10 @@ public class TaskController {
     @ResponseBody
     public TaskDto completeTask(
             @PathVariable Long id,
-            Authentication authentication,
-            RedirectAttributes redirectAttributes
+            Authentication authentication
     ) {
 
-        TaskDto completedTask = taskService.completeTask(id, authentication.getName());
-
-        redirectAttributes.addFlashAttribute("toastMessage", "Task completed successfully!");
-        redirectAttributes.addFlashAttribute("toastType", "success");
-
-        return completedTask;
+        return taskService.completeTask(id, authentication.getName());
     }
 
     /**

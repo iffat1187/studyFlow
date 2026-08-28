@@ -147,15 +147,7 @@
 <script th:src="@{/js/script.js}"></script>
 <script th:src="@{/js/task.js}"></script>
 
-<script th:if="${toastMessage != null}">
-    if (window.showToast) {
-        showToast(
-            [[${toastMessage}]],
-            [[${toastType}]],
-            { duration: 4000 }
-        );
-    }
-</script>
+<div th:replace="~{fragments/flash :: flashToasts}"></div>
 
 </body>
 
