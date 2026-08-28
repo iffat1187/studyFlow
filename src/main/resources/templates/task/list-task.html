@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+
+<body>
+
+
+<div th:replace="~{layout :: layout(~{::section})}">
+
+
+    <section>
+
+        <!-- ============================
+             Page Header
+        ============================= -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    <i class="bi bi-list-check"></i>
+                    Tasks
+                </h1>
+
+                <p>
+                    Stay on top of your assignments, revision, and study goals.
+                </p>
+
+            </div>
+
+
+            <div class="page-header-actions">
+
+                <a th:href="@{/tasks/new}"
+                   class="btn btn-primary">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                    Add Task
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Filters
+        ============================= -->
+
+        <div class="task-filters">
+
+            <!-- Search -->
+            <div class="search-container">
+                <form method="get" action="/tasks">
+                    <i class="bi bi-search"></i>
+                    <input
+                            type="text"
+                            name="search"
+                            id="taskSearch"
+                            placeholder="Search tasks..."
+                            autocomplete="off"
+                            aria-label="Search tasks"
+                            th:value="${searchTerm}">
+                    <input type="hidden" name="view" th:value="${currentView}">
+                    <input type="hidden" name="subjectId" th:value="${selectedSubjectId}">
+                </form>
+            </div>
+
+            <!-- Subject Filter -->
+            <div class="filter-group">
+                <label for="subjectFilter" class="visually-hidden">Filter by Subject</label>
+                <select id="subjectFilter"
+                        name="subjectId"
+                        onchange="this.form.submit()"
+                        class="form-control">
+                    <option value="">All Subjects</option>
+                    <option th:each="subject : ${subjects}"
+                            th:value="${subject.id}"
+                            th:text="${subject.name}"
+                            th:selected="${subject.id == selectedSubjectId}">
+                    </option>
+                </select>
+                <input type="hidden" name="view" th:value="${currentView}">
+                <input type="hidden" name="search" th:value="${searchTerm}">
+            </div>
+
+            <!-- Upcoming/Past Toggle -->
+            <div class="filter-group view-toggle">
+                <a th:href="@{/tasks(view='upcoming', subjectId=${selectedSubjectId}, search=${searchTerm})}"
+                   th:classappend="${currentView == 'upcoming' ? ' active' : ''}"
+                   class="btn btn-sm btn-outline">
+                    <i class="bi bi-calendar-event"></i> Upcoming
+                </a>
+                <a th:href="@{/tasks(view='past', subjectId=${selectedSubjectId}, search=${searchTerm})}"
+                   th:classappend="${currentView == 'past' ? ' active' : ''}"
+                   class="btn btn-sm btn-outline">
+                    <i class="bi bi-calendar-check"></i> Past
+                </a>
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Empty State
+        ============================= -->
+
+        <div class="empty-state fade-in"
+             th:if="${#lists.isEmpty(tasks)}">
+
+            <i class="bi bi-list-check"></i>
+
+            <h3 th:if="${selectedSubjectId != null}">
+                No Tasks in <span th:text="${#lists.get(subjects.?[id == selectedSubjectId], 0).name}">this subject</span>
+            </h3>
+            <h3 th:if="${selectedSubjectId == null and searchTerm != null}">
+                No Tasks Match "<span th:text="${searchTerm}">Search</span>"
+            </h3>
+            <h3 th:if="${selectedSubjectId == null and searchTerm == null}">
+                No Tasks Yet
+            </h3>
+
+            <p th:if="${selectedSubjectId != null}">
+                Add your first task for this subject.
+            </p>
+            <p th:if="${selectedSubjectId == null and searchTerm != null}">
+                Try adjusting your search or filter.
+            </p>
+            <p th:if="${selectedSubjectId == null and searchTerm == null}">
+                Stay organized by creating your first study task.
+            </p>
+
+            <div class="empty-state-actions">
+                <a th:if="${selectedSubjectId != null}"
+                   th:href="@{/tasks/new(subjectId=${selectedSubjectId})}"
+                   class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> Add Your First Task
+                </a>
+                <a th:if="${selectedSubjectId == null}"
+                   th:href="@{/tasks/new}"
+                   class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> Add Your First Task
+                </a>
+                <a th:if="${selectedSubjectId == null}"
+                   th:href="@{/subjects}"
+                   class="btn btn-secondary">
+                    <i class="bi bi-book-half"></i> Browse Subjects
+                </a>
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Task List
+        ============================= -->
+
+        <div class="task-list" th:unless="${#lists.isEmpty(tasks)}">
+
+            <div class="task-card fade-in"
+                 th:each="task : ${tasks}">
+
+                <!-- Type Badge -->
+                <div class="task-type-badge"
+                     th:classappend="${#strings.toLowerCase(task.type.name())}"
+                     th:text="${task.type.name()}">
+                    Assignment
+                </div>
+
+                <!-- Content -->
+                <div class="task-content">
+
+                    <div class="task-header">
+                        <h3 th:text="${task.title}">Task Title</h3>
+                        <div class="task-header-right">
+                            <span class="task-subject"
+                                th:text="${task.subjectName}">
+                                Subject
+                            </span>
+                            <span class="status-badge"
+                                th:classappend="${task.completed ? ' completed' : ' pending'}"
+                                th:text="${task.completed ? 'Completed' : 'In Progress'}">
+                                In Progress
+                            </span>
+                        </div>
+
+                    <p class="task-details"
+                       th:if="${task.details != null and !task.details.isEmpty()}"
+                       th:text="${task.details}">
+                        Task details
+                    </p>
+
+                    <div class="task-meta">
+                        <div class="task-due">
+                            <i class="bi bi-calendar" th:classappend="${task.dueDate != null and task.dueDate.isBefore(today) and !task.completed ? ' overdue' : ''}"></i>
+                            <span th:text="${task.dueDate != null ? #temporals.format(task.dueDate, 'MMM d, yyyy') : 'No due date'}">Due Date</span>
+                            <span th:if="${task.dueTime != null}" th:text="'· ' + ${#temporals.format(task.dueTime, 'HH:mm')}">Time</span>
+                            <span th:if="${task.recurrenceType != null and task.recurrenceType != T(com.studyflow.studyflow.entity.RecurrenceType).ONCE}"
+                                  class="recurrence-badge"
+                                  th:classappend="${#strings.toLowerCase(task.recurrenceType.name())}"
+                                  th:text="${task.recurrenceType.name()}">
+                                Once
+                            </span>
+                        </div>
+
+                        <div class="task-progress">
+                            <div class="progress-bar-container">
+                                <div class="progress-bar"
+                                     th:style="'width: ' + ${task.progress} + '%'"
+                                     th:classappend="${task.completed ? ' completed' : ''}"
+                                     role="progressbar"
+                                     th:attr="aria-valuenow=${task.progress}, aria-valuemin=0, aria-valuemax=100">
+                                </div>
+                            </div>
+                            <span class="progress-text" th:text="${task.progress} + '%'">0%</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Actions -->
+                <div class="task-actions">
+
+                    <!-- Mark Complete Button -->
+                    <button th:if="${!task.completed}"
+                            class="action-btn complete"
+                            th:data-task-id="${task.id}"
+                            title="Mark Complete"
+                            aria-label="Mark Complete">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+
+                    <!-- Progress Slider -->
+                    <div class="progress-slider-container">
+                        <input type="range"
+                               class="progress-slider"
+                               min="0" max="100" step="25"
+                               th:value="${task.progress}"
+                               th:data-task-id="${task.id}"
+                               th:disabled="${task.completed}"
+                               aria-label="Task progress">
+                    </div>
+
+                    <a th:href="@{/tasks/edit/{id}(id=${task.id})}"
+                       class="action-btn edit"
+                       title="Edit Task"
+                       aria-label="Edit Task">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+
+                    <a th:href="@{/tasks/delete/{id}(id=${task.id})}"
+                       class="action-btn delete"
+                       title="Delete Task"
+                       aria-label="Delete Task">
+                        <i class="bi bi-trash3"></i>
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+</div>
+
+</div>
+
+
+</html>

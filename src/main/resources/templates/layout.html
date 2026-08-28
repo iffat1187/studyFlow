@@ -22,6 +22,14 @@
         StudyFlow | Smart Study Planner
     </title>
 
+    <!-- ==========================================
+         CSRF Token for AJAX requests
+    =========================================== -->
+
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="_csrf_parameter" th:content="${_csrf.parameterName}">
+
 
     <!-- ==========================================
          Bootstrap Icons
@@ -43,6 +51,9 @@
 
     <link rel="stylesheet"
           th:href="@{/css/topic.css}">
+
+    <link rel="stylesheet"
+          th:href="@{/css/task.css}">
 
     <link rel="stylesheet"
           th:href="@{/css/admin.css}">
@@ -130,10 +141,21 @@
 
 
 <!-- ==========================================
-     StudyFlow Main JavaScript
-=========================================== -->
+      StudyFlow Main JavaScript
+=================================================== -->
 
 <script th:src="@{/js/script.js}"></script>
+<script th:src="@{/js/task.js}"></script>
+
+<script th:if="${toastMessage != null}">
+    if (window.showToast) {
+        showToast(
+            [[${toastMessage}]],
+            [[${toastType}]],
+            { duration: 4000 }
+        );
+    }
+</script>
 
 </body>
 

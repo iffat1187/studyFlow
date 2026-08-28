@@ -1061,6 +1061,44 @@ select.form-control option{
     padding-left:48px;
 }
 
+/* Date/Time Input Enhancements */
+
+.input-with-icon input[type="date"],
+.input-with-icon input[type="time"],
+.input-with-icon input[type="datetime-local"]{
+    padding-right:48px;
+}
+
+/* Ensure native date/time pickers are visible and styled */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator{
+    opacity:1;
+    cursor:pointer;
+    filter:invert(0.5);
+    transition:filter var(--transition);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover{
+    filter:invert(0.3) brightness(1.2);
+}
+
+/* Firefox date/time picker */
+input[type="date"]::-moz-calendar-picker-indicator,
+input[type="time"]::-moz-calendar-picker-indicator{
+    opacity:1;
+    cursor:pointer;
+}
+
+/* Ensure date/time inputs in input-with-icon have proper spacing */
+.input-with-icon input[type="date"],
+.input-with-icon input[type="time"],
+.input-with-icon input[type="datetime-local"]{
+    padding-right:48px;
+}
+
 /* Validation */
 
 .form-control.is-invalid{
@@ -1249,6 +1287,18 @@ select.form-control option{
     font-size:15px;
     max-width:420px;
     margin-bottom:6px;
+}
+
+.empty-state-actions{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:12px;
+    margin-top:8px;
+}
+
+.empty-state-actions .btn{
+    min-width:180px;
 }
 
 

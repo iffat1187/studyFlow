@@ -4,6 +4,7 @@ import com.studyflow.studyflow.dto.SubjectDto;
 import com.studyflow.studyflow.entity.Subject;
 import com.studyflow.studyflow.entity.User;
 import com.studyflow.studyflow.repository.SubjectRepository;
+import com.studyflow.studyflow.repository.TaskRepository;
 import com.studyflow.studyflow.repository.TopicRepository;
 import com.studyflow.studyflow.repository.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,6 +29,7 @@ public class SubjectServiceImpl implements SubjectService {
 
     private final SubjectRepository subjectRepository;
     private final TopicRepository topicRepository;
+    private final TaskRepository taskRepository;
     private final UserRepository userRepository;
 
     /**
@@ -36,9 +38,11 @@ public class SubjectServiceImpl implements SubjectService {
      */
     public SubjectServiceImpl(SubjectRepository subjectRepository,
                               TopicRepository topicRepository,
+                              TaskRepository taskRepository,
                               UserRepository userRepository) {
         this.subjectRepository = subjectRepository;
         this.topicRepository = topicRepository;
+        this.taskRepository = taskRepository;
         this.userRepository = userRepository;
     }
 
@@ -136,13 +140,16 @@ public class SubjectServiceImpl implements SubjectService {
 
     /**
      * Delete a subject, only after verifying ownership.
-     * If the subject has topics, they are deleted first to maintain referential integrity.
+     * If the subject has topics or tasks, they are deleted first to maintain referential integrity.
      */
     @Override
     @Transactional
     public void deleteSubject(Long id, String userEmail) {
 
         Subject subject = requireOwnedSubject(id, userEmail);
+
+        // Delete associated tasks first to avoid foreign key constraint violations
+        taskRepository.deleteBySubject(subject);
 
         // Delete associated topics first to avoid foreign key constraint violations
         topicRepository.deleteBySubject(subject);

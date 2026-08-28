@@ -21,6 +21,11 @@ import java.util.List;
  * bidirectional via the {@code subject} field in Topic. Cascade is NOT
  * configured for ALL to avoid unintended bulk deletions; topic lifecycle
  * is managed explicitly.
+ *
+ * A subject can also contain many {@link Task} entries. The relationship is
+ * bidirectional via the {@code subject} field in Task. Cascade is NOT
+ * configured for ALL to avoid unintended bulk deletions; task lifecycle
+ * is managed explicitly.
  */
 @Entity
 @Table(name = "subjects")
@@ -83,4 +88,17 @@ public class Subject {
      */
     @OneToMany(mappedBy = "subject", fetch = FetchType.LAZY)
     private List<Topic> topics = new ArrayList<>();
+
+    /**
+     * Tasks belonging to this subject.
+     *
+     * LAZY loading avoids pulling all tasks when only the subject is needed.
+     * The owning side of the relationship is {@link Task#getSubject()}.
+     * No cascade is configured: deleting a subject does NOT automatically
+     * delete its tasks. Task lifecycle is managed explicitly to prevent
+     * unintended data loss. The service layer handles subject deletion
+     * with appropriate checks or explicit task removal.
+     */
+    @OneToMany(mappedBy = "subject", fetch = FetchType.LAZY)
+    private List<Task> tasks = new ArrayList<>();
 }
