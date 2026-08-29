@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+
+<body>
+
+
+<div th:replace="~{layout :: layout(~{::section})}">
+
+
+    <section class="exam-page">
+
+        <!-- ============================
+             Page Header
+        ============================= -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    <i class="bi bi-calendar-event"></i>
+                    Exams
+                </h1>
+
+                <p>
+                    Keep track of your upcoming tests, midterms, finals and assessments.
+                </p>
+
+            </div>
+
+
+            <div class="page-header-actions">
+
+                <button type="button"
+                        class="btn btn-primary"
+                        data-exam-open
+                        aria-haspopup="dialog">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                    Add Exam
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Filters
+        ============================= -->
+
+        <div class="exam-filters">
+
+            <form class="exam-filter-form"
+                  method="get"
+                  action="/exams">
+
+                <input type="hidden" name="view" th:value="${currentView}">
+
+                <!-- Search -->
+                <div class="search-container">
+                    <i class="bi bi-search"></i>
+                    <input
+                            type="text"
+                            name="search"
+                            id="examSearch"
+                            placeholder="Search exams..."
+                            autocomplete="off"
+                            aria-label="Search exams"
+                            th:value="${searchTerm}">
+                </div>
+
+                <!-- Subject Filter -->
+                <div class="filter-group">
+                    <label for="subjectFilter" class="visually-hidden">Filter by Subject</label>
+                    <select id="subjectFilter"
+                            name="subjectId"
+                            onchange="this.form.submit()"
+                            class="form-control"
+                            aria-label="Filter by Subject">
+                        <option value="">All Subjects</option>
+                        <option th:each="subject : ${subjects}"
+                                th:value="${subject.id}"
+                                th:text="${subject.name}"
+                                th:selected="${subject.id == selectedSubjectId}">
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Exam Type Filter -->
+                <div class="filter-group">
+                    <label for="typeFilter" class="visually-hidden">Filter by Exam Type</label>
+                    <select id="typeFilter"
+                            name="type"
+                            onchange="this.form.submit()"
+                            class="form-control"
+                            aria-label="Filter by Exam Type">
+                        <option value="">All Types</option>
+                        <option th:each="type : ${T(com.studyflow.studyflow.entity.ExamType).values()}"
+                                th:value="${type}"
+                                th:text="${#strings.capitalizeWords(#strings.replace(type.name(), '_', ' '))}"
+                                th:selected="${type == selectedType}">
+                        </option>
+                    </select>
+                </div>
+
+            </form>
+
+            <!-- Upcoming / Past Toggle -->
+            <div class="filter-group exam-view-toggle">
+                <a th:href="@{/exams(view='upcoming', subjectId=${selectedSubjectId}, search=${searchTerm}, type=${selectedType})}"
+                   th:classappend="${currentView == 'upcoming' ? ' active' : ''}"
+                   class="btn btn-sm btn-outline"
+                   aria-label="View upcoming exams">
+                    <i class="bi bi-calendar-event"></i> Upcoming
+                </a>
+                <a th:href="@{/exams(view='past', subjectId=${selectedSubjectId}, search=${searchTerm}, type=${selectedType})}"
+                   th:classappend="${currentView == 'past' ? ' active' : ''}"
+                   class="btn btn-sm btn-outline"
+                   aria-label="View past exams">
+                    <i class="bi bi-calendar-check"></i> Past
+                </a>
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Empty State
+        ============================= -->
+
+        <div class="empty-state fade-in"
+             th:if="${#lists.isEmpty(exams)}">
+
+            <i class="bi bi-calendar-x"></i>
+
+            <h3 th:if="${searchTerm != null or selectedSubjectId != null or selectedType != null}">
+                No matching exams
+            </h3>
+            <h3 th:if="${searchTerm == null and selectedSubjectId == null and selectedType == null}">
+                No exams yet
+            </h3>
+
+            <p th:if="${searchTerm != null or selectedSubjectId != null or selectedType != null}">
+                Try adjusting your search or filters.
+            </p>
+            <p th:if="${searchTerm == null and selectedSubjectId == null and selectedType == null}">
+                Add your upcoming exams to keep everything organized.
+            </p>
+
+            <div class="empty-state-actions">
+
+                <button type="button"
+                        class="btn btn-primary"
+                        data-exam-open
+                        aria-haspopup="dialog">
+                    <i class="bi bi-plus-lg"></i> Add First Exam
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Exam Cards
+        ============================= -->
+
+        <div class="exam-grid" th:unless="${#lists.isEmpty(exams)}">
+
+            <article class="exam-card fade-in"
+                     th:each="exam : ${exams}">
+
+                <!-- Date Block (visually prominent) -->
+                <div class="exam-date-block"
+                     th:classappend="${exam.examDate.isBefore(today) ? ' is-past' : ''}">
+                    <span class="exam-date-month"
+                          th:text="${#temporals.format(exam.examDate, 'MMM')}">Aug</span>
+                    <span class="exam-date-day"
+                          th:text="${#temporals.format(exam.examDate, 'dd')}">28</span>
+                    <span class="exam-date-year"
+                          th:text="${#temporals.format(exam.examDate, 'yyyy')}">2026</span>
+                </div>
+
+                <!-- Content -->
+                <div class="exam-card-body">
+
+                    <div class="exam-card-top">
+
+                        <span class="exam-type-badge"
+                              th:text="${#strings.capitalizeWords(#strings.replace(exam.examType.name(), '_', ' '))}">
+                            Final
+                        </span>
+
+                        <span class="status-badge exam-status"
+                              th:classappend="${exam.examDate.isBefore(today) ? ' past' : ' upcoming'}"
+                              th:text="${exam.examDate.isBefore(today) ? 'Past' : 'Upcoming'}">
+                            Upcoming
+                        </span>
+
+                    </div>
+
+                    <h3 class="exam-name" th:text="${exam.name}">Spring Boot Final</h3>
+
+                    <div class="exam-subject">
+                        <i class="bi bi-book-half"></i>
+                        <span th:text="${exam.subjectName}">Spring Boot</span>
+                    </div>
+
+                    <div class="exam-meta">
+
+                        <span class="exam-meta-item">
+                            <i class="bi bi-calendar3"></i>
+                            <span th:text="${#temporals.format(exam.examDate, 'MMM d, yyyy')}">Aug 28, 2026</span>
+                        </span>
+
+                        <span class="exam-meta-item">
+                            <i class="bi bi-clock"></i>
+                            <span th:if="${exam.examTime != null}"
+                                  th:text="${#temporals.format(exam.examTime, 'hh:mm a')}">10:00 AM</span>
+                            <span th:if="${exam.examTime == null}">Time not set</span>
+                        </span>
+
+                        <span class="exam-meta-item">
+                            <i class="bi bi-hourglass-split"></i>
+                            <span th:text="${exam.durationMinutes < 60
+                                ? exam.durationMinutes + ' min'
+                                : (exam.durationMinutes % 60 == 0
+                                    ? (exam.durationMinutes / 60) + 'h'
+                                    : (exam.durationMinutes / 60) + 'h ' + (exam.durationMinutes % 60) + 'm')}">
+                                2h
+                            </span>
+                        </span>
+
+                    </div>
+
+                    <p class="exam-details"
+                       th:if="${exam.details != null and !exam.details.isEmpty()}"
+                       th:text="${exam.details}">
+                        Exam notes
+                    </p>
+
+                    <div class="exam-card-actions">
+
+                        <a th:href="@{/exams/edit/{id}(id=${exam.id})}"
+                           class="btn btn-sm btn-outline"
+                           aria-label="Edit exam">
+                            <i class="bi bi-pencil"></i>
+                            Edit
+                        </a>
+
+                        <button type="button"
+                                class="btn btn-sm btn-danger-outline"
+                                data-exam-delete
+                                th:attr="data-exam-name=${exam.name}, data-exam-id=${exam.id}"
+                                aria-haspopup="dialog"
+                                aria-label="Delete exam">
+                            <i class="bi bi-trash3"></i>
+                            Delete
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+        </div>
+
+
+    <!-- ============================
+         Add Exam Modal
+    ============================= -->
+
+    <div class="exam-modal-overlay" th:classappend="${showExamModal} ? 'open' : ''">
+
+        <div class="exam-modal"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="examModalTitle">
+
+            <div class="exam-modal-header">
+
+                <div class="exam-modal-title">
+
+                    <span class="exam-modal-icon">
+                        <i class="bi bi-calendar-plus"></i>
+                    </span>
+
+                    <h3 id="examModalTitle">Add Exam</h3>
+
+                </div>
+
+                <button type="button"
+                        class="exam-modal-close"
+                        data-exam-modal-close
+                        aria-label="Close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+
+            </div>
+
+            <form th:action="@{/exams/save}"
+                  th:object="${examDto}"
+                  method="post"
+                  id="examForm">
+
+                <!-- Exam Name -->
+
+                <div class="form-group">
+
+                    <label for="examName">
+                        Exam Name <span class="required">*</span>
+                    </label>
+
+                    <div class="input-with-icon">
+                        <i class="bi bi-pencil-square"></i>
+                        <input type="text"
+                               id="examName"
+                               class="form-control"
+                               th:field="*{name}"
+                               maxlength="100"
+                               placeholder="e.g. Calculus Midterm">
+                    </div>
+
+                    <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
+                        Exam name is required.
+                    </p>
+
+                </div>
+
+
+                <!-- Subject + Type Row -->
+
+                <div class="exam-form-row">
+
+                    <div class="form-group">
+
+                        <label for="examSubject">
+                            Subject <span class="required">*</span>
+                        </label>
+
+                        <select id="examSubject"
+                                class="form-control"
+                                th:field="*{subjectId}">
+                            <option value="">Select Subject</option>
+                            <option th:each="subject : ${subjects}"
+                                    th:value="${subject.id}"
+                                    th:text="${subject.name}">
+                            </option>
+                        </select>
+
+                        <p class="field-error" th:if="${#fields.hasErrors('subjectId')}" th:errors="*{subjectId}">
+                            Subject is required.
+                        </p>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="examType">
+                            Type <span class="required">*</span>
+                        </label>
+
+                        <select id="examType"
+                                class="form-control"
+                                th:field="*{examType}">
+                            <option value="">Select exam type</option>
+                            <option th:each="type : ${T(com.studyflow.studyflow.entity.ExamType).values()}"
+                                    th:value="${type}"
+                                    th:text="${#strings.capitalizeWords(#strings.replace(type.name(), '_', ' '))}">
+                            </option>
+                        </select>
+
+                        <p class="field-error" th:if="${#fields.hasErrors('examType')}" th:errors="*{examType}">
+                            Exam type is required.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- WHEN Section -->
+
+                <div class="exam-when-section">
+
+                    <div class="exam-section-heading">
+                        <i class="bi bi-stopwatch"></i>
+                        <span>When</span>
+                    </div>
+
+                    <div class="exam-form-row">
+
+                        <!-- Date -->
+
+                        <div class="form-group">
+
+                            <label for="examDate">
+                                Date <span class="required">*</span>
+                            </label>
+
+                            <div class="input-with-icon">
+                                <i class="bi bi-calendar3"></i>
+                                <input type="date"
+                                       id="examDate"
+                                       class="form-control"
+                                       th:field="*{examDate}">
+                            </div>
+
+                            <p class="field-error" th:if="${#fields.hasErrors('examDate')}" th:errors="*{examDate}">
+                                Exam date is required.
+                            </p>
+
+                        </div>
+
+                        <!-- Time -->
+
+                        <div class="form-group">
+
+                            <label for="examTime">
+                                Time
+                            </label>
+
+                            <div class="input-with-icon">
+                                <i class="bi bi-clock"></i>
+                                <input type="time"
+                                       id="examTime"
+                                       class="form-control"
+                                       th:field="*{examTime}"
+                                       data-time-input>
+                            </div>
+
+                            <p class="field-error" th:if="${#fields.hasErrors('examTime')}" th:errors="*{examTime}">
+                                Invalid time.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <p class="exam-end-helper" id="examEndTimeHelper" data-end-helper>
+                        Pick a time to see when this exam ends.
+                    </p>
+
+                    <!-- Duration -->
+
+                    <div class="exam-duration">
+
+                        <div class="exam-section-heading">
+                            <i class="bi bi-hourglass-split"></i>
+                            <span>Duration</span>
+                        </div>
+
+                        <div class="duration-control">
+
+                            <input type="hidden"
+                                   th:field="*{durationMinutes}"
+                                   data-duration-input>
+
+                            <div class="duration-stepper">
+
+                                <button type="button"
+                                        class="duration-btn"
+                                        data-duration-step="-15"
+                                        aria-label="Decrease duration">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+
+                                <span class="duration-display" data-duration-display>1h</span>
+
+                                <button type="button"
+                                        class="duration-btn"
+                                        data-duration-step="15"
+                                        aria-label="Increase duration">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+
+                            </div>
+
+                            <div class="duration-presets" role="group" aria-label="Duration presets">
+                                <button type="button" class="duration-pill" data-duration="30">30m</button>
+                                <button type="button" class="duration-pill" data-duration="45">45m</button>
+                                <button type="button" class="duration-pill" data-duration="60">1h</button>
+                                <button type="button" class="duration-pill" data-duration="90">1h 30m</button>
+                                <button type="button" class="duration-pill" data-duration="120">2h</button>
+                                <button type="button" class="duration-pill" data-duration="180">3h</button>
+                            </div>
+
+                            <p class="field-error" th:if="${#fields.hasErrors('durationMinutes')}" th:errors="*{durationMinutes}">
+                                Exam duration is required.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Details -->
+
+                <div class="form-group exam-details-group">
+
+                    <label for="examDetails">
+                        Details
+                    </label>
+
+                    <textarea id="examDetails"
+                              class="form-control"
+                              rows="4"
+                              th:field="*{details}"
+                              maxlength="500"
+                              placeholder="Add exam notes, chapters, room number, materials, etc."></textarea>
+
+                    <p class="field-error" th:if="${#fields.hasErrors('details')}" th:errors="*{details}">
+                        Details is invalid.
+                    </p>
+
+                </div>
+
+
+                <!-- Modal Footer -->
+
+                <div class="exam-modal-footer">
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-exam-modal-close>
+                        Cancel
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary"
+                            data-exam-submit>
+                        <i class="bi bi-check-lg"></i>
+                        Save Exam
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================
+         Delete Exam Confirmation
+    ============================= -->
+
+    <div class="exam-modal-overlay" id="examConfirmOverlay" aria-hidden="true">
+
+        <div class="exam-modal exam-confirm"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="examConfirmTitle">
+
+            <div class="exam-modal-header">
+
+                <div class="exam-modal-title">
+
+                    <span class="exam-modal-icon exam-confirm-icon">
+                        <i class="bi bi-trash3"></i>
+                    </span>
+
+                    <h3 id="examConfirmTitle">Delete Exam?</h3>
+
+                </div>
+
+                <button type="button"
+                        class="exam-modal-close"
+                        data-exam-confirm-close
+                        aria-label="Close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+
+            </div>
+
+            <div class="exam-confirm-body">
+
+                <p>
+                    Are you sure you want to delete
+                    <strong data-exam-confirm-name>this exam</strong>?
+                    This action cannot be undone.
+                </p>
+
+            </div>
+
+            <div class="exam-confirm-actions">
+
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-exam-confirm-close>
+                    Cancel
+                </button>
+
+                <form method="post"
+                      id="examDeleteForm"
+                      action="/exams/delete/0">
+
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <button type="submit"
+                            class="btn btn-danger">
+                        <i class="bi bi-trash3"></i>
+                        Delete
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    </section>
+
+
+</div>
+
+
+</body>
+
+
+</html>

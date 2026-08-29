@@ -239,33 +239,167 @@
                         Upcoming Exams
                     </h2>
 
-                    <span class="dash-card__soon">Soon</span>
+                    <span class="dash-card__soon dash-card__count"
+                          th:if="${data.hasUpcomingExams}"
+                          th:text="${data.upcomingExamCount} + ' upcoming'">
+                        3 upcoming
+                    </span>
 
                 </header>
 
                 <div class="dash-card__body">
 
-                    <div class="dash-empty">
+                    <!-- Empty state -->
+
+                    <div class="dash-empty" th:if="${!data.hasUpcomingExams}">
 
                         <span class="dash-empty__icon">
                             <i class="bi bi-journal-x"></i>
                         </span>
 
                         <h3>
-                            No exams added yet
+                            No upcoming exams.
                         </h3>
 
                         <p>
-                            Exam tracking is coming soon. You'll manage your
-                            upcoming tests here.
+                            Add your exams to keep important dates visible.
                         </p>
 
-                        <span class="chip chip--soon" aria-disabled="true">
-                            <i class="bi bi-hourglass-split"></i>
-                            Coming soon
-                        </span>
+                        <a th:href="@{/exams(add=true)}" class="btn btn-primary">
+                            <i class="bi bi-plus-lg"></i>
+                            Add Exam
+                        </a>
+
+                        <a th:if="${!data.hasSubjects}"
+                           th:href="@{/subjects/new}"
+                           class="btn btn-outline">
+                            <i class="bi bi-book-half"></i>
+                            Add a subject first
+                        </a>
 
                     </div>
+
+                    <!-- Nearest exam highlight -->
+
+                    <div class="dash-next-exam" th:if="${data.nextExam != null}">
+
+                        <span class="dash-next-exam__flag">
+                            <i class="bi bi-flag-fill"></i>
+                            Next Exam
+                        </span>
+
+                        <div class="dash-next-exam__row">
+
+                            <div class="dash-next-exam__date"
+                                 th:classappend="${data.nextExam.isToday ? ' is-today' : ''}">
+
+                                <span class="dash-next-exam__day"
+                                      th:text="${#temporals.format(data.nextExam.examDate, 'dd')}">28</span>
+
+                                <span class="dash-next-exam__month"
+                                      th:text="${#temporals.format(data.nextExam.examDate, 'MMM')}">Aug</span>
+
+                            </div>
+
+                            <div class="dash-next-exam__info">
+
+                                <h3 th:text="${data.nextExam.name}">Spring Boot Final</h3>
+
+                                <p>
+                                    <span th:text="${data.nextExam.subjectName}">Spring Boot</span>
+                                    <span th:text="' · ' + ${#strings.capitalizeWords(#strings.replace(data.nextExam.examType.name(), '_', ' '))}">
+                                        · Final
+                                    </span>
+                                </p>
+
+                                <ul class="dash-next-exam__meta">
+                                    <li>
+                                        <i class="bi bi-calendar3"></i>
+                                        <span th:text="${#temporals.format(data.nextExam.examDate, 'EEE, MMM d, yyyy')}">
+                                            Fri, Aug 28, 2026
+                                        </span>
+                                    </li>
+                                    <li th:if="${data.nextExam.examTime != null}">
+                                        <i class="bi bi-clock"></i>
+                                        <span th:text="${#temporals.format(data.nextExam.examTime, 'hh:mm a')}">
+                                            10:00 AM
+                                        </span>
+                                    </li>
+                                    <li>
+                                        <i class="bi bi-hourglass-split"></i>
+                                        <span th:text="${data.nextExam.durationMinutes < 60
+                                            ? data.nextExam.durationMinutes + ' min'
+                                            : (data.nextExam.durationMinutes % 60 == 0
+                                                ? (data.nextExam.durationMinutes / 60) + 'h'
+                                                : (data.nextExam.durationMinutes / 60) + 'h ' + (data.nextExam.durationMinutes % 60) + 'm')}">
+                                            2h
+                                        </span>
+                                    </li>
+                                </ul>
+
+                            </div>
+
+                            <span class="dash-urgency"
+                                  th:classappend="${data.nextExam.isToday ? ' dash-urgency--today' : ''}"
+                                  th:text="${data.nextExam.urgencyLabel}">
+                                6 days
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Remaining upcoming exams -->
+
+                    <ul class="dash-exam-list" th:if="${#lists.size(data.upcomingExams) > 1}">
+
+                        <li class="dash-exam-item"
+                            th:each="exam, stat : ${data.upcomingExams}"
+                            th:if="${stat.index > 0}">
+
+                            <span class="dash-exam-item__date"
+                                  th:classappend="${exam.isToday ? ' is-today' : ''}">
+
+                                <span class="dash-exam-item__day"
+                                      th:text="${#temporals.format(exam.examDate, 'dd')}">30</span>
+
+                                <span class="dash-exam-item__month"
+                                      th:text="${#temporals.format(exam.examDate, 'MMM')}">Aug</span>
+
+                            </span>
+
+                            <div class="dash-exam-item__info">
+
+                                <strong th:text="${exam.name}">Database Midterm</strong>
+
+                                <small>
+                                    <span th:text="${exam.subjectName}">Database</span>
+                                    <span th:text="' · ' + ${#strings.capitalizeWords(#strings.replace(exam.examType.name(), '_', ' '))}">
+                                        · Midterm
+                                    </span>
+                                </small>
+
+                            </div>
+
+                            <span class="dash-urgency"
+                                  th:classappend="${exam.isToday ? ' dash-urgency--today' : ''}"
+                                  th:text="${exam.urgencyLabel}">
+                                3 days
+                            </span>
+
+                        </li>
+
+                    </ul>
+
+                    <a th:if="${data.hasUpcomingExams}"
+                       th:href="@{/exams}"
+                       class="dash-card__link dash-exams__all">
+
+                        View All Exams
+
+                        <i class="bi bi-arrow-right"></i>
+
+                    </a>
 
                 </div>
 
@@ -544,7 +678,7 @@
 
                     </div>
 
-                    <div class="dash-tool dash-tool--soon" aria-disabled="true">
+                    <a th:href="@{/exams}" class="dash-tool">
 
                         <span class="dash-tool__icon dash-tool__icon--sky">
                             <i class="bi bi-calendar-event"></i>
@@ -554,13 +688,11 @@
 
                             <strong>Exams</strong>
 
-                            <small>Coming soon</small>
+                            <small>Manage upcoming tests</small>
 
                         </div>
 
-                        <span class="dash-tool__tag">Soon</span>
-
-                    </div>
+                    </a>
 
                     <div class="dash-tool dash-tool--soon" aria-disabled="true">
 

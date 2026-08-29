@@ -1,11 +1,14 @@
 package com.studyflow.studyflow.service.impl;
 
 import com.studyflow.studyflow.dto.DashboardData;
+import com.studyflow.studyflow.dto.ExamDto;
 import com.studyflow.studyflow.dto.SetupStep;
 import com.studyflow.studyflow.dto.SubjectDto;
+import com.studyflow.studyflow.dto.UpcomingExam;
 import com.studyflow.studyflow.entity.User;
 import com.studyflow.studyflow.repository.UserRepository;
 import com.studyflow.studyflow.service.DashboardService;
+import com.studyflow.studyflow.service.ExamService;
 import com.studyflow.studyflow.service.SubjectService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,9 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of {@link DashboardService}.
@@ -26,13 +31,16 @@ import java.util.Locale;
  * - the displayed name comes from the authenticated user's record
  * - the setup checklist is computed from data that actually exists
  *   (account creation always counts, subjects come from the subject module)
- * - steps that depend on not-yet-implemented modules (topics, tasks, exams)
- *   are marked as future rather than fabricated
+ * - the upcoming exams section shows the user's real nearest exams via the
+ *   ownership-aware {@link ExamService}
+ * - steps that depend on not-yet-implemented modules (topics, tasks) are
+ *   marked as future rather than fabricated
  * - the subject snapshot shows ONLY the authenticated user's subjects via
  *   the ownership-aware {@link SubjectService}
  *
- * Subjects are user-owned: the subject service resolves the authenticated
- * user from the security context email and returns only that user's data.
+ * Subjects and exams are user-owned: the underlying services resolve the
+ * authenticated user from the security context email and return only that
+ * user's data, so one user can never see another user's exams here.
  */
 @Service
 public class DashboardServiceImpl implements DashboardService {
@@ -42,18 +50,22 @@ public class DashboardServiceImpl implements DashboardService {
     private static final DateTimeFormatter DAY_LABEL =
             DateTimeFormatter.ofPattern("EEEE", Locale.ENGLISH);
 
+    static final int DASHBOARD_EXAM_LIMIT = 3;
     private static final int SETUP_TOTAL = 5;
 
     private final UserRepository userRepository;
     private final SubjectService subjectService;
+    private final ExamService examService;
 
     /**
      * Constructor injection of the repositories and existing services.
      */
     public DashboardServiceImpl(UserRepository userRepository,
-                                SubjectService subjectService) {
+                                SubjectService subjectService,
+                                ExamService examService) {
         this.userRepository = userRepository;
         this.subjectService = subjectService;
+        this.examService = examService;
     }
 
     @Override
@@ -69,7 +81,20 @@ public class DashboardServiceImpl implements DashboardService {
         List<SubjectDto> subjects = subjectService.getAllSubjects(userEmail);
         boolean hasSubjects = !subjects.isEmpty();
 
-        List<SetupStep> setupSteps = buildSetupSteps(hasSubjects);
+        // Only the authenticated user's exams: the db-side "upcoming" query is
+        // scoped to the owning user and returns today-or-future exams soonest
+        // first, so the nearest exam is already the first element.
+        List<UpcomingExam> upcomingExams = examService
+                .getExams(userEmail, null, null, null, true)
+                .stream()
+                .limit(DASHBOARD_EXAM_LIMIT)
+                .map(this::toUpcomingExam)
+                .collect(Collectors.toList());
+
+        boolean hasExams = examService.userHasAnyExam(userEmail);
+        boolean hasUpcomingExams = !upcomingExams.isEmpty();
+
+        List<SetupStep> setupSteps = buildSetupSteps(hasSubjects, hasExams);
         int setupCompleted = (int) setupSteps.stream()
                 .filter(step -> step.status() == SetupStep.Status.COMPLETED)
                 .count();
@@ -84,11 +109,54 @@ public class DashboardServiceImpl implements DashboardService {
                 subjects,
                 hasSubjects,
                 subjects.size(),
+                upcomingExams,
+                hasUpcomingExams,
+                upcomingExams.size(),
+                upcomingExams.isEmpty() ? null : upcomingExams.get(0),
                 setupSteps,
                 setupCompleted,
                 SETUP_TOTAL,
                 Math.round(setupCompleted * 100f / SETUP_TOTAL)
         );
+    }
+
+    /**
+     * Wrap a user-scoped exam DTO into its dashboard view, computing the
+     * urgency from the real exam date against the server clock.
+     */
+    private UpcomingExam toUpcomingExam(ExamDto exam) {
+        LocalDate today = LocalDate.now();
+        long daysLeft = ChronoUnit.DAYS.between(today, exam.examDate());
+        boolean isToday = exam.examDate().equals(today);
+        return new UpcomingExam(
+                exam.id(),
+                exam.name(),
+                exam.subjectName(),
+                exam.examType(),
+                exam.examDate(),
+                exam.examTime(),
+                exam.durationMinutes(),
+                daysLeft,
+                isToday,
+                urgencyLabel(daysLeft, isToday)
+        );
+    }
+
+    /**
+     * Human urgency label derived from the actual date gap.
+     */
+    private String urgencyLabel(long daysLeft, boolean isToday) {
+        if (isToday || daysLeft <= 0) {
+            return "Today";
+        }
+        if (daysLeft == 1) {
+            return "Tomorrow";
+        }
+        if (daysLeft < 7) {
+            return daysLeft + " days";
+        }
+        long weeks = daysLeft / 7;
+        return weeks == 1 ? "1 week" : weeks + " weeks";
     }
 
     /**
@@ -122,10 +190,12 @@ public class DashboardServiceImpl implements DashboardService {
      * Build the five-step getting-started checklist.
      *
      * Account creation is always completed for an authenticated user.
-     * The subject step reflects real data. Topics, tasks and exams belong
-     * to modules that do not exist yet, so they are marked UPCOMING.
+     * The subject and exam steps reflect real data: the exam step only
+     * becomes the next actionable step once the user owns at least one
+     * subject (an exam cannot be created without one). Topics and tasks
+     * belong to modules that do not exist yet, so they are marked UPCOMING.
      */
-    private List<SetupStep> buildSetupSteps(boolean hasSubjects) {
+    private List<SetupStep> buildSetupSteps(boolean hasSubjects, boolean hasExams) {
         List<SetupStep> steps = new ArrayList<>();
 
         steps.add(new SetupStep(
@@ -164,8 +234,10 @@ public class DashboardServiceImpl implements DashboardService {
                 5,
                 "Add your first exam",
                 "bi-calendar-event",
-                SetupStep.Status.UPCOMING,
-                null
+                hasExams ? SetupStep.Status.COMPLETED
+                        : hasSubjects ? SetupStep.Status.CURRENT
+                        : SetupStep.Status.UPCOMING,
+                hasExams || !hasSubjects ? null : "/exams"
         ));
 
         return steps;

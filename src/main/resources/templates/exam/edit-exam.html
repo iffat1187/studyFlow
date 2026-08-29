@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+    <title>Edit Exam | StudyFlow</title>
+</head>
+
+
+<body>
+
+
+<div th:replace="~{layout :: layout(~{::section})}">
+
+
+    <section class="exam-page">
+
+        <!-- ============================
+             Page Header
+        ============================ -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    <i class="bi bi-pencil-square"></i>
+                    Edit Exam
+                </h1>
+
+                <p th:if="${examDto.subjectName != null}">
+                    Edit this exam in <strong th:text="${examDto.subjectName}">Subject</strong>.
+                </p>
+                <p th:if="${examDto.subjectName == null}">
+                    Update your exam information.
+                </p>
+
+            </div>
+
+
+            <a th:href="@{/exams}"
+               class="btn btn-secondary">
+
+                <i class="bi bi-arrow-left"></i>
+
+                Back to Exams
+
+            </a>
+
+        </div>
+
+
+
+
+
+        <!-- ============================
+             Edit Exam Form
+        ============================ -->
+
+        <div class="card form-card">
+
+            <form th:action="@{/exams/update/{id}(id=*{id})}"
+                  th:object="${examDto}"
+                  method="post"
+                  data-exam-edit-form>
+
+                <!-- CSRF token: required by Spring Security -->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <!-- Hidden ID -->
+
+                <input type="hidden" th:field="*{id}"/>
+
+
+
+
+                <!-- Exam Name -->
+
+                <div class="form-group">
+
+                    <label for="examName">
+                        Exam Name <span class="required">*</span>
+                    </label>
+
+                    <div class="input-with-icon">
+                        <i class="bi bi-pencil-square"></i>
+                        <input type="text"
+                               id="examName"
+                               class="form-control"
+                               th:field="*{name}"
+                               maxlength="100"
+                               placeholder="e.g. Calculus Midterm">
+                    </div>
+
+                    <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
+                        Exam name is required.
+                    </p>
+
+                </div>
+
+
+                <!-- Subject + Type Row -->
+
+                <div class="exam-form-row">
+
+                    <div class="form-group">
+
+                        <label for="examSubject">
+                            Subject <span class="required">*</span>
+                        </label>
+
+                        <select id="examSubject"
+                                class="form-control"
+                                th:field="*{subjectId}">
+                            <option value="">Select Subject</option>
+                            <option th:each="subject : ${subjects}"
+                                    th:value="${subject.id}"
+                                    th:text="${subject.name}">
+                            </option>
+                        </select>
+
+                        <p class="field-error" th:if="${#fields.hasErrors('subjectId')}" th:errors="*{subjectId}">
+                            Subject is required.
+                        </p>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="examType">
+                            Type <span class="required">*</span>
+                        </label>
+
+                        <select id="examType"
+                                class="form-control"
+                                th:field="*{examType}">
+                            <option value="">Select exam type</option>
+                            <option th:each="type : ${T(com.studyflow.studyflow.entity.ExamType).values()}"
+                                    th:value="${type}"
+                                    th:text="${#strings.capitalizeWords(#strings.replace(type.name(), '_', ' '))}">
+                            </option>
+                        </select>
+
+                        <p class="field-error" th:if="${#fields.hasErrors('examType')}" th:errors="*{examType}">
+                            Exam type is required.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- WHEN Section -->
+
+                <div class="exam-when-section">
+
+                    <div class="exam-section-heading">
+                        <i class="bi bi-stopwatch"></i>
+                        <span>When</span>
+                    </div>
+
+                    <div class="exam-form-row">
+
+                        <!-- Date -->
+
+                        <div class="form-group">
+
+                            <label for="examDate">
+                                Date <span class="required">*</span>
+                            </label>
+
+                            <div class="input-with-icon">
+                                <i class="bi bi-calendar3"></i>
+                                <input type="date"
+                                       id="examDate"
+                                       class="form-control"
+                                       th:field="*{examDate}">
+                            </div>
+
+                            <p class="field-error" th:if="${#fields.hasErrors('examDate')}" th:errors="*{examDate}">
+                                Exam date is required.
+                            </p>
+
+                        </div>
+
+                        <!-- Time -->
+
+                        <div class="form-group">
+
+                            <label for="examTime">
+                                Time
+                            </label>
+
+                            <div class="input-with-icon">
+                                <i class="bi bi-clock"></i>
+                                <input type="time"
+                                       id="examTime"
+                                       class="form-control"
+                                       th:field="*{examTime}"
+                                       data-time-input>
+                            </div>
+
+                            <p class="field-error" th:if="${#fields.hasErrors('examTime')}" th:errors="*{examTime}">
+                                Invalid time.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <p class="exam-end-helper" data-end-helper>
+                        Pick a time to see when this exam ends.
+                    </p>
+
+                    <!-- Duration -->
+
+                    <div class="exam-duration">
+
+                        <div class="exam-section-heading">
+                            <i class="bi bi-hourglass-split"></i>
+                            <span>Duration</span>
+                        </div>
+
+                        <div class="duration-control">
+
+                            <input type="hidden"
+                                   th:field="*{durationMinutes}"
+                                   data-duration-input>
+
+                            <div class="duration-stepper">
+
+                                <button type="button"
+                                        class="duration-btn"
+                                        data-duration-step="-15"
+                                        aria-label="Decrease duration">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+
+                                <span class="duration-display" data-duration-display>1h</span>
+
+                                <button type="button"
+                                        class="duration-btn"
+                                        data-duration-step="15"
+                                        aria-label="Increase duration">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+
+                            </div>
+
+                            <div class="duration-presets" role="group" aria-label="Duration presets">
+                                <button type="button" class="duration-pill" data-duration="30">30m</button>
+                                <button type="button" class="duration-pill" data-duration="45">45m</button>
+                                <button type="button" class="duration-pill" data-duration="60">1h</button>
+                                <button type="button" class="duration-pill" data-duration="90">1h 30m</button>
+                                <button type="button" class="duration-pill" data-duration="120">2h</button>
+                                <button type="button" class="duration-pill" data-duration="180">3h</button>
+                            </div>
+
+                            <p class="field-error" th:if="${#fields.hasErrors('durationMinutes')}" th:errors="*{durationMinutes}">
+                                Exam duration is required.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Details -->
+
+                <div class="form-group exam-details-group">
+
+                    <label for="examDetails">
+                        Details
+                    </label>
+
+                    <textarea id="examDetails"
+                              class="form-control"
+                              rows="4"
+                              th:field="*{details}"
+                              maxlength="500"
+                              placeholder="Add exam notes, chapters, room number, materials, etc."></textarea>
+
+                    <p class="field-error" th:if="${#fields.hasErrors('details')}" th:errors="*{details}">
+                        Details is invalid.
+                    </p>
+
+                </div>
+
+
+
+
+
+                <!-- Buttons -->
+
+                <div class="form-actions">
+
+                    <a th:href="@{/exams}"
+                       class="btn btn-secondary">
+
+                        <i class="bi bi-arrow-left"></i>
+
+                        Cancel
+
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-primary"
+                            data-exam-update-submit>
+
+                        <i class="bi bi-check-circle"></i>
+
+                        Update Exam
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+</body>
+
+
+</html>

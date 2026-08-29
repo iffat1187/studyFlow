@@ -3,6 +3,7 @@ package com.studyflow.studyflow.service;
 import com.studyflow.studyflow.dto.SubjectDto;
 import com.studyflow.studyflow.entity.Subject;
 import com.studyflow.studyflow.entity.User;
+import com.studyflow.studyflow.repository.ExamRepository;
 import com.studyflow.studyflow.repository.SubjectRepository;
 import com.studyflow.studyflow.repository.TaskRepository;
 import com.studyflow.studyflow.repository.TopicRepository;
@@ -30,6 +31,7 @@ public class SubjectServiceImpl implements SubjectService {
     private final SubjectRepository subjectRepository;
     private final TopicRepository topicRepository;
     private final TaskRepository taskRepository;
+    private final ExamRepository examRepository;
     private final UserRepository userRepository;
 
     /**
@@ -39,10 +41,12 @@ public class SubjectServiceImpl implements SubjectService {
     public SubjectServiceImpl(SubjectRepository subjectRepository,
                               TopicRepository topicRepository,
                               TaskRepository taskRepository,
+                              ExamRepository examRepository,
                               UserRepository userRepository) {
         this.subjectRepository = subjectRepository;
         this.topicRepository = topicRepository;
         this.taskRepository = taskRepository;
+        this.examRepository = examRepository;
         this.userRepository = userRepository;
     }
 
@@ -150,6 +154,9 @@ public class SubjectServiceImpl implements SubjectService {
 
         // Delete associated tasks first to avoid foreign key constraint violations
         taskRepository.deleteBySubject(subject);
+
+        // Delete associated exams first to avoid foreign key constraint violations
+        examRepository.deleteBySubject(subject);
 
         // Delete associated topics first to avoid foreign key constraint violations
         topicRepository.deleteBySubject(subject);
