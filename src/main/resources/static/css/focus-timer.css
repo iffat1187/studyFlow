@@ -1,0 +1,298 @@
+/* =====================================================
+   STUDYFLOW
+   Focus Timer Styles (Study Session Sub-Phase F)
+   Reuses the StudyFlow design system: modal overlay,
+   buttons, duration widgets and helper classes come from
+   the global framework (style.css / exam.css). This file
+   only covers the timer-specific presentation.
+   =====================================================
+
+   Screen-reader-only helper (not defined globally).
+*/
+
+.sr-only{
+    position:absolute;
+    width:1px;
+    height:1px;
+    padding:0;
+    margin:-1px;
+    overflow:hidden;
+    clip:rect(0,0,0,0);
+    white-space:nowrap;
+    border:0;
+}
+
+
+/* ==========================
+   Modal sizing
+========================== */
+
+.focus-timer-modal{
+    max-width:560px;
+}
+
+.focus-timer-icon{
+    color:var(--primary-light);
+    background:rgba(139,92,246,.14);
+    border-color:rgba(139,92,246,.28);
+}
+
+.focus-timer-body{
+    position:relative;
+    padding:24px 24px 28px;
+}
+
+/* The button/box [hidden] flag must win over the global .btn display. */
+.focus-timer-body [hidden]{
+    display:none !important;
+}
+
+
+/* ==========================
+   Setup panel
+========================== */
+
+.focus-timer-question{
+    margin-bottom:18px;
+    font-size:14.5px;
+    font-weight:600;
+    color:var(--text-light);
+}
+
+.focus-timer-form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+
+.focus-timer-form-row .form-group{
+    margin-bottom:24px;
+}
+
+.focus-timer-duration{
+    padding:18px 20px;
+    margin-bottom:24px;
+    border-radius:var(--radius-lg);
+    background:rgba(255,255,255,.02);
+    border:1px solid var(--border);
+}
+
+.focus-timer-section-heading{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:14px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:1.2px;
+    text-transform:uppercase;
+    color:var(--text-muted);
+}
+
+.focus-timer-section-heading i{
+    color:var(--primary-light);
+    font-size:14px;
+}
+
+/* Disabled selectors while the timer runs stay readable. */
+.focus-timer-body select:disabled,
+.focus-timer-body .duration-presets button:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+}
+
+
+/* ==========================
+   Dial (ring + time + status)
+========================== */
+
+.focus-timer-dial{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    width:230px;
+    height:230px;
+    margin:0 auto 22px;
+}
+
+.focus-timer-ring{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    transform:rotate(-90deg);
+}
+
+.focus-timer-ring-track{
+    fill:none;
+    stroke:rgba(255,255,255,.08);
+    stroke-width:10;
+}
+
+.focus-timer-ring-progress{
+    fill:none;
+    stroke:var(--primary);
+    stroke-width:10;
+    stroke-linecap:round;
+    transition:stroke-dashoffset .25s linear;
+}
+
+.focus-timer-time{
+    font-size:52px;
+    font-weight:800;
+    letter-spacing:-1.5px;
+    font-variant-numeric:tabular-nums;
+    color:#fff;
+    line-height:1;
+    z-index:1;
+}
+
+.focus-timer-status{
+    margin-top:12px;
+    padding:6px 14px;
+    border-radius:var(--radius-pill);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    color:var(--text-muted);
+    background:rgba(148,163,184,.10);
+    border:1px solid rgba(148,163,184,.25);
+    z-index:1;
+    text-align:center;
+}
+
+.focus-timer-status::before{
+    content:"";
+    display:inline-block;
+    width:6px;
+    height:6px;
+    margin-right:7px;
+    border-radius:50%;
+    background:currentColor;
+    vertical-align:middle;
+}
+
+.focus-timer-body.is-running .focus-timer-status{
+    color:var(--primary-light);
+    background:rgba(139,92,246,.14);
+    border-color:rgba(139,92,246,.30);
+}
+
+.focus-timer-body.is-running .focus-timer-time{
+    color:var(--primary-light);
+}
+
+.focus-timer-body.is-running .focus-timer-ring-progress{
+    filter:drop-shadow(0 0 18px rgba(139,92,246,.55));
+}
+
+.focus-timer-body.is-paused .focus-timer-status{
+    color:#fbbf24;
+    background:rgba(251,191,36,.12);
+    border-color:rgba(251,191,36,.30);
+}
+
+.focus-timer-body.is-paused .focus-timer-ring-progress{
+    filter:drop-shadow(0 0 14px rgba(251,191,36,.35));
+}
+
+.focus-timer-body.is-finished .focus-timer-time{
+    color:var(--text-muted);
+}
+
+
+/* ==========================
+   Completion feedback
+========================== */
+
+.focus-timer-complete{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    margin:0 0 20px;
+    padding:16px 18px;
+    border-radius:var(--radius-lg);
+    background:rgba(16,185,129,.12);
+    border:1px solid rgba(16,185,129,.30);
+}
+
+.focus-timer-complete i{
+    font-size:28px;
+    color:var(--success);
+}
+
+.focus-timer-complete strong{
+    display:block;
+    font-size:15px;
+    color:#fff;
+}
+
+.focus-timer-complete span{
+    display:block;
+    font-size:13px;
+    color:var(--text-light);
+}
+
+
+/* ==========================
+   Actions
+========================== */
+
+.focus-timer-actions{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+.focus-timer-actions .btn{
+    min-width:128px;
+}
+
+
+/* ==========================
+   Stop confirmation overlay
+========================== */
+
+.focus-timer-confirm{
+    max-width:430px;
+}
+
+.session-confirm-overlay{
+    z-index:var(--z-modal);
+}
+
+@media(max-width:576px){
+
+    .focus-timer-actions .btn{
+        flex:1;
+        min-width:130px;
+    }
+}
+
+
+/* ==========================
+   Responsive
+========================== */
+
+@media(max-width:480px){
+
+    .focus-timer-form-row{
+        grid-template-columns:1fr;
+        gap:0;
+    }
+
+    .focus-timer-dial{
+        width:200px;
+        height:200px;
+    }
+
+    .focus-timer-time{
+        font-size:44px;
+    }
+}

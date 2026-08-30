@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+    <title>Edit Study Session | StudyFlow</title>
+</head>
+
+
+<body>
+
+
+<div th:replace="~{layout :: layout(~{::section})}">
+
+
+    <section class="study-session-page">
+
+        <!-- ============================
+             Page Header
+        ============================ -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    <i class="bi bi-pencil-square"></i>
+                    Edit Study Session
+                </h1>
+
+                <p th:if="${studySessionDto.subjectName != null}">
+                    Update this session in <strong th:text="${studySessionDto.subjectName}">Subject</strong>.
+                </p>
+                <p th:if="${studySessionDto.subjectName == null}">
+                    Update your study session information.
+                </p>
+
+            </div>
+
+
+            <a th:href="@{/study-sessions}"
+               class="btn btn-secondary">
+
+                <i class="bi bi-arrow-left"></i>
+
+                Back to Study Sessions
+
+            </a>
+
+        </div>
+
+
+
+
+        <!-- ============================
+             Edit Study Session Form
+        ============================ -->
+
+        <div class="card form-card">
+
+            <form th:action="@{/study-sessions/update/{id}(id=*{id})}"
+                  th:object="${studySessionDto}"
+                  method="post"
+                  data-session-edit-form>
+
+                <!-- CSRF token: required by Spring Security -->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <!-- Hidden ID -->
+
+                <input type="hidden" th:field="*{id}"/>
+
+
+
+
+                <!-- Subject + Session Type Row -->
+
+                <div class="session-form-row">
+
+                    <div class="form-group">
+
+                        <label for="sessionSubject">
+                            Subject <span class="required">*</span>
+                        </label>
+
+                        <select id="sessionSubject"
+                                class="form-control"
+                                th:field="*{subjectId}">
+                            <option value="">Select Subject</option>
+                            <option th:each="subject : ${subjects}"
+                                    th:value="${subject.id}"
+                                    th:text="${subject.name}">
+                            </option>
+                        </select>
+
+                        <p class="field-error" th:if="${#fields.hasErrors('subjectId')}" th:errors="*{subjectId}">
+                            Subject is required.
+                        </p>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="sessionType">
+                            Session Type <span class="required">*</span>
+                        </label>
+
+                        <select id="sessionType"
+                                class="form-control"
+                                th:field="*{sessionType}">
+                            <option value="">Select session type</option>
+                            <option th:each="type : ${T(com.studyflow.studyflow.entity.StudySessionType).values()}"
+                                    th:value="${type}"
+                                    th:text="${#strings.capitalizeWords(#strings.toLowerCase(#strings.replace(type.name(), '_', ' ')))}">
+                            </option>
+                        </select>
+
+                        <p class="field-error" th:if="${#fields.hasErrors('sessionType')}" th:errors="*{sessionType}">
+                            Session type is required.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Topic (optional; options update with the chosen Subject) -->
+
+                <div class="form-group">
+
+                    <label for="sessionTopic">
+                        Topic
+                    </label>
+
+                    <select id="sessionTopic"
+                            class="form-control"
+                            th:field="*{topicId}">
+                        <option value="">No specific topic</option>
+                    </select>
+
+                    <p class="field-error" th:if="${#fields.hasErrors('topicId')}" th:errors="*{topicId}">
+                        Topic is invalid.
+                    </p>
+
+                </div>
+
+
+                <!-- WHEN Section -->
+
+                <div class="session-when-section">
+
+                    <div class="session-section-heading">
+                        <i class="bi bi-stopwatch"></i>
+                        <span>When</span>
+                    </div>
+
+                    <div class="session-time-row">
+
+                        <!-- Date -->
+
+                        <div class="form-group">
+
+                            <label for="sessionDate">
+                                Date <span class="required">*</span>
+                            </label>
+
+                            <div class="input-with-icon">
+                                <i class="bi bi-calendar3"></i>
+                                <input type="date"
+                                       id="sessionDate"
+                                       class="form-control"
+                                       th:field="*{sessionDate}">
+                            </div>
+
+                            <p class="field-error" th:if="${#fields.hasErrors('sessionDate')}" th:errors="*{sessionDate}">
+                                Session date is required.
+                            </p>
+
+                        </div>
+
+                        <!-- Start Time -->
+
+                        <div class="form-group">
+
+                            <label for="sessionStartTime">
+                                Start Time
+                            </label>
+
+                            <div class="input-with-icon">
+                                <i class="bi bi-clock"></i>
+                                <input type="time"
+                                       id="sessionStartTime"
+                                       class="form-control"
+                                       th:field="*{startTime}"
+                                       data-session-start-input>
+                            </div>
+
+                            <p class="field-error" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}">
+                                Invalid start time.
+                            </p>
+
+                        </div>
+
+                        <!-- End Time -->
+
+                        <div class="form-group">
+
+                            <label for="sessionEndTime">
+                                End Time
+                            </label>
+
+                            <div class="input-with-icon">
+                                <i class="bi bi-clock-history"></i>
+                                <input type="time"
+                                       id="sessionEndTime"
+                                       class="form-control"
+                                       th:field="*{endTime}">
+                            </div>
+
+                            <p class="field-error" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}">
+                                Invalid end time.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <p class="session-end-helper" id="sessionEndTimeHelper" data-session-end-helper>
+                        Pick a start time to see when this session ends.
+                    </p>
+
+                    <!-- Duration -->
+
+                    <div class="session-duration">
+
+                        <div class="session-section-heading">
+                            <i class="bi bi-hourglass-split"></i>
+                            <span>Duration</span>
+                        </div>
+
+                        <div class="duration-control">
+
+                            <input type="hidden"
+                                   th:field="*{durationMinutes}"
+                                   data-duration-input>
+
+                            <div class="duration-stepper">
+
+                                <button type="button"
+                                        class="duration-btn"
+                                        data-duration-step="-15"
+                                        aria-label="Decrease duration">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+
+                                <span class="duration-display" data-duration-display>1h</span>
+
+                                <button type="button"
+                                        class="duration-btn"
+                                        data-duration-step="15"
+                                        aria-label="Increase duration">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+
+                            </div>
+
+                            <div class="duration-presets" role="group" aria-label="Duration presets">
+                                <button type="button" class="duration-pill" data-duration="15">15m</button>
+                                <button type="button" class="duration-pill" data-duration="30">30m</button>
+                                <button type="button" class="duration-pill" data-duration="45">45m</button>
+                                <button type="button" class="duration-pill" data-duration="60">1h</button>
+                                <button type="button" class="duration-pill" data-duration="90">1h 30m</button>
+                                <button type="button" class="duration-pill" data-duration="120">2h</button>
+                                <button type="button" class="duration-pill" data-duration="180">3h</button>
+                            </div>
+
+                            <p class="field-error" th:if="${#fields.hasErrors('durationMinutes')}" th:errors="*{durationMinutes}">
+                                Session duration is required.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Notes -->
+
+                <div class="form-group session-notes-group">
+
+                    <label for="sessionNotes">
+                        Notes
+                    </label>
+
+                    <textarea id="sessionNotes"
+                              class="form-control"
+                              rows="4"
+                              th:field="*{notes}"
+                              maxlength="500"
+                              placeholder="Optional: what you covered or plan to study..."></textarea>
+
+                    <p class="field-error" th:if="${#fields.hasErrors('notes')}" th:errors="*{notes}">
+                        Notes is invalid.
+                    </p>
+
+                </div>
+
+
+
+
+                <!-- Buttons -->
+
+                <div class="form-actions">
+
+                    <a th:href="@{/study-sessions}"
+                       class="btn btn-secondary">
+
+                        <i class="bi bi-arrow-left"></i>
+
+                        Cancel
+
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-primary"
+                            data-session-update-submit>
+
+                        <i class="bi bi-check-circle"></i>
+
+                        Update Study Session
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- Embed the user's own topics (grouped by subject) so the edit form can
+         filter them client-side when the Subject changes. No foreign topics
+         are ever embedded: the grouping comes from the user-scoped service. -->
+
+    <script th:inline="javascript">
+        window.studySessionTopics = /*[[${topicsBySubject}]]*/ {};
+        window.studySessionEditSelectedTopic = /*[[${studySessionDto.topicId}]]*/ null;
+    </script>
+
+
+</div>
+
+
+</body>
+
+
+</html>
