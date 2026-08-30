@@ -961,4 +961,254 @@ a.dash-tool:hover{
         height:62px;
     }
 
+    .study-stats{
+        grid-template-columns:1fr;
+    }
+
+}
+
+
+/* =====================================================
+   12. Study Progress
+   Real study statistics: stat tiles, weekly bars,
+   study time by subject, recent sessions.
+===================================================== */
+
+.study-stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+}
+
+.study-stat{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding:16px;
+    border-radius:var(--radius-md);
+    background:rgba(15,23,42,.35);
+    border:1px solid var(--border);
+}
+
+.study-stat__icon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:34px;
+    height:34px;
+    border-radius:var(--radius-sm);
+    font-size:16px;
+}
+
+.study-stat__icon--today{
+    color:var(--primary-light);
+    background:rgba(139,92,246,.12);
+    border:1px solid rgba(139,92,246,.26);
+}
+
+.study-stat__icon--week{
+    color:#FBBF24;
+    background:rgba(245,158,11,.12);
+    border:1px solid rgba(245,158,11,.28);
+}
+
+.study-stat__icon--sessions{
+    color:#4ADE80;
+    background:rgba(34,197,94,.12);
+    border:1px solid rgba(34,197,94,.28);
+}
+
+.study-stat__label{
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.3px;
+    color:var(--text-muted);
+}
+
+.study-stat__value{
+    font-size:24px;
+    font-weight:800;
+    letter-spacing:-.5px;
+    color:var(--text);
+}
+
+.study-subsection-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:20px 0 12px;
+    font-size:12.5px;
+    font-weight:700;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    color:var(--text-light);
+}
+
+.dash-week-study{
+    display:flex;
+    gap:10px;
+}
+
+.dash-week-day{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+}
+
+.dash-week-day__track{
+    width:100%;
+    height:92px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    border-radius:var(--radius-sm);
+    background:rgba(15,23,42,.30);
+    border:1px solid var(--border);
+    overflow:hidden;
+}
+
+.dash-week-day__bar{
+    width:60%;
+    min-height:2px;
+    border-radius:var(--radius-sm) var(--radius-sm) 0 0;
+    background:rgba(139,92,246,.35);
+    transition:height .6s ease;
+}
+
+.dash-week-day.is-today .dash-week-day__bar{
+    background:linear-gradient(180deg,#A78BFA,#8B5CF6);
+    box-shadow:0 4px 14px rgba(139,92,246,.35);
+}
+
+.dash-week-day__name{
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.6px;
+    text-transform:uppercase;
+    color:var(--text-muted);
+}
+
+.dash-week-day.is-today .dash-week-day__name{
+    color:var(--primary-light);
+}
+
+.dash-subject-study{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    list-style:none;
+}
+
+.dash-subject-study__item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 14px;
+    border-radius:var(--radius-md);
+    background:rgba(15,23,42,.30);
+    border:1px solid var(--border);
+}
+
+.dash-subject-study__bar{
+    width:4px;
+    height:26px;
+    flex-shrink:0;
+    border-radius:99px;
+}
+
+.dash-subject-study__bar.purple{ background:var(--primary); }
+.dash-subject-study__bar.blue{ background:#3B82F6; }
+.dash-subject-study__bar.green{ background:var(--success); }
+.dash-subject-study__bar.orange{ background:var(--warning); }
+.dash-subject-study__bar.red{ background:var(--danger); }
+
+.dash-subject-study__name{
+    flex:1;
+    min-width:0;
+    font-size:13.5px;
+    font-weight:600;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.dash-subject-study__time{
+    font-size:13px;
+    font-weight:700;
+    color:var(--text-light);
+    white-space:nowrap;
+}
+
+.dash-session-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    list-style:none;
+}
+
+.dash-session-item{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:12px 14px;
+    border-radius:var(--radius-md);
+    background:rgba(15,23,42,.35);
+    border:1px solid var(--border);
+    transition:all var(--transition);
+}
+
+.dash-session-item:hover{
+    border-color:rgba(139,92,246,.30);
+    background:rgba(15,23,42,.55);
+}
+
+.dash-session-item__dot{
+    width:10px;
+    height:10px;
+    flex-shrink:0;
+    border-radius:50%;
+}
+
+.dash-session-item__dot.purple{ background:var(--primary); }
+.dash-session-item__dot.blue{ background:#3B82F6; }
+.dash-session-item__dot.green{ background:var(--success); }
+.dash-session-item__dot.orange{ background:var(--warning); }
+.dash-session-item__dot.red{ background:var(--danger); }
+
+.dash-session-item__main{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+
+.dash-session-item__main strong{
+    font-size:14px;
+    font-weight:700;
+    color:var(--text);
+}
+
+.dash-session-item__main small{
+    font-size:12px;
+    color:var(--text-muted);
+}
+
+.dash-session-item__date{
+    font-size:12.5px;
+    color:var(--text-muted);
+    white-space:nowrap;
+}
+
+.dash-session-item__time{
+    font-size:13px;
+    font-weight:700;
+    color:var(--primary-light);
+    white-space:nowrap;
+}
+
+.dash-sessions__all{
+    margin-top:16px;
 }

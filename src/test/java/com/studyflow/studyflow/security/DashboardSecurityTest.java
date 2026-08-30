@@ -5,6 +5,7 @@ import com.studyflow.studyflow.entity.ExamType;
 import com.studyflow.studyflow.entity.Role;
 import com.studyflow.studyflow.entity.Subject;
 import com.studyflow.studyflow.entity.User;
+import com.studyflow.studyflow.repository.StudySessionRepository;
 import com.studyflow.studyflow.repository.SubjectRepository;
 import com.studyflow.studyflow.repository.UserRepository;
 import com.studyflow.studyflow.service.ExamService;
@@ -55,6 +56,9 @@ class DashboardSecurityTest {
 
     @MockitoBean
     private SubjectRepository subjectRepository;
+
+    @MockitoBean
+    private StudySessionRepository studySessionRepository;
 
     @MockitoBean
     private ExamService examService;

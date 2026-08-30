@@ -1,25 +1,41 @@
 package com.studyflow.studyflow.service.impl;
 
 import com.studyflow.studyflow.dto.DashboardData;
+import com.studyflow.studyflow.dto.DayStudyMinutes;
 import com.studyflow.studyflow.dto.ExamDto;
+import com.studyflow.studyflow.dto.RecentStudySession;
 import com.studyflow.studyflow.dto.SetupStep;
+import com.studyflow.studyflow.dto.StudyProgress;
 import com.studyflow.studyflow.dto.SubjectDto;
+import com.studyflow.studyflow.dto.SubjectStudySummary;
 import com.studyflow.studyflow.dto.UpcomingExam;
+import com.studyflow.studyflow.entity.StudySession;
+import com.studyflow.studyflow.entity.StudySessionType;
+import com.studyflow.studyflow.entity.Subject;
+import com.studyflow.studyflow.entity.Topic;
 import com.studyflow.studyflow.entity.User;
+import com.studyflow.studyflow.repository.StudySessionRepository;
 import com.studyflow.studyflow.repository.UserRepository;
 import com.studyflow.studyflow.service.DashboardService;
 import com.studyflow.studyflow.service.ExamService;
 import com.studyflow.studyflow.service.SubjectService;
+import com.studyflow.studyflow.util.StudyTimeFormatter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +53,9 @@ import java.util.stream.Collectors;
  *   marked as future rather than fabricated
  * - the subject snapshot shows ONLY the authenticated user's subjects via
  *   the ownership-aware {@link SubjectService}
+ * - the Study Progress and Recent Study Sessions sections are aggregated
+ *   from the authenticated user's real sessions by user-scoped database
+ *   queries (sums, counts and groups; never in-memory filtering)
  *
  * Subjects and exams are user-owned: the underlying services resolve the
  * authenticated user from the security context email and return only that
@@ -52,20 +71,24 @@ public class DashboardServiceImpl implements DashboardService {
 
     static final int DASHBOARD_EXAM_LIMIT = 3;
     private static final int SETUP_TOTAL = 5;
+    private static final int DAYS_IN_WEEK = 7;
 
     private final UserRepository userRepository;
     private final SubjectService subjectService;
     private final ExamService examService;
+    private final StudySessionRepository studySessionRepository;
 
     /**
      * Constructor injection of the repositories and existing services.
      */
     public DashboardServiceImpl(UserRepository userRepository,
                                 SubjectService subjectService,
-                                ExamService examService) {
+                                ExamService examService,
+                                StudySessionRepository studySessionRepository) {
         this.userRepository = userRepository;
         this.subjectService = subjectService;
         this.examService = examService;
+        this.studySessionRepository = studySessionRepository;
     }
 
     @Override
@@ -99,6 +122,10 @@ public class DashboardServiceImpl implements DashboardService {
                 .filter(step -> step.status() == SetupStep.Status.COMPLETED)
                 .count();
 
+        // Study sessions are aggregated per owning user via the subject
+        // chain, so only the authenticated user's sessions ever count.
+        StudyProgress studyProgress = buildStudyProgress(resolveUser(userEmail), today);
+
         return new DashboardData(
                 userName,
                 displayName,
@@ -116,8 +143,156 @@ public class DashboardServiceImpl implements DashboardService {
                 setupSteps,
                 setupCompleted,
                 SETUP_TOTAL,
-                Math.round(setupCompleted * 100f / SETUP_TOTAL)
+                Math.round(setupCompleted * 100f / SETUP_TOTAL),
+                studyProgress
         );
+    }
+
+    /**
+     * Build the user's real study statistics for the Study Progress section.
+     *
+     * All sums, counts and groups are computed by user-scoped database
+     * queries against the owning {@link User} (via the subject chain); no
+     * sessions are loaded into memory and re-filtered here. The week is
+     * defined from the start of the current week through today (Monday
+     * rule), so "today" is always part of "this week".
+     *
+     * A missing account simply yields an empty progress object: the page
+     * renders honest "0m" labels instead of fabricated numbers.
+     */
+    private StudyProgress buildStudyProgress(User user, LocalDate today) {
+        LocalDate weekStart = today.with(DayOfWeek.MONDAY);
+
+        Map<LocalDate, Long> minutesByDate = new HashMap<>();
+        long todayMinutes = 0;
+        long weekMinutes = 0;
+        long weekSessionCount = 0;
+        List<RecentStudySession> recentSessions = new ArrayList<>();
+        List<SubjectStudySummary> subjectSummaries = new ArrayList<>();
+
+        if (user != null) {
+            weekMinutes = nullSafeLong(studySessionRepository
+                    .sumDurationMinutesBySubject_UserAndSessionDateBetween(user, weekStart, today));
+            weekSessionCount = studySessionRepository
+                    .countBySubject_UserAndSessionDateBetween(user, weekStart, today);
+
+            for (Object[] row : studySessionRepository
+                    .sumDurationMinutesByDateForUser(user, weekStart, today)) {
+                LocalDate date = (LocalDate) row[0];
+                minutesByDate.put(date, ((Number) row[1]).longValue());
+            }
+            todayMinutes = minutesByDate.getOrDefault(today, 0L);
+
+            recentSessions = studySessionRepository
+                    .findTop5BySubject_UserOrderBySessionDateDescStartTimeDescIdDesc(user)
+                    .stream()
+                    .map(this::toRecentStudySession)
+                    .collect(Collectors.toList());
+
+            List<Object[]> bySubject =
+                    studySessionRepository.sumDurationMinutesBySubjectForUser(user);
+            bySubject.sort(Comparator.comparingLong(
+                    row -> -((Number) row[3]).longValue()));
+            for (Object[] row : bySubject) {
+                subjectSummaries.add(new SubjectStudySummary(
+                        (Long) row[0],
+                        (String) row[1],
+                        (String) row[2],
+                        StudyTimeFormatter.formatMinutes(((Number) row[3]).longValue())
+                ));
+            }
+        }
+
+        List<DayStudyMinutes> dailyMinutes =
+                buildDailyMinutes(weekStart, today, minutesByDate);
+
+        boolean hasRecentSessions = !recentSessions.isEmpty();
+        boolean hasSubjectSummaries = !subjectSummaries.isEmpty();
+        boolean hasStudy = hasSubjectSummaries || weekSessionCount > 0;
+
+        return new StudyProgress(
+                StudyTimeFormatter.formatMinutes(todayMinutes),
+                StudyTimeFormatter.formatMinutes(weekMinutes),
+                weekSessionCount,
+                hasStudy,
+                dailyMinutes,
+                recentSessions,
+                hasRecentSessions,
+                subjectSummaries,
+                hasSubjectSummaries
+        );
+    }
+
+    /**
+     * Build the seven-day (Monday-Sunday) breakdown of the current week.
+     * Days outside the range carry 0 minutes; the bar percentage is
+     * relative to the week's largest day so the chart is self-scaling.
+     */
+    private List<DayStudyMinutes> buildDailyMinutes(LocalDate weekStart,
+                                                    LocalDate today,
+                                                    Map<LocalDate, Long> minutesByDate) {
+        long weekMax = 0;
+        long[] minutes = new long[DAYS_IN_WEEK];
+        for (int i = 0; i < DAYS_IN_WEEK; i++) {
+            LocalDate day = weekStart.plusDays(i);
+            minutes[i] = minutesByDate.getOrDefault(day, 0L);
+            weekMax = Math.max(weekMax, minutes[i]);
+        }
+
+        List<DayStudyMinutes> days = new ArrayList<>(DAYS_IN_WEEK);
+        for (int i = 0; i < DAYS_IN_WEEK; i++) {
+            LocalDate day = weekStart.plusDays(i);
+            boolean isToday = day.equals(today);
+            int barPercent = weekMax == 0 ? 0
+                    : (int) Math.round(minutes[i] * 100.0 / weekMax);
+            days.add(new DayStudyMinutes(
+                    day.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH),
+                    (int) minutes[i],
+                    StudyTimeFormatter.formatMinutes(minutes[i]),
+                    barPercent,
+                    isToday
+            ));
+        }
+        return days;
+    }
+
+    /**
+     * Convert a user-scoped study session into its dashboard view.
+     *
+     * Called inside the read-only transaction, so the lazy subject/topic
+     * relationships are resolved before the mapping returns. Ownership was
+     * already guaranteed by the {@code findTop5BySubject_User...} query.
+     */
+    private RecentStudySession toRecentStudySession(StudySession session) {
+        Subject subject = session.getSubject();
+        Topic topic = session.getTopic();
+        return new RecentStudySession(
+                session.getId(),
+                subject != null ? subject.getName() : null,
+                subject != null ? subject.getColor() : null,
+                topic != null ? topic.getName() : null,
+                session.getSessionDate(),
+                StudyTimeFormatter.formatMinutes(
+                        session.getDurationMinutes() == null ? 0 : session.getDurationMinutes()),
+                sessionTypeLabel(session.getSessionType())
+        );
+    }
+
+    /**
+     * Human label for a session type, e.g. EXAM_PREPARATION → "Exam Preparation".
+     */
+    private String sessionTypeLabel(StudySessionType type) {
+        if (type == null) {
+            return "Session";
+        }
+        return Arrays.stream(type.name().toLowerCase(Locale.ENGLISH).split("_"))
+                .map(word -> word.isEmpty() ? word
+                        : Character.toUpperCase(word.charAt(0)) + word.substring(1))
+                .collect(Collectors.joining(" "));
+    }
+
+    private long nullSafeLong(Long value) {
+        return value == null ? 0L : value;
     }
 
     /**
@@ -160,6 +335,17 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     /**
+     * Resolve the authenticated user from the security context email,
+     * or null when the record cannot be found.
+     */
+    private User resolveUser(String userEmail) {
+        if (userEmail == null || userEmail.isBlank()) {
+            return null;
+        }
+        return userRepository.findByEmail(userEmail).orElse(null);
+    }
+
+    /**
      * Resolve the user's display name from the authenticated email.
      * Falls back to the email prefix when the record cannot be found,
      * so the dashboard never shows a hard-coded name.
@@ -168,7 +354,7 @@ public class DashboardServiceImpl implements DashboardService {
         if (userEmail == null || userEmail.isBlank()) {
             return "";
         }
-        User user = userRepository.findByEmail(userEmail).orElse(null);
+        User user = resolveUser(userEmail);
         if (user != null && user.getName() != null && !user.getName().isBlank()) {
             return user.getName();
         }

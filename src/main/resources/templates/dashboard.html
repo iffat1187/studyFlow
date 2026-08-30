@@ -468,13 +468,13 @@
                         Study Progress
                     </h2>
 
-                    <span class="dash-card__soon">Soon</span>
-
                 </header>
 
                 <div class="dash-card__body">
 
-                    <div class="dash-empty">
+                    <!-- Empty state -->
+
+                    <div class="dash-empty" th:if="${!data.studyProgress.hasStudy}">
 
                         <span class="dash-empty__icon">
                             <i class="bi bi-stopwatch"></i>
@@ -485,14 +485,123 @@
                         </h3>
 
                         <p>
-                            Track your study time and progress here once study
-                            sessions arrive.
+                            Track your study time and progress here every time
+                            you complete a focus session.
                         </p>
 
-                        <span class="chip chip--soon" aria-disabled="true">
-                            <i class="bi bi-hourglass-split"></i>
-                            Coming soon
-                        </span>
+                        <a th:href="@{/study-sessions}" class="btn btn-primary">
+                            <i class="bi bi-play-circle"></i>
+                            Start a Study Session
+                        </a>
+
+                    </div>
+
+                    <div th:if="${data.studyProgress.hasStudy}">
+
+                        <!-- Real study statistics -->
+
+                        <div class="study-stats" role="group" aria-label="Study time summary">
+
+                            <div class="study-stat">
+
+                                <span class="study-stat__icon study-stat__icon--today">
+                                    <i class="bi bi-stopwatch" aria-hidden="true"></i>
+                                </span>
+
+                                <span class="study-stat__label">Today's Study Time</span>
+
+                                <strong class="study-stat__value" th:text="${data.studyProgress.todayLabel}">
+                                    2h 35m
+                                </strong>
+
+                            </div>
+
+                            <div class="study-stat">
+
+                                <span class="study-stat__icon study-stat__icon--week">
+                                    <i class="bi bi-calendar-week" aria-hidden="true"></i>
+                                </span>
+
+                                <span class="study-stat__label">This Week</span>
+
+                                <strong class="study-stat__value" th:text="${data.studyProgress.weekLabel}">
+                                    8h 10m
+                                </strong>
+
+                            </div>
+
+                            <div class="study-stat">
+
+                                <span class="study-stat__icon study-stat__icon--sessions">
+                                    <i class="bi bi-collection" aria-hidden="true"></i>
+                                </span>
+
+                                <span class="study-stat__label">Sessions This Week</span>
+
+                                <strong class="study-stat__value" th:text="${data.studyProgress.weekSessionCount}">
+                                    6
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                        <h3 class="study-subsection-title">
+                            <i class="bi bi-bar-chart-line" aria-hidden="true"></i>
+                            This week
+                        </h3>
+
+                        <!-- Honest per-day breakdown: bars scale to the
+                             week's busiest day; quiet days are 0. -->
+
+                        <div class="dash-week-study" role="group" aria-label="Study minutes per day this week">
+
+                            <div
+                                    class="dash-week-day"
+                                    th:each="day : ${data.studyProgress.dailyMinutes}"
+                                    th:classappend="${day.isToday ? ' is-today' : ''}"
+                                    role="img"
+                                    th:aria-label="${day.dayName} + ': ' + ${day.minutesLabel}">
+
+                                <span class="dash-week-day__track">
+
+                                    <span class="dash-week-day__bar"
+                                          th:style="'height: ' + ${day.barPercent} + '%'"></span>
+
+                                </span>
+
+                                <span class="dash-week-day__name" th:text="${day.dayName}">
+                                    Mon
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <h3 class="study-subsection-title" th:if="${data.studyProgress.hasSubjectSummaries}">
+                            <i class="bi bi-bookshelf" aria-hidden="true"></i>
+                            Study time by subject
+                        </h3>
+
+                        <ul class="dash-subject-study" th:if="${data.studyProgress.hasSubjectSummaries}">
+
+                            <li class="dash-subject-study__item"
+                                th:each="summary : ${data.studyProgress.subjectSummaries}">
+
+                                <span class="dash-subject-study__bar"
+                                      th:classappend="${#strings.toLowerCase(summary.color)}"></span>
+
+                                <span class="dash-subject-study__name" th:text="${summary.subjectName}">
+                                    Database
+                                </span>
+
+                                <span class="dash-subject-study__time" th:text="${summary.totalLabel}">
+                                    4h 20m
+                                </span>
+
+                            </li>
+
+                        </ul>
 
                     </div>
 
@@ -501,6 +610,120 @@
             </section>
 
         </div>
+
+
+        <!-- ============================
+             Recent Study Sessions
+        ============================= -->
+
+        <section class="dash-card fade-in" aria-labelledby="recentSessionsTitle">
+
+            <header class="dash-card__header">
+
+                <h2 id="recentSessionsTitle">
+                    <i class="bi bi-clock-history"></i>
+                    Recent Study Sessions
+                </h2>
+
+                <span class="dash-card__count"
+                      th:if="${data.studyProgress.hasRecentSessions}"
+                      th:text="${#lists.size(data.studyProgress.recentSessions)} + ' recent'">
+                    5 recent
+                </span>
+
+                <a th:if="${data.studyProgress.hasRecentSessions}"
+                   th:href="@{/study-sessions}"
+                   class="dash-card__link">
+
+                    View All Sessions
+
+                    <i class="bi bi-arrow-right"></i>
+
+                </a>
+
+            </header>
+
+            <div class="dash-card__body">
+
+                <!-- Empty state -->
+
+                <div class="dash-empty" th:if="${!data.studyProgress.hasRecentSessions}">
+
+                    <span class="dash-empty__icon">
+                        <i class="bi bi-journal-x"></i>
+                    </span>
+
+                    <h3>
+                        No recent study sessions yet.
+                    </h3>
+
+                    <p>
+                        When you finish a focus session it shows up here.
+                    </p>
+
+                    <a th:href="@{/study-sessions}" class="btn btn-primary">
+                        <i class="bi bi-play-circle"></i>
+                        Start a Study Session
+                    </a>
+
+                </div>
+
+                <!-- Real sessions, newest first -->
+
+                <ul class="dash-session-list" th:if="${data.studyProgress.hasRecentSessions}">
+
+                    <li class="dash-session-item"
+                        th:each="recent : ${data.studyProgress.recentSessions}">
+
+                        <span class="dash-session-item__dot"
+                              th:classappend="${#strings.toLowerCase(recent.subjectColor)}"></span>
+
+                        <div class="dash-session-item__main">
+
+                            <strong th:text="${recent.subjectName}">Database</strong>
+
+                            <small>
+                                <span th:if="${recent.topicName != null}" th:text="${recent.topicName}">
+                                    Normalization
+                                </span>
+                                <span th:if="${recent.topicName != null}"
+                                      th:text="' · ' + ${recent.sessionTypeLabel}">
+                                    · Revision
+                                </span>
+                                <span th:unless="${recent.topicName != null}"
+                                      th:text="${recent.sessionTypeLabel}">
+                                    Revision
+                                </span>
+                            </small>
+
+                        </div>
+
+                        <span class="dash-session-item__date"
+                              th:text="${#temporals.format(recent.sessionDate, 'MMM d, yyyy')}">
+                            Aug 28, 2026
+                        </span>
+
+                        <span class="dash-session-item__time" th:text="${recent.durationLabel}">
+                            1h 30m
+                        </span>
+
+                    </li>
+
+                </ul>
+
+                <a th:if="${data.studyProgress.hasRecentSessions}"
+                   th:href="@{/study-sessions}"
+                   class="dash-card__link dash-sessions__all">
+
+                    View All Sessions
+
+                    <i class="bi bi-arrow-right"></i>
+
+                </a>
+
+            </div>
+
+        </section>
 
 
         <!-- ============================
@@ -642,7 +865,7 @@
 
                     </a>
 
-                    <div class="dash-tool dash-tool--soon" aria-disabled="true">
+                    <a th:href="@{/study-sessions}" class="dash-tool">
 
                         <span class="dash-tool__icon dash-tool__icon--amber">
                             <i class="bi bi-stopwatch"></i>
@@ -652,15 +875,13 @@
 
                             <strong>Focus Timer</strong>
 
-                            <small>Coming soon</small>
+                            <small>Track focused study time</small>
 
                         </div>
 
-                        <span class="dash-tool__tag">Soon</span>
+                    </a>
 
-                    </div>
-
-                    <div class="dash-tool dash-tool--soon" aria-disabled="true">
+                    <a th:href="@{/study-sessions}" class="dash-tool">
 
                         <span class="dash-tool__icon dash-tool__icon--green">
                             <i class="bi bi-clock-history"></i>
@@ -670,13 +891,11 @@
 
                             <strong>Study Sessions</strong>
 
-                            <small>Coming soon</small>
+                            <small>Review your study history</small>
 
                         </div>
 
-                        <span class="dash-tool__tag">Soon</span>
-
-                    </div>
+                    </a>
 
                     <a th:href="@{/exams}" class="dash-tool">
 
@@ -711,6 +930,22 @@
                         <span class="dash-tool__tag">Soon</span>
 
                     </div>
+
+                    <a th:href="@{/analytics}" class="dash-tool">
+
+                        <span class="dash-tool__icon dash-tool__icon--pink">
+                            <i class="bi bi-bar-chart-line"></i>
+                        </span>
+
+                        <div class="dash-tool__text">
+
+                            <strong>Analytics</strong>
+
+                            <small>See your study trends</small>
+
+                        </div>
+
+                    </a>
 
                 </div>
 

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<div th:replace="~{layout :: layout(~{::section})}">
+
+    <section class="analytics-page">
+
+        <!-- ============================
+             Page Header
+        ============================= -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    <i class="bi bi-bar-chart-line"></i>
+                    Analytics
+                </h1>
+
+                <p>
+                    Your study time, streaks and habits — calculated from your real sessions.
+                </p>
+
+            </div>
+
+            <div class="page-header-actions">
+
+                <a th:href="@{/study-sessions}" class="btn btn-outline">
+                    <i class="bi bi-stopwatch"></i>
+                    Study Sessions
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Overview Metrics (always real)
+        ============================= -->
+
+        <div class="analytics-stats" role="group" aria-label="Study analytics overview">
+
+            <div class="analytics-stat">
+
+                <span class="analytics-stat__icon analytics-stat__icon--violet">
+                    <i class="bi bi-clock-history" aria-hidden="true"></i>
+                </span>
+
+                <div class="analytics-stat__body">
+
+                    <span class="analytics-stat__label">Total Study Time</span>
+
+                    <strong class="analytics-stat__value" th:text="${data.totalStudyTime}">12h 40m</strong>
+
+                    <small class="analytics-stat__sub">All recorded study time</small>
+
+                </div>
+
+            </div>
+
+            <div class="analytics-stat">
+
+                <span class="analytics-stat__icon analytics-stat__icon--sky">
+                    <i class="bi bi-calendar-week" aria-hidden="true"></i>
+                </span>
+
+                <div class="analytics-stat__body">
+
+                    <span class="analytics-stat__label">This Week</span>
+
+                    <strong class="analytics-stat__value" th:text="${data.weekStudyTime}">3h 10m</strong>
+
+                    <small class="analytics-stat__sub">Monday through today</small>
+
+                </div>
+
+            </div>
+
+            <div class="analytics-stat">
+
+                <span class="analytics-stat__icon analytics-stat__icon--green">
+                    <i class="bi bi-calendar-month" aria-hidden="true"></i>
+                </span>
+
+                <div class="analytics-stat__body">
+
+                    <span class="analytics-stat__label">This Month</span>
+
+                    <strong class="analytics-stat__value" th:text="${data.monthStudyTime}">9h 45m</strong>
+
+                    <small class="analytics-stat__sub">First of the month through today</small>
+
+                </div>
+
+            </div>
+
+            <div class="analytics-stat">
+
+                <span class="analytics-stat__icon analytics-stat__icon--amber">
+                    <i class="bi bi-collection" aria-hidden="true"></i>
+                </span>
+
+                <div class="analytics-stat__body">
+
+                    <span class="analytics-stat__label">Total Sessions</span>
+
+                    <strong class="analytics-stat__value" th:text="${data.totalSessions}">28</strong>
+
+                    <small class="analytics-stat__sub">Sessions you have logged</small>
+
+                </div>
+
+            </div>
+
+            <div class="analytics-stat">
+
+                <span class="analytics-stat__icon analytics-stat__icon--red">
+                    <i class="bi bi-fire" aria-hidden="true"></i>
+                </span>
+
+                <div class="analytics-stat__body">
+
+                    <span class="analytics-stat__label">Current Streak</span>
+
+                    <strong class="analytics-stat__value">
+                        <span th:text="${data.currentStreak}">3</span>
+                    </strong>
+
+                    <small class="analytics-stat__sub">Consecutive days ending today</small>
+
+                </div>
+
+            </div>
+
+            <div class="analytics-stat">
+
+                <span class="analytics-stat__icon analytics-stat__icon--pink">
+                    <i class="bi bi-trophy" aria-hidden="true"></i>
+                </span>
+
+                <div class="analytics-stat__body">
+
+                    <span class="analytics-stat__label">Longest Streak</span>
+
+                    <strong class="analytics-stat__value">
+                        <span th:text="${data.longestStreak}">9</span>
+                    </strong>
+
+                    <small class="analytics-stat__sub">Your best run of study days</small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Charts & Breakdowns (real data only)
+        ============================= -->
+
+        <div th:if="${data.hasStudy}">
+
+            <!-- Daily Study Trend -->
+
+            <div class="analytics-card analytics-chart analytics-chart--wide">
+
+                <div class="analytics-card__header">
+
+                    <h2 class="analytics-card__title">
+                        <i class="bi bi-bar-chart-line" aria-hidden="true"></i>
+                        Daily Study Trend
+                    </h2>
+
+                    <span class="analytics-card__aside">This week</span>
+
+                </div>
+
+                <div class="analytics-chart__canvas analytics-chart__canvas--bar">
+
+                    <canvas id="dailyTrendChart"
+                            aria-label="Bar chart of your study minutes per day for the current week"
+                            role="img"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <div class="analytics-chart-grid">
+
+                <!-- Subject Distribution -->
+
+                <div class="analytics-card analytics-chart">
+
+                    <div class="analytics-card__header">
+
+                        <h2 class="analytics-card__title">
+                            <i class="bi bi-pie-chart-fill" aria-hidden="true"></i>
+                            Subject Distribution
+                        </h2>
+
+                    </div>
+
+                    <div class="analytics-chart__canvas analytics-chart__canvas--donut">
+
+                        <canvas id="subjectDistributionChart"
+                                aria-label="Doughnut chart of your study time by subject"
+                                role="img"></canvas>
+
+                    </div>
+
+                    <h3 class="analytics-list-title">Study time per subject</h3>
+
+                    <ul class="analytics-list" th:if="${!#lists.isEmpty(data.subjectStudyData)}">
+
+                        <li class="analytics-list__item"
+                            th:each="entry : ${data.subjectStudyData}">
+
+                            <span class="analytics-list__dot"
+                                  th:style="'background:' + ${entry.colorHex}"></span>
+
+                            <span class="analytics-list__name" th:text="${entry.subjectName}">Spring Boot</span>
+
+                            <span class="analytics-list__value" th:text="${entry.minutesLabel}">4h 20m</span>
+
+                        </li>
+
+                    </ul>
+
+                </div>
+
+                <!-- Session Type Distribution -->
+
+                <div class="analytics-card analytics-chart">
+
+                    <div class="analytics-card__header">
+
+                        <h2 class="analytics-card__title">
+                            <i class="bi bi-grid-1x2" aria-hidden="true"></i>
+                            Session Types
+                        </h2>
+
+                    </div>
+
+                    <div class="analytics-chart__canvas analytics-chart__canvas--donut">
+
+                        <canvas id="sessionTypeDistributionChart"
+                                aria-label="Doughnut chart of your study time by session type"
+                                role="img"></canvas>
+
+                    </div>
+
+                    <h3 class="analytics-list-title">Study methods you use most</h3>
+
+                    <ul class="analytics-list" th:if="${!#lists.isEmpty(data.sessionTypeStudyData)}">
+
+                        <li class="analytics-list__item"
+                            th:each="entry : ${data.sessionTypeStudyData}">
+
+                            <span class="analytics-list__dot"
+                                  th:style="'background:' + ${entry.colorHex}"></span>
+
+                            <span class="analytics-list__name" th:text="${entry.typeLabel}">Focus</span>
+
+                            <span class="analytics-list__value" th:text="${entry.minutesLabel}">2h 30m</span>
+
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+
+            <!-- Recent Study Activity -->
+
+            <div class="analytics-card analytics-recent">
+
+                <div class="analytics-card__header">
+
+                    <h2 class="analytics-card__title">
+                        <i class="bi bi-clock-history" aria-hidden="true"></i>
+                        Recent Study Activity
+                    </h2>
+
+                    <a th:href="@{/study-sessions}" class="analytics-card__link">
+                        View all sessions
+                        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </a>
+
+                </div>
+
+                <ul class="analytics-activity" th:if="${!#lists.isEmpty(data.recentActivity)}">
+
+                    <li class="analytics-activity__item"
+                        th:each="activity : ${data.recentActivity}">
+
+                        <span class="analytics-activity__date">
+                            <span th:text="${#temporals.format(activity.sessionDate, 'EEE')}">Mon</span>
+                            <strong th:text="${#temporals.format(activity.sessionDate, 'MMM d')}">Aug 28</strong>
+                        </span>
+
+                        <span class="analytics-activity__subject" th:text="${activity.subjectName}">
+                            Spring Boot
+                        </span>
+
+                        <span class="analytics-activity__time" th:text="${activity.durationLabel}">
+                            1h 30m
+                        </span>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Empty Analytics State
+        ============================= -->
+
+        <div class="analytics-card analytics-empty" th:unless="${data.hasStudy}">
+
+            <span class="analytics-empty__icon">
+                <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
+            </span>
+
+            <h3>No study activity yet.</h3>
+
+            <p>
+                Start your first study session to see your progress here.
+            </p>
+
+            <a th:href="@{/study-sessions}" class="btn btn-primary">
+                <i class="bi bi-play-circle" aria-hidden="true"></i>
+                Start a Study Session
+            </a>
+
+        </div>
+
+
+        <!-- ============================
+             Chart data transfer
+             Aggregated statistics only — the user's own numbers.
+        ============================ -->
+
+        <script th:inline="javascript">
+            window.analyticsChartData = {
+                dailyLabels: /*[[${data.dailyStudyData.![dayName]}]]*/ [],
+                dailyMinutes: /*[[${data.dailyStudyData.![minutes]}]]*/ [],
+                subjectLabels: /*[[${data.subjectStudyData.![subjectName]}]]*/ [],
+                subjectMinutes: /*[[${data.subjectStudyData.![minutes]}]]*/ [],
+                subjectColors: /*[[${data.subjectStudyData.![colorHex]}]]*/ [],
+                typeLabels: /*[[${data.sessionTypeStudyData.![typeLabel]}]]*/ [],
+                typeMinutes: /*[[${data.sessionTypeStudyData.![minutes]}]]*/ [],
+                typeColors: /*[[${data.sessionTypeStudyData.![colorHex]}]]*/ []
+            };
+        </script>
+
+        <!-- Chart.js (CDN, consistent with the admin dashboard and Bootstrap Icons usage) -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+        <!-- Analytics page charts -->
+        <script th:src="@{/js/analytics.js}"></script>
+
+    </section>
+
+</div>
+
+</body>
+
+</html>
