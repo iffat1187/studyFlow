@@ -768,8 +768,26 @@
 
                         <div>
                             <strong>Focus session complete!</strong>
-                            <span>Great work.</span>
+                            <span data-focus-timer-result>Great work.</span>
                         </div>
+
+                    </div>
+
+
+                    <!-- Save feedback (validation hint / persistence failure) -->
+
+                    <div class="focus-timer-save-error" data-focus-timer-save-error hidden>
+
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+
+                        <span data-focus-timer-save-error-text></span>
+
+                        <button type="button"
+                                class="btn btn-outline btn-sm"
+                                data-focus-timer-retry
+                                hidden>
+                            <i class="bi bi-arrow-clockwise"></i> Retry Save
+                        </button>
 
                     </div>
 
@@ -807,7 +825,7 @@
         </div>
 
 
-        <!-- Stop confirmation (reuses the StudyFlow overlay system; sits at
+        <!-- Stop/Finish confirmation (reuses the StudyFlow overlay system; sits at
              page level so it is not clipped by the transformed modal) -->
 
         <div class="session-modal-overlay session-confirm-overlay"
@@ -824,32 +842,37 @@
                     <div class="session-modal-title">
 
                         <span class="session-modal-icon session-confirm-icon">
-                            <i class="bi bi-stop-fill"></i>
+                            <i class="bi bi-flag-fill"></i>
                         </span>
 
-                        <h3 id="focusTimerConfirmTitle">Stop Focus Session?</h3>
+                        <h3 id="focusTimerConfirmTitle">Finish Focus Session?</h3>
 
                     </div>
 
                 </div>
 
                 <div class="session-confirm-body">
-                    <p>Your current timer will be stopped.</p>
+
+                    <p>
+                        Discard this session, or save your
+                        <strong>actual study time</strong> to your session history?
+                    </p>
+
                 </div>
 
                 <div class="session-confirm-actions">
 
                     <button type="button"
                             class="btn btn-secondary"
-                            data-focus-timer-confirm-cancel>
-                        Cancel
+                            data-focus-timer-confirm-discard>
+                        Discard
                     </button>
 
                     <button type="button"
-                            class="btn btn-danger"
-                            data-focus-timer-confirm-stop>
-                        <i class="bi bi-stop-fill"></i>
-                        Stop
+                            class="btn btn-primary"
+                            data-focus-timer-confirm-save>
+                        <i class="bi bi-bookmark-check"></i>
+                        Save Session
                     </button>
 
                 </div>

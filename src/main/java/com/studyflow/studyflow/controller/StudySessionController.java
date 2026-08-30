@@ -1,16 +1,25 @@
 package com.studyflow.studyflow.controller;
 
 import com.studyflow.studyflow.dto.StudySessionDto;
+import com.studyflow.studyflow.dto.StudySessionTimerRequest;
 import com.studyflow.studyflow.dto.TopicDto;
 import com.studyflow.studyflow.entity.StudySessionType;
 import com.studyflow.studyflow.service.StudySessionService;
 import com.studyflow.studyflow.service.SubjectService;
+import com.studyflow.studyflow.service.TimerSaveIdempotencyGuard;
 import com.studyflow.studyflow.service.TopicService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -18,6 +27,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,16 +53,19 @@ public class StudySessionController {
     private final StudySessionService studySessionService;
     private final SubjectService subjectService;
     private final TopicService topicService;
+    private final TimerSaveIdempotencyGuard timerSaveGuard;
 
     /**
      * Constructor Injection.
      */
     public StudySessionController(StudySessionService studySessionService,
                                   SubjectService subjectService,
-                                  TopicService topicService) {
+                                  TopicService topicService,
+                                  TimerSaveIdempotencyGuard timerSaveGuard) {
         this.studySessionService = studySessionService;
         this.subjectService = subjectService;
         this.topicService = topicService;
+        this.timerSaveGuard = timerSaveGuard;
     }
 
     /**
@@ -254,6 +267,108 @@ public class StudySessionController {
         redirectAttributes.addFlashAttribute("successMessage", "Study session deleted successfully!");
 
         return "redirect:/study-sessions";
+    }
+
+    /**
+     * Persist a completed Focus Timer run as a real StudySession.
+     *
+     * The Focus Timer is only a UI mechanism: it sends the selected
+     * subject/topic/type plus the real start/end wall-clock times and the
+     * rounded ACTIVE study duration (paused time excluded — computed by the
+     * timer, never the selected preset). The authenticated user comes from
+     * Spring Security, and the submitted subjectId/topicId are only trusted
+     * after {@link StudySessionService#saveSession} re-verifies the full
+     * ownership chain (Subject → User, Topic → Subject). Response is JSON so
+     * the timer AJAX can distinguish 200/400/403/409/500.
+     *
+     * @return 200 on success, 400 on invalid body/values, 403 on ownership
+     *         violations, 409 when the same timer run was already saved
+     */
+    @PostMapping(value = "/from-timer",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> saveSessionFromTimer(
+            @Valid @RequestBody StudySessionTimerRequest request,
+            Authentication authentication) {
+
+        String userEmail = authentication.getName();
+
+        // Logical sanity: a timer can never end before it starts on the
+        // same local date (midnight-crossing runs are a documented
+        // limitation of the Date + LocalTime data model).
+        if (request.endTime().isBefore(request.startTime())) {
+            return ResponseEntity.badRequest()
+                    .body(errorBody("End time cannot be before start time."));
+        }
+
+        // Idempotency: refuse a replayed completion of the same timer run.
+        if (!timerSaveGuard.acquire(userEmail, request.clientKey())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(errorBody("This study session was already saved."));
+        }
+
+        StudySessionDto dto = new StudySessionDto(
+                null,
+                request.subjectId(),
+                request.topicId(),
+                null,
+                null,
+                request.sessionDate(),
+                request.startTime(),
+                request.endTime(),
+                request.durationMinutes(),
+                request.sessionType(),
+                request.notes()
+        );
+
+        try {
+            StudySessionDto saved = studySessionService.saveSession(dto, userEmail);
+            timerSaveGuard.commit(userEmail, request.clientKey());
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("success", true);
+            body.put("id", saved.id());
+            body.put("message", "Study session saved successfully!");
+            return ResponseEntity.ok(body);
+        } catch (AccessDeniedException ex) {
+            timerSaveGuard.release(userEmail, request.clientKey());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(errorBody("You cannot save a session for that subject or topic."));
+        } catch (RuntimeException ex) {
+            timerSaveGuard.release(userEmail, request.clientKey());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(errorBody("Unable to save study session."));
+        }
+    }
+
+    /**
+     * 400 for request bodies that fail bean validation.
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleTimerValidation(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(FieldError::getDefaultMessage)
+                .orElse("Invalid request.");
+        return ResponseEntity.badRequest().body(errorBody(message));
+    }
+
+    /**
+     * 400 for unreadable JSON bodies (malformed JSON, invalid enum/time).
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleUnreadableBody(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest().body(errorBody("Invalid request body."));
+    }
+
+    /**
+     * JSON error response shared by the timer endpoint and its handlers.
+     */
+    private Map<String, Object> errorBody(String message) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("success", false);
+        body.put("message", message);
+        return body;
     }
 
     /**
