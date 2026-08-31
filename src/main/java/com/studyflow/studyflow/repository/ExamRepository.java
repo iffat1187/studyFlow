@@ -155,4 +155,18 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
                         @Param("search") String search,
                         @Param("subjectId") Long subjectId,
                         @Param("examType") ExamType examType);
+
+    /**
+     * Exams within a date range (inclusive) belonging to subjects owned by
+     * the given user. Used by the calendar to fetch all exams whose exam date
+     * falls inside the displayed period.
+     *
+     * @param user  the owning user
+     * @param start first date of the range (inclusive)
+     * @param end   last date of the range (inclusive)
+     * @return the user's exams in the range, soonest first
+     */
+    @Query("SELECT e FROM Exam e WHERE e.subject.user = :user AND e.examDate BETWEEN :start AND :end " +
+            "ORDER BY e.examDate ASC, e.examTime ASC, e.id ASC")
+    List<Exam> findBySubject_UserAndExamDateBetween(User user, LocalDate start, LocalDate end);
 }

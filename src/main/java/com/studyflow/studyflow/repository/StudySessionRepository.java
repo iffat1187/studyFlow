@@ -162,4 +162,18 @@ public interface StudySessionRepository extends JpaRepository<StudySession, Long
             "where s.subject.user = :user " +
             "group by s.sessionType")
     List<Object[]> sumDurationMinutesByTypeForUser(User user);
+
+    /**
+     * Study sessions within a date range (inclusive) belonging to subjects
+     * owned by the given user. Used by the calendar to fetch all sessions
+     * whose session date falls inside the displayed period.
+     *
+     * @param user  the owning user
+     * @param start first date of the range (inclusive)
+     * @param end   last date of the range (inclusive)
+     * @return the user's study sessions in the range, soonest first
+     */
+    @Query("SELECT s FROM StudySession s WHERE s.subject.user = :user AND s.sessionDate BETWEEN :start AND :end " +
+            "ORDER BY s.sessionDate ASC, s.startTime ASC, s.id ASC")
+    List<StudySession> findBySubject_UserAndSessionDateBetween(User user, LocalDate start, LocalDate end);
 }

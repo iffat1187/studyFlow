@@ -163,6 +163,20 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findUpcomingIncompleteByUser(User user, LocalDate today);
 
     /**
+     * Tasks within a date range (inclusive) belonging to subjects owned by
+     * the given user. Used by the calendar to fetch all tasks whose due date
+     * falls inside the displayed period.
+     *
+     * @param user  the owning user
+     * @param start first date of the range (inclusive)
+     * @param end   last date of the range (inclusive)
+     * @return the user's tasks in the range, soonest first
+     */
+    @Query("SELECT t FROM Task t WHERE t.subject.user = :user AND t.dueDate BETWEEN :start AND :end " +
+            "ORDER BY t.dueDate ASC, t.dueTime ASC, t.id ASC")
+    List<Task> findBySubject_UserAndDueDateBetween(User user, LocalDate start, LocalDate end);
+
+    /**
      * Delete all tasks belonging to a specific subject.
      * Used when deleting a subject to maintain referential integrity.
      *

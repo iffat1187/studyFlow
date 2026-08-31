@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<div th:replace="~{layout :: layout(~{::section})}">
+
+    <section class="calendar-page">
+
+        <!-- ============================
+             Page Header
+        ============================= -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    <i class="bi bi-calendar3"></i>
+                    Calendar
+                </h1>
+
+                <p>
+                    Your tasks, exams and study sessions in one planning view.
+                </p>
+
+            </div>
+
+            <div class="page-header-actions">
+
+                <button type="button" class="btn btn-outline" id="calPrev"
+                        aria-label="Previous period">
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                </button>
+
+                <button type="button" class="btn btn-outline" id="calToday">
+                    <i class="bi bi-calendar-check" aria-hidden="true"></i>
+                    Today
+                </button>
+
+                <button type="button" class="btn btn-outline" id="calNext"
+                        aria-label="Next period">
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Calendar Toolbar
+        ============================= -->
+
+        <div class="calendar-toolbar">
+
+            <div class="calendar-period" id="calPeriodLabel">
+                <!-- populated by JavaScript -->
+            </div>
+
+            <div class="calendar-controls">
+
+                <div class="view-switch" role="tablist" aria-label="Calendar view">
+
+                    <button type="button" class="view-switch__tab is-active"
+                            data-view="month" role="tab" aria-selected="true"
+                            id="calTabMonth" aria-controls="calMonthView">
+                        Month
+                    </button>
+
+                    <button type="button" class="view-switch__tab"
+                            data-view="week" role="tab" aria-selected="false"
+                            id="calTabWeek" aria-controls="calWeekView">
+                        Week
+                    </button>
+
+                    <button type="button" class="view-switch__tab"
+                            data-view="day" role="tab" aria-selected="false"
+                            id="calTabDay" aria-controls="calDayView">
+                        Day
+                    </button>
+
+                </div>
+
+                <div class="calendar-filters">
+
+                    <div class="cal-filter-group" role="group" aria-label="Event type filter">
+
+                        <button type="button" class="cal-filter is-active"
+                                data-type="all">All</button>
+
+                        <button type="button" class="cal-filter"
+                                data-type="TASK">Tasks</button>
+
+                        <button type="button" class="cal-filter"
+                                data-type="EXAM">Exams</button>
+
+                        <button type="button" class="cal-filter"
+                                data-type="STUDY_SESSION">Study Sessions</button>
+
+                    </div>
+
+                    <div class="cal-filter-subject">
+
+                        <select id="calSubjectFilter" aria-label="Filter by subject">
+
+                            <option value="all">All Subjects</option>
+
+                            <option th:each="subject : ${subjects}"
+                                    th:value="${subject.id}"
+                                    th:text="${subject.name}">Spring Boot</option>
+
+                        </select>
+
+                        <i class="bi bi-chevron-down" aria-hidden="true"></i>
+
+                    </div>
+
+                    <button type="button" class="cal-filter cal-clear-filters"
+                            id="calClearFilters"
+                            title="Clear all filters"
+                            aria-label="Clear all filters">
+                        <i class="bi bi-x-circle" aria-hidden="true"></i>
+                        Clear
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Month View
+        ============================= -->
+
+        <div class="calendar-month" id="calMonthView" role="tabpanel" aria-labelledby="calTabMonth">
+
+            <div class="cal-weekdays">
+
+                <div class="cal-weekday">Mon</div>
+                <div class="cal-weekday">Tue</div>
+                <div class="cal-weekday">Wed</div>
+                <div class="cal-weekday">Thu</div>
+                <div class="cal-weekday">Fri</div>
+                <div class="cal-weekday">Sat</div>
+                <div class="cal-weekday">Sun</div>
+
+            </div>
+
+            <div class="cal-month-grid" id="calMonthGrid">
+                <!-- populated by JavaScript -->
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Week View (timeline)
+        ============================= -->
+
+        <div class="calendar-week" id="calWeekView" hidden role="tabpanel" aria-labelledby="calTabWeek">
+
+            <div class="cal-week-head" id="calWeekHead">
+                <!-- headers populated by JavaScript -->
+            </div>
+
+            <div class="cal-week-body">
+                <div class="cal-time-col" id="calTimeCol">
+                    <!-- time labels populated by JavaScript -->
+                </div>
+                <div class="cal-week-columns" id="calWeekColumns">
+                    <!-- day columns populated by JavaScript -->
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Day View (timeline)
+        ============================= -->
+
+        <div class="calendar-day" id="calDayView" hidden role="tabpanel" aria-labelledby="calTabDay">
+
+            <div class="cal-day-header" id="calDayHeader">
+                <!-- populated by JavaScript -->
+            </div>
+
+            <div class="cal-day-body">
+
+                <div class="cal-day-empty-state" id="calDayEmpty">
+                    <!-- populated by JavaScript -->
+                </div>
+
+                <div class="cal-day-timeline" id="calDayTimeline">
+                    <!-- populated by JavaScript -->
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Empty calendar (whole range)
+        ============================= -->
+
+        <div class="calendar-empty" id="calEmptyState" hidden>
+
+            <div class="empty-state">
+
+                <i class="bi bi-calendar-x" aria-hidden="true"></i>
+
+                <h3>No events scheduled</h3>
+
+                <p>
+                    Add a task, exam, or study session to start planning your time.
+                </p>
+
+                <div class="empty-state-actions">
+
+                    <a th:href="@{/tasks/new}" class="btn btn-primary">
+                        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                        Task
+                    </a>
+
+                    <a th:href="@{/exams}" class="btn btn-outline">
+                        <i class="bi bi-mortarboard" aria-hidden="true"></i>
+                        Exam
+                    </a>
+
+                    <a th:href="@{/study-sessions/new}" class="btn btn-outline">
+                        <i class="bi bi-stopwatch" aria-hidden="true"></i>
+                        Study Session
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Mobile selected-day detail panel
+        ============================= -->
+
+        <div class="cal-day-panel" id="calDayPanel" hidden>
+
+            <div class="cal-day-panel__head" id="calDayPanelHead"></div>
+
+            <div class="cal-day-panel__list" id="calDayPanelList"></div>
+
+            <button type="button" class="cal-day-panel__close" id="calDayPanelClose">
+                Close
+            </button>
+
+        </div>
+
+
+        <!-- ============================
+             Event Detail Modal
+        ============================= -->
+
+        <div class="modal-overlay" id="calDetailOverlay">
+
+            <div class="modal cal-detail-modal" role="dialog"
+                 aria-modal="true" aria-labelledby="calDetailTitle">
+
+                <div class="modal-header">
+
+                    <div class="modal-icon" id="calDetailIcon">
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+
+                    <h3 class="modal-title" id="calDetailTitle">Event details</h3>
+
+                    <button type="button" class="modal-close" id="calDetailClose"
+                            aria-label="Close">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+
+                </div>
+
+                <div class="modal-body cal-detail-body" id="calDetailBody">
+                    <!-- populated by JavaScript -->
+                </div>
+
+                <div class="modal-footer" id="calDetailFooter">
+                    <!-- actions populated by JavaScript -->
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Initial data from the server (current month)
+             The backend is authoritative: only the authenticated user's
+             events and subjects are ever exposed here.
+        ============================ -->
+
+        <script th:inline="javascript">
+            window.calendarInitial = {
+                events: /*[[${events}]]*/ [],
+                subjects: /*[[${subjects}]]*/ [],
+                startDate: /*[[${startDate}]]*/ null,
+                endDate: /*[[${endDate}]]*/ null
+            };
+        </script>
+
+        <script th:src="@{/js/calendar.js}"></script>
+
+    </section>
+
+</div>
+
+</body>
+
+</html>
