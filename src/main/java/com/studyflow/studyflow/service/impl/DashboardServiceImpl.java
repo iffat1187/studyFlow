@@ -1,6 +1,8 @@
 package com.studyflow.studyflow.service.impl;
 
 import com.studyflow.studyflow.dto.DashboardData;
+import com.studyflow.studyflow.dto.DashboardSubjectTopics;
+import com.studyflow.studyflow.dto.DashboardTaskItem;
 import com.studyflow.studyflow.dto.DayStudyMinutes;
 import com.studyflow.studyflow.dto.ExamDto;
 import com.studyflow.studyflow.dto.RecentStudySession;
@@ -12,9 +14,12 @@ import com.studyflow.studyflow.dto.UpcomingExam;
 import com.studyflow.studyflow.entity.StudySession;
 import com.studyflow.studyflow.entity.StudySessionType;
 import com.studyflow.studyflow.entity.Subject;
+import com.studyflow.studyflow.entity.Task;
 import com.studyflow.studyflow.entity.Topic;
 import com.studyflow.studyflow.entity.User;
 import com.studyflow.studyflow.repository.StudySessionRepository;
+import com.studyflow.studyflow.repository.TaskRepository;
+import com.studyflow.studyflow.repository.TopicRepository;
 import com.studyflow.studyflow.repository.UserRepository;
 import com.studyflow.studyflow.service.DashboardService;
 import com.studyflow.studyflow.service.ExamService;
@@ -46,20 +51,20 @@ import java.util.stream.Collectors;
  * - the personalized greeting and date are derived from the server clock
  * - the displayed name comes from the authenticated user's record
  * - the setup checklist is computed from data that actually exists
- *   (account creation always counts, subjects come from the subject module)
+ *   (account creation always counts, subjects/exams/topics/tasks reflect real data)
  * - the upcoming exams section shows the user's real nearest exams via the
  *   ownership-aware {@link ExamService}
- * - steps that depend on not-yet-implemented modules (topics, tasks) are
- *   marked as future rather than fabricated
+ * - topic previews and counts are aggregated through user-scoped queries
+ * - today's and upcoming tasks come from user-scoped task queries
  * - the subject snapshot shows ONLY the authenticated user's subjects via
  *   the ownership-aware {@link SubjectService}
  * - the Study Progress and Recent Study Sessions sections are aggregated
  *   from the authenticated user's real sessions by user-scoped database
  *   queries (sums, counts and groups; never in-memory filtering)
  *
- * Subjects and exams are user-owned: the underlying services resolve the
- * authenticated user from the security context email and return only that
- * user's data, so one user can never see another user's exams here.
+ * Subjects, topics and tasks are user-owned: the underlying repositories
+ * resolve the owning {@link User} and return only that user's data, so
+ * one user can never see another user's dashboard state.
  */
 @Service
 public class DashboardServiceImpl implements DashboardService {
@@ -70,6 +75,8 @@ public class DashboardServiceImpl implements DashboardService {
             DateTimeFormatter.ofPattern("EEEE", Locale.ENGLISH);
 
     static final int DASHBOARD_EXAM_LIMIT = 3;
+    private static final int DASHBOARD_TOPIC_PREVIEW_LIMIT = 3;
+    private static final int DASHBOARD_TASK_LIMIT = 5;
     private static final int SETUP_TOTAL = 5;
     private static final int DAYS_IN_WEEK = 7;
 
@@ -77,6 +84,8 @@ public class DashboardServiceImpl implements DashboardService {
     private final SubjectService subjectService;
     private final ExamService examService;
     private final StudySessionRepository studySessionRepository;
+    private final TopicRepository topicRepository;
+    private final TaskRepository taskRepository;
 
     /**
      * Constructor injection of the repositories and existing services.
@@ -84,11 +93,15 @@ public class DashboardServiceImpl implements DashboardService {
     public DashboardServiceImpl(UserRepository userRepository,
                                 SubjectService subjectService,
                                 ExamService examService,
-                                StudySessionRepository studySessionRepository) {
+                                StudySessionRepository studySessionRepository,
+                                TopicRepository topicRepository,
+                                TaskRepository taskRepository) {
         this.userRepository = userRepository;
         this.subjectService = subjectService;
         this.examService = examService;
         this.studySessionRepository = studySessionRepository;
+        this.topicRepository = topicRepository;
+        this.taskRepository = taskRepository;
     }
 
     @Override
@@ -99,6 +112,7 @@ public class DashboardServiceImpl implements DashboardService {
         String displayName = firstToken(userName);
 
         LocalDate today = LocalDate.now();
+        User user = resolveUser(userEmail);
 
         // Only the authenticated user's subjects are shown on the dashboard.
         List<SubjectDto> subjects = subjectService.getAllSubjects(userEmail);
@@ -117,14 +131,30 @@ public class DashboardServiceImpl implements DashboardService {
         boolean hasExams = examService.userHasAnyExam(userEmail);
         boolean hasUpcomingExams = !upcomingExams.isEmpty();
 
-        List<SetupStep> setupSteps = buildSetupSteps(hasSubjects, hasExams);
+        // Topics per subject: one grouped query for counts + all user topics
+        // for previews, bounded by the subject list size.
+        List<DashboardSubjectTopics> subjectTopics =
+                buildSubjectTopics(subjects, user);
+        boolean hasSubjectTopics = subjectTopics.stream()
+                .anyMatch(DashboardSubjectTopics::hasTopics);
+
+        // Today's and upcoming tasks: user-scoped, limited, incomplete-first.
+        List<DashboardTaskItem> todayTasks =
+                buildTodayTasks(user, today);
+        List<DashboardTaskItem> upcomingTasks =
+                buildUpcomingTasks(user, today);
+        int completedTodayCount = (int) todayTasks.stream()
+                .filter(DashboardTaskItem::completed).count();
+
+        List<SetupStep> setupSteps = buildSetupSteps(
+                hasSubjects, hasExams, hasSubjectTopics, !todayTasks.isEmpty());
         int setupCompleted = (int) setupSteps.stream()
                 .filter(step -> step.status() == SetupStep.Status.COMPLETED)
                 .count();
 
         // Study sessions are aggregated per owning user via the subject
         // chain, so only the authenticated user's sessions ever count.
-        StudyProgress studyProgress = buildStudyProgress(resolveUser(userEmail), today);
+        StudyProgress studyProgress = buildStudyProgress(user, today);
 
         return new DashboardData(
                 userName,
@@ -136,6 +166,15 @@ public class DashboardServiceImpl implements DashboardService {
                 subjects,
                 hasSubjects,
                 subjects.size(),
+                subjectTopics,
+                hasSubjectTopics,
+                todayTasks,
+                !todayTasks.isEmpty(),
+                todayTasks.size(),
+                completedTodayCount,
+                upcomingTasks,
+                !upcomingTasks.isEmpty(),
+                upcomingTasks.size(),
                 upcomingExams,
                 hasUpcomingExams,
                 upcomingExams.size(),
@@ -376,12 +415,12 @@ public class DashboardServiceImpl implements DashboardService {
      * Build the five-step getting-started checklist.
      *
      * Account creation is always completed for an authenticated user.
-     * The subject and exam steps reflect real data: the exam step only
-     * becomes the next actionable step once the user owns at least one
-     * subject (an exam cannot be created without one). Topics and tasks
-     * belong to modules that do not exist yet, so they are marked UPCOMING.
+     * The subject, topic, task and exam steps reflect real data.
      */
-    private List<SetupStep> buildSetupSteps(boolean hasSubjects, boolean hasExams) {
+    private List<SetupStep> buildSetupSteps(boolean hasSubjects,
+                                            boolean hasExams,
+                                            boolean hasTopics,
+                                            boolean hasTasks) {
         List<SetupStep> steps = new ArrayList<>();
 
         steps.add(new SetupStep(
@@ -404,16 +443,20 @@ public class DashboardServiceImpl implements DashboardService {
                 3,
                 "Add your first topic",
                 "bi-journal-text",
-                SetupStep.Status.UPCOMING,
-                null
+                hasTopics ? SetupStep.Status.COMPLETED
+                        : hasSubjects ? SetupStep.Status.CURRENT
+                        : SetupStep.Status.UPCOMING,
+                hasTopics || !hasSubjects ? null : "/subjects"
         ));
 
         steps.add(new SetupStep(
                 4,
                 "Create your first task",
                 "bi-list-check",
-                SetupStep.Status.UPCOMING,
-                null
+                hasTasks ? SetupStep.Status.COMPLETED
+                        : hasSubjects ? SetupStep.Status.CURRENT
+                        : SetupStep.Status.UPCOMING,
+                hasTasks || !hasSubjects ? null : "/subjects"
         ));
 
         steps.add(new SetupStep(
@@ -427,6 +470,81 @@ public class DashboardServiceImpl implements DashboardService {
         ));
 
         return steps;
+    }
+
+    /**
+     * Build per-subject topic summaries for the dashboard.
+     *
+     * One grouped query produces subject-scoped counts; a single
+     * user-scoped fetch provides previews. Both are bounded to the
+     * number of displayed subjects and the preview limit — no N+1.
+     */
+    private List<DashboardSubjectTopics> buildSubjectTopics(
+            List<SubjectDto> subjects, User user) {
+
+        Map<Long, Long> countBySubjectId = new HashMap<>();
+        Map<Long, List<String>> previewBySubjectId = new HashMap<>();
+
+        if (user != null) {
+            for (Object[] row : topicRepository.countTopicsPerSubjectForUser(user)) {
+                Long subjectId = (Long) row[0];
+                Long count     = (Long) row[2];
+                countBySubjectId.put(subjectId, count);
+            }
+            List<Topic> allTopics =
+                    topicRepository.findBySubject_UserOrderByIdAsc(user);
+            for (Topic t : allTopics) {
+                Long subjectId = t.getSubject().getId();
+                previewBySubjectId
+                        .computeIfAbsent(subjectId, k -> new ArrayList<>())
+                        .add(t.getName());
+            }
+        }
+
+        List<DashboardSubjectTopics> result = new ArrayList<>(subjects.size());
+        for (SubjectDto s : subjects) {
+            long count = countBySubjectId.getOrDefault(s.id(), 0L);
+            List<String> allPreviews =
+                    previewBySubjectId.getOrDefault(s.id(), List.of());
+            List<String> limited = allPreviews.stream()
+                    .limit(DASHBOARD_TOPIC_PREVIEW_LIMIT)
+                    .collect(Collectors.toList());
+            result.add(new DashboardSubjectTopics(
+                    s.id(),
+                    s.name(),
+                    s.color(),
+                    count,
+                    count > 0,
+                    limited,
+                    allPreviews.size() > DASHBOARD_TOPIC_PREVIEW_LIMIT
+            ));
+        }
+        return result;
+    }
+
+    /**
+     * Build today's tasks for the dashboard: incomplete first, limited.
+     */
+    private List<DashboardTaskItem> buildTodayTasks(User user, LocalDate today) {
+        if (user == null) return List.of();
+        return taskRepository.findDueTodayByUser(user, today)
+                .stream()
+                .limit(DASHBOARD_TASK_LIMIT)
+                .map(t -> DashboardTaskItem.fromEntity(t, today))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Build upcoming incomplete tasks (after today) for the dashboard,
+     * soonest first, limited.
+     */
+    private List<DashboardTaskItem> buildUpcomingTasks(User user, LocalDate today) {
+        if (user == null) return List.of();
+        return taskRepository.findUpcomingIncompleteByUser(user, today)
+                .stream()
+                .limit(DASHBOARD_TASK_LIMIT)
+                .map(t -> DashboardTaskItem.fromEntity(t, today))
+                .collect(Collectors.toList());
     }
 
     /**

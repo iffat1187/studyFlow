@@ -147,10 +147,14 @@ class AnalyticsServiceTest {
     void dailyTrend_rendersSevenRealDaysWithTodayFlag() {
         stubNoActivity();
 
+        // Always place the second fixture day INSIDE the current week,
+        // so the assertion is correct no matter which weekday today is.
+        LocalDate secondDay = weekStart.equals(today) ? weekStart.plusDays(1) : weekStart;
+
         when(studySessionRepository.sumDurationMinutesByDateForUser(eq(userA), eq(weekStart), eq(today)))
                 .thenReturn(List.<Object[]>of(
                         new Object[]{today, 30L},
-                        new Object[]{today.minusDays(1), 45L}
+                        new Object[]{secondDay, 45L}
                 ));
 
         AnalyticsDto data = analyticsService.getAnalytics("a@example.com");
@@ -167,9 +171,13 @@ class AnalyticsServiceTest {
                 .filter(day -> !day.isToday())
                 .map(DayStudyMinutes::minutes))
                 .anyMatch(minutes -> minutes == 45);
-        // Percentages are relative to the week's busiest day.
-        DayStudyMinutes monday = data.dailyStudyData().get(0);
-        assertThat(monday.barPercent()).isIn(0, 15);
+        // Percentages are relative to the week's busiest day (45m here),
+        // so its day shows 100% regardless of the current weekday.
+        DayStudyMinutes busiest = data.dailyStudyData().stream()
+                .filter(day -> day.minutes() == 45)
+                .findFirst()
+                .orElseThrow();
+        assertThat(busiest.barPercent()).isEqualTo(100);
     }
 
     @Test

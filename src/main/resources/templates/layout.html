@@ -88,7 +88,13 @@
      Application Layout
 =========================================== -->
 
-<div class="app-layout">
+<div class="app-shell">
+
+    <!-- ==========================================
+         Application Layout
+    =========================================== -->
+
+    <div class="app-layout">
 
 
     <!-- ==========================================
@@ -136,7 +142,17 @@
 
         </main>
 
+        </div>
+
     </div>
+
+    <!-- ==========================================
+         Global Footer
+         Single application-wide footer — NOT part
+         of the sidebar navigation.
+    =========================================== -->
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
 </div>
 

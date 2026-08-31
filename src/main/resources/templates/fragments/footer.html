@@ -3,13 +3,15 @@
 
 <!--
 =========================================================
-    StudyFlow Footer Fragment
+    StudyFlow Global Footer Fragment
+    Rendered exactly once, at the bottom of the app shell
+    in layout.html. It is NOT part of the sidebar navigation.
 =========================================================
 -->
 
 <div th:fragment="footer">
 
-    <footer class="app-footer">
+    <footer class="site-footer">
 
         <div class="footer-content">
 
@@ -18,64 +20,28 @@
             <div class="footer-left">
 
                 <p>
-
-                    <i class="bi bi-c-circle"></i>
-
-                    2026 <strong>StudyFlow</strong>
-
+                    © 2025 StudyFlow. All rights reserved.
                 </p>
 
             </div>
-
-
 
             <!-- Center -->
 
             <div class="footer-center">
 
                 <p>
-
-                    Built with
-
-                    <i class="bi bi-heart-fill footer-heart"></i>
-
-                    using
-
-                    <strong>Spring Boot</strong> •
-
-                    <strong>JPA</strong> •
-
-                    <strong>MySQL</strong>
-
+                    Made with ❤️ for students
                 </p>
 
             </div>
-
-
 
             <!-- Right -->
 
             <div class="footer-right">
 
-                <p>
+                <span class="created-by">Created by</span>
 
-                    <i class="bi bi-code-slash"></i>
-
-                    Created by
-
-                    <span class="developer-name">
-
-                        Iffat Jahan
-
-                    </span>
-
-                </p>
-
-                <small>
-
-                    Version 1.0
-
-                </small>
+                <span class="creator-name">Iffat Jahan</span>
 
             </div>
 

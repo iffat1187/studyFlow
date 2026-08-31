@@ -225,9 +225,18 @@ ol{
    5. App Layout
 ===================================================== */
 
+/* Root shell: stacked column so the global footer flows after the
+   application content instead of being pinned inside the sidebar. */
+
+.app-shell{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+
 .app-layout{
     display:flex;
-    min-height:100vh;
+    flex:1;
     background:var(--bg-primary);
 }
 
@@ -240,7 +249,6 @@ ol{
 .main-content{
     flex:1;
     min-width:0;
-    min-height:100vh;
     display:flex;
     flex-direction:column;
 }
@@ -416,29 +424,97 @@ ol{
     border-radius:20px;
 }
 
-/* Sidebar Footer */
+/* Site Footer
+   Global application footer — rendered exactly once at the bottom
+   of the app shell in layout.html, never inside the sidebar.
+   Follows the page flow: short pages sit naturally near the bottom,
+   long pages place it after the content. */
 
-.sidebar-footer{
-    padding:22px;
+.site-footer{
+    flex:none;
+    padding:22px 24px;
+    background:linear-gradient(180deg,#111827 0%,#0F172A 100%);
     border-top:1px solid var(--border);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:8px;
-    text-align:center;
     color:var(--text-muted);
     font-size:13px;
 }
 
-.version-badge{
-    display:inline-block;
-    margin-bottom:10px;
-    padding:5px 12px;
-    border-radius:var(--radius-pill);
-    background:rgba(139,92,246,.15);
-    color:var(--primary-light);
+/* Three-column footer: equal side tracks keep the center phrase
+   truly centered across the full footer width. */
+
+.footer-content{
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    align-items:center;
+    gap:24px;
+    width:100%;
+    max-width:1280px;
+    margin:0 auto;
+}
+
+.footer-left{
+    text-align:left;
+}
+
+.footer-left p,
+.footer-center p{
+    margin:0;
+    line-height:1.5;
+}
+
+.footer-center{
+    text-align:center;
+}
+
+.footer-right{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    justify-content:center;
+    text-align:right;
+    line-height:1.4;
+}
+
+/* Creator block hierarchy: label is small and muted, name is
+   slightly stronger so it reads as the emphasized line. */
+
+.created-by{
     font-size:12px;
+    font-weight:400;
+    color:var(--text-muted);
+}
+
+.creator-name{
+    font-size:13px;
     font-weight:600;
+    color:var(--text-light);
+}
+
+/* Mobile: single column, everything centered, creator block
+   keeps its vertical two-line arrangement. */
+
+@media(max-width:768px){
+
+    .site-footer{
+        padding:20px 16px;
+    }
+
+    .footer-content{
+        grid-template-columns:1fr;
+        gap:12px;
+        text-align:center;
+    }
+
+    .footer-left,
+    .footer-center,
+    .footer-right{
+        text-align:center;
+    }
+
+    .footer-right{
+        align-items:center;
+    }
+
 }
 
 /* Sidebar Scrollbar */

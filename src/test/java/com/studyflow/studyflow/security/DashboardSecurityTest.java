@@ -168,7 +168,10 @@ class DashboardSecurityTest {
                         .with(user("student@example.com").roles("USER")))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Another")))
-                .andExpect(content().string(not(containsString("Iffat"))));
+                // Another student's identity must never leak; the global
+                // footer legitimately shows the creator name, so the canary
+                // here is a name that is never rendered anywhere.
+                .andExpect(content().string(not(containsString("Alice Leigh"))));
     }
 
     @Test

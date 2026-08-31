@@ -137,6 +137,32 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     long countBySubject(Subject subject);
 
     /**
+     * The user's tasks due today for the dashboard: incomplete tasks first,
+     * then by due time then id for a stable, actionable order. Scoped to the
+     * owning user via the subject chain.
+     *
+     * @param user  the owning user
+     * @param today the current date (tasks due on this date)
+     * @return the user's today tasks, incomplete first
+     */
+    @Query("SELECT t FROM Task t WHERE t.subject.user = :user AND t.dueDate = :today " +
+            "ORDER BY t.completed ASC, t.dueTime ASC, t.id ASC")
+    List<Task> findDueTodayByUser(User user, LocalDate today);
+
+    /**
+     * The user's nearest upcoming incomplete tasks (due strictly after today)
+     * for the dashboard, soonest first. Scoped to the owning user via the
+     * subject chain. Completed and past tasks are excluded.
+     *
+     * @param user  the owning user
+     * @param today the current date
+     * @return the user's upcoming incomplete tasks, soonest first
+     */
+    @Query("SELECT t FROM Task t WHERE t.subject.user = :user AND t.dueDate > :today " +
+            "AND t.completed = false ORDER BY t.dueDate ASC, t.dueTime ASC, t.id ASC")
+    List<Task> findUpcomingIncompleteByUser(User user, LocalDate today);
+
+    /**
      * Delete all tasks belonging to a specific subject.
      * Used when deleting a subject to maintain referential integrity.
      *

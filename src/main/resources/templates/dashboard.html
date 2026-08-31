@@ -425,33 +425,100 @@
                         Today's Tasks
                     </h2>
 
-                    <span class="dash-card__soon">Soon</span>
+                    <span class="dash-card__count"
+                          th:if="${data.hasTodayTasks}"
+                          th:text="${data.completedTodayCount} + ' of ' + ${data.todayTaskCount} + ' done'">
+                        2 of 4 done
+                    </span>
 
                 </header>
 
                 <div class="dash-card__body">
 
-                    <div class="dash-empty">
+                    <!-- Empty state: no subjects -->
+                    <div class="dash-empty" th:if="${!data.hasSubjects}">
 
                         <span class="dash-empty__icon">
                             <i class="bi bi-clipboard-check"></i>
                         </span>
 
-                        <h3>
-                            No tasks for today
-                        </h3>
+                        <h3>No tasks for today</h3>
 
-                        <p>
-                            Tasks are coming soon. You'll structure your daily
-                            study work here.
-                        </p>
+                        <p>Add a subject first, then create tasks to plan your study day.</p>
 
-                        <span class="chip chip--soon" aria-disabled="true">
-                            <i class="bi bi-hourglass-split"></i>
-                            Coming soon
-                        </span>
+                        <a th:href="@{/subjects/new}" class="btn btn-outline">
+                            <i class="bi bi-plus-lg"></i>
+                            Add your first subject
+                        </a>
 
                     </div>
+
+                    <!-- Empty state: has subjects, no tasks today -->
+                    <div class="dash-empty" th:if="${data.hasSubjects and !data.hasTodayTasks}">
+
+                        <span class="dash-empty__icon dash-empty__icon--success">
+                            <i class="bi bi-emoji-smile"></i>
+                        </span>
+
+                        <h3>All clear for today</h3>
+
+                        <p>No tasks are due today. Check upcoming tasks below or add a new one.</p>
+
+                    </div>
+
+                    <!-- Real tasks list -->
+                    <ul class="dash-task-list" th:if="${data.hasTodayTasks}">
+
+                        <li class="dash-task-item"
+                            th:each="task : ${data.todayTasks}"
+                            th:classappend="${task.completed ? ' is-completed' : ''} + ${task.overdue ? ' is-overdue' : ''} + ${task.dueToday ? ' is-due-today' : ''}"
+                            th:attr="data-task-id=${task.id}">
+
+                            <label class="dash-task-item__check" th:unless="${task.completed}">
+                                <input type="checkbox"
+                                       class="dash-task-item__checkbox"
+                                       th:attr="data-task-id=${task.id}"
+                                       aria-label="'Mark complete: ' + ${task.title}">
+                                <i class="bi bi-circle dash-task-item__check-icon"></i>
+                            </label>
+
+                            <span class="dash-task-item__check dash-task-item__check--done" th:if="${task.completed}">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </span>
+
+                            <span class="dash-task-item__bar"
+                                  th:style="'background-color: ' + ${task.subjectColor}"
+                                  th:classappend="${#strings.toLowerCase(task.subjectColor)}"></span>
+
+                            <div class="dash-task-item__main">
+                                <strong class="dash-task-item__title" th:text="${task.title}">Read Chapter 5</strong>
+                                <small class="dash-task-item__meta">
+                                    <span class="dash-task-item__subject" th:text="${task.subjectName}">Database</span>
+                                    <span class="dash-task-item__type badge"
+                                          th:text="${#strings.capitalizeWords(task.taskTypeName)}">Revision</span>
+                                </small>
+                            </div>
+
+                            <div class="dash-task-item__due">
+                                <span class="dash-task-item__date"
+                                      th:classappend="${task.overdue ? ' is-overdue' : ''} + ${task.dueToday ? ' is-due-today' : ''}"
+                                      th:text="${task.dueDateLabel}">Today</span>
+                                <small class="dash-task-item__time" th:if="${task.dueTimeLabel != null}"
+                                       th:text="${task.dueTimeLabel}">5:00 PM</small>
+                            </div>
+
+                            <div class="dash-task-item__progress" th:unless="${task.completed}"
+                                 th:if="${task.progress > 0}">
+                                <div class="dash-task-item__progress-bar">
+                                    <div class="dash-task-item__progress-fill"
+                                         th:style="'width: ' + ${task.progress} + '%'"></div>
+                                </div>
+                                <span class="dash-task-item__progress-label" th:text="${task.progress} + '%'">45%</span>
+                            </div>
+
+                        </li>
+
+                    </ul>
 
                 </div>
 
@@ -610,6 +677,65 @@
             </section>
 
         </div>
+
+
+        <!-- ============================
+             Upcoming Tasks
+        ============================= -->
+
+        <section class="dash-card fade-in" aria-labelledby="upcomingTasksTitle"
+                 th:if="${data.hasUpcomingTasks}">
+
+            <header class="dash-card__header">
+
+                <h2 id="upcomingTasksTitle">
+                    <i class="bi bi-calendar3"></i>
+                    Upcoming Tasks
+                </h2>
+
+                <span class="dash-card__count"
+                      th:text="${data.upcomingTaskCount} + ' upcoming'">
+                    3 upcoming
+                </span>
+
+            </header>
+
+            <div class="dash-card__body">
+
+                <ul class="dash-task-list">
+
+                    <li class="dash-task-item"
+                        th:each="task : ${data.upcomingTasks}"
+                        th:classappend="${task.overdue ? ' is-overdue' : ''} + ${task.dueTomorrow ? ' is-due-tomorrow' : ''}"
+                        th:attr="data-task-id=${task.id}">
+
+                        <span class="dash-task-item__bar"
+                              th:style="'background-color: ' + ${task.subjectColor}"></span>
+
+                        <div class="dash-task-item__main">
+                            <strong class="dash-task-item__title" th:text="${task.title}">Read Chapter 5</strong>
+                            <small class="dash-task-item__meta">
+                                <span class="dash-task-item__subject" th:text="${task.subjectName}">Database</span>
+                                <span class="dash-task-item__type badge"
+                                      th:text="${#strings.capitalizeWords(task.taskTypeName)}">Revision</span>
+                            </small>
+                        </div>
+
+                        <div class="dash-task-item__due">
+                            <span class="dash-task-item__date"
+                                  th:classappend="${task.dueTomorrow ? ' is-due-tomorrow' : ''}"
+                                  th:text="${task.dueDateLabel}">Tomorrow</span>
+                            <small class="dash-task-item__time" th:if="${task.dueTimeLabel != null}"
+                                   th:text="${task.dueTimeLabel}">10:00 AM</small>
+                        </div>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </section>
 
 
         <!-- ============================
@@ -777,31 +903,44 @@
 
                 </div>
 
-                <!-- Subject snapshot grid -->
+                <!-- Subject snapshot grid with topic previews -->
 
                 <div class="dash-subjects" th:unless="${!data.hasSubjects}">
 
                     <div
                             class="dash-subject fade-in"
-                            th:each="subject, stat : ${data.subjects}"
+                            th:each="topicInfo, stat : ${data.subjectTopics}"
                             th:if="${stat.index < 6}">
 
                         <span class="dash-subject__bar"
-                              th:classappend="${#strings.toLowerCase(subject.color)}"></span>
+                              th:classappend="${#strings.toLowerCase(topicInfo.subjectColor)}"></span>
 
                         <div class="dash-subject__content">
 
-                            <h3 th:text="${subject.name}">Database</h3>
+                            <h3 th:text="${topicInfo.subjectName}">Database</h3>
 
-                            <p th:text="${subject.description != null and !subject.description.isEmpty() ? subject.description : 'No description yet.'}">
-                                Description
+                            <p class="dash-subject__topics" th:if="${topicInfo.hasTopics}">
+                                <span class="dash-subject__count"
+                                      th:text="${topicInfo.topicCount} + (topicInfo.topicCount == 1 ? ' topic' : ' topics')">3 topics</span>
+                                <span class="dash-subject__preview" th:if="${!topicInfo.previewTopics.isEmpty()}">
+                                    —
+                                    <span th:each="topicName, tStat : ${topicInfo.previewTopics}"
+                                          th:text="${topicName} + (${!tStat.last} ? ', ' : '')">Normalization, Indexing</span>
+                                    <span th:if="${topicInfo.hasMoreTopics}" class="dash-subject__more">
+                                        …
+                                    </span>
+                                </span>
+                            </p>
+
+                            <p class="dash-subject__topics dash-subject__topics--empty" th:unless="${topicInfo.hasTopics}">
+                                No topics yet
                             </p>
 
                         </div>
 
                         <span class="dash-subject__badge subject-badge"
-                              th:classappend="${#strings.toLowerCase(subject.color)}"
-                              th:text="${subject.color}">
+                              th:classappend="${#strings.toLowerCase(topicInfo.subjectColor)}"
+                              th:text="${topicInfo.subjectColor}">
                             Purple
                         </span>
 

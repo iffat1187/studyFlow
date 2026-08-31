@@ -76,6 +76,21 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     long countBySubject(Subject subject);
 
     /**
+     * Topic counts per subject for a given user, scoped through the user's
+     * subjects. Returns rows of [subject.id, subject.color, count].
+     *
+     * Used by the dashboard so topic counts come from one grouped query
+     * instead of a per-subject N+1. Only subjects owned by the user are
+     * considered.
+     *
+     * @param user the owning user
+     * @return rows of [subjectId (Long), subjectColor (String), topicCount (Long)]
+     */
+    @Query("select t.subject.id, t.subject.color, count(t) " +
+            "from Topic t where t.subject.user = :user group by t.subject.id, t.subject.color")
+    List<Object[]> countTopicsPerSubjectForUser(User user);
+
+    /**
      * Delete all topics belonging to a specific subject.
      * Used when deleting a subject to maintain referential integrity.
      *
