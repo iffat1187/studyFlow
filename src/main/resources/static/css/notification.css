@@ -1,0 +1,389 @@
+/* =============================================
+   StudyFlow - Notification Center Styles
+   Bell dropdown + notifications page
+============================================= */
+
+/* ---------- Bell Dropdown ---------- */
+
+.notification-menu{
+    position:relative;
+}
+
+.notification-dropdown{
+    position:absolute;
+    top:calc(100% + 8px);
+    right:0;
+    width:340px;
+    max-width:calc(100vw - 32px);
+    background:var(--bg-card);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:var(--radius-md);
+    box-shadow:0 12px 32px rgba(0,0,0,.4);
+    overflow:hidden;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(8px);
+    transition:all var(--transition);
+    z-index:1001;
+}
+
+.notification-menu.is-open .notification-dropdown{
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+}
+
+.notification-dropdown__header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 16px;
+    border-bottom:1px solid var(--border);
+}
+
+.notification-dropdown__title{
+    font-weight:700;
+    font-size:14px;
+}
+
+.notification-dropdown__mark-all{
+    background:none;
+    border:none;
+    color:var(--primary-light);
+    font-size:12px;
+    cursor:pointer;
+    padding:0;
+}
+
+.notification-dropdown__mark-all:hover{
+    text-decoration:underline;
+}
+
+.notification-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    max-height:360px;
+    overflow-y:auto;
+}
+
+.notification-item{
+    border-bottom:1px solid var(--border);
+}
+
+.notification-item__link{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:12px 16px;
+    color:#fff;
+    text-decoration:none;
+    transition:background var(--transition);
+}
+
+.notification-item__link:hover{
+    background:rgba(139,92,246,.12);
+}
+
+.notification-item__icon{
+    flex:0 0 auto;
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(139,92,246,.16);
+    color:var(--primary-light);
+    font-size:16px;
+}
+
+.notification-item__body{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.notification-item__title{
+    font-size:13px;
+    font-weight:600;
+    line-height:1.3;
+}
+
+.notification-item__time{
+    font-size:11px;
+    color:var(--text-muted);
+}
+
+.notification-item__dot,
+.notification-dot{
+    flex:0 0 auto;
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:var(--primary);
+    margin-top:6px;
+}
+
+.notification-item.is-unread .notification-item__title{
+    font-weight:700;
+}
+
+.notification-dropdown__empty{
+    padding:28px 16px;
+    text-align:center;
+    color:var(--text-muted);
+    font-size:13px;
+}
+
+.notification-dropdown__view-all{
+    display:block;
+    text-align:center;
+    padding:12px 16px;
+    border-top:1px solid var(--border);
+    color:var(--primary-light);
+    font-size:13px;
+    font-weight:600;
+    text-decoration:none;
+    transition:background var(--transition);
+}
+
+.notification-dropdown__view-all:hover{
+    background:rgba(139,92,246,.12);
+}
+
+/* ---------- Notifications Page ---------- */
+
+.notification-summary{
+    margin-bottom:18px;
+    font-size:14px;
+    color:var(--text-muted);
+}
+
+.notification-summary__count{
+    font-weight:700;
+    color:var(--primary-light);
+}
+
+.notification-page-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.notification-page-item{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    padding:16px;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    transition:background var(--transition);
+    position:relative;
+    cursor:pointer;
+}
+
+.notification-page-item.is-read{
+    background:transparent;
+    opacity:.72;
+}
+
+.notification-page-item__body{
+    flex:1;
+    min-width:0;
+    color:#fff;
+    text-decoration:none;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+
+.notification-page-item__title{
+    font-size:15px;
+    font-weight:700;
+    line-height:1.3;
+}
+
+.notification-page-item.is-read .notification-page-item__title{
+    font-weight:600;
+}
+
+.notification-page-item__message{
+    font-size:13px;
+    color:var(--text);
+    line-height:1.4;
+}
+
+.notification-page-item__meta{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:12px;
+    color:var(--text-muted);
+}
+
+.notification-page-item__type{
+    padding:2px 8px;
+    border-radius:var(--radius-sm);
+    background:rgba(139,92,246,.14);
+    color:var(--primary-light);
+    font-weight:600;
+}
+
+.notification-dot{
+    margin-top:8px;
+}
+
+/* ---------- Empty State ---------- */
+
+.notification-empty{
+    text-align:center;
+    padding:64px 20px;
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+}
+
+.notification-empty i{
+    font-size:48px;
+    color:var(--text-muted);
+}
+
+.notification-empty h2{
+    margin:16px 0 8px;
+    font-size:20px;
+    color:var(--text);
+}
+
+.notification-empty p{
+    color:var(--text-muted);
+    font-size:14px;
+    margin:0 0 20px;
+}
+
+/* ====================================================
+   Notification Settings Page
+==================================================== */
+
+.notification-settings-form{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+.settings-group{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    overflow:hidden;
+}
+
+.settings-group__title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 18px;
+    border-bottom:1px solid var(--border);
+    font-weight:700;
+    font-size:14px;
+    color:var(--primary-light);
+    letter-spacing:.3px;
+}
+
+.settings-group__items{
+    padding:6px 0;
+}
+
+.settings-row{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 18px;
+    cursor:pointer;
+    transition:background var(--transition);
+}
+
+.settings-row:hover{
+    background:rgba(139,92,246,.08);
+}
+
+.settings-row + .settings-row{
+    border-top:1px solid var(--border);
+}
+
+/* Hide the real checkbox; the switch visual is driven by it. */
+.settings-row input[type="checkbox"]{
+    position:absolute;
+    opacity:0;
+    width:0;
+    height:0;
+    pointer-events:none;
+}
+
+.settings-row__text{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+
+.settings-row__name{
+    font-size:14px;
+    font-weight:600;
+    color:var(--text);
+}
+
+.settings-row__desc{
+    font-size:12.5px;
+    color:var(--text-muted);
+    line-height:1.35;
+}
+
+.switch{
+    flex:0 0 auto;
+    position:relative;
+    width:46px;
+    height:26px;
+    border-radius:26px;
+    background:rgba(255,255,255,.15);
+    transition:background var(--transition);
+}
+
+.switch__thumb{
+    position:absolute;
+    top:3px;
+    left:3px;
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    background:#fff;
+    transition:transform var(--transition);
+}
+
+.settings-row input:checked + .settings-row__text + .switch{
+    background:var(--primary);
+}
+
+.settings-row input:checked + .settings-row__text + .switch .switch__thumb{
+    transform:translateX(20px);
+}
+
+.settings-row input:focus-visible + .settings-row__text + .switch{
+    outline:2px solid var(--primary-light);
+    outline-offset:2px;
+}
+
+.notification-settings-actions{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding-top:6px;
+}

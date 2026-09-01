@@ -109,7 +109,8 @@ public class SecurityConfig {
                                 "/exams/**",
                                 "/study-sessions/**",
                                 "/analytics/**",
-                                "/calendar/**"
+                                "/calendar/**",
+                                "/notifications/**"
                         ).authenticated()
                         .anyRequest().authenticated()
                 )

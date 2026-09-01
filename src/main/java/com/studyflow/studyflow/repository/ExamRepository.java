@@ -157,6 +157,20 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
                         @Param("examType") ExamType examType);
 
     /**
+     * Exams on or after the given day belonging to subjects owned by the
+     * given user. Used by the notification generation service for the Exam
+     * Today and Exam Tomorrow rules; past exams are excluded so rules never
+     * fire on exams that have already happened.
+     *
+     * @param user      the owning user
+     * @param dateFrom  lower bound (inclusive) for the exam date
+     * @return the user's exams on or after the given date, soonest first
+     */
+    @Query("SELECT e FROM Exam e WHERE e.subject.user = :user AND e.examDate >= :dateFrom " +
+            "ORDER BY e.examDate ASC, e.examTime ASC, e.id ASC")
+    List<Exam> findUpcomingFromByUser(@Param("user") User user, @Param("dateFrom") LocalDate dateFrom);
+
+    /**
      * Exams within a date range (inclusive) belonging to subjects owned by
      * the given user. Used by the calendar to fetch all exams whose exam date
      * falls inside the displayed period.

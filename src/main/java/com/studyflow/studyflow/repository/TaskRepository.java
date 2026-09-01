@@ -163,6 +163,33 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findUpcomingIncompleteByUser(User user, LocalDate today);
 
     /**
+     * The user's incomplete tasks due today, soonest time first. Used by the
+     * notification generation service for the Task Due rule; completed tasks
+     * (which must never trigger a due/overdue notification) are excluded.
+     * Scoped to the owning user via the subject chain.
+     *
+     * @param user  the owning user
+     * @param today the current date (tasks due on this date)
+     * @return the user's incomplete tasks due today
+     */
+    @Query("SELECT t FROM Task t WHERE t.subject.user = :user AND t.dueDate = :today " +
+            "AND t.completed = false ORDER BY t.dueTime ASC, t.id ASC")
+    List<Task> findIncompleteDueTodayByUser(User user, LocalDate today);
+
+    /**
+     * The user's incomplete, overdue tasks (due before today). Used by the
+     * notification generation service for the Task Overdue rule; completed
+     * tasks are excluded. Scoped to the owning user via the subject chain.
+     *
+     * @param user  the owning user
+     * @param today the current date (overdue means due before this date)
+     * @return the user's incomplete overdue tasks, most-overdue first
+     */
+    @Query("SELECT t FROM Task t WHERE t.subject.user = :user AND t.dueDate < :today " +
+            "AND t.completed = false ORDER BY t.dueDate ASC, t.dueTime ASC, t.id ASC")
+    List<Task> findIncompleteOverdueByUser(User user, LocalDate today);
+
+    /**
      * Tasks within a date range (inclusive) belonging to subjects owned by
      * the given user. Used by the calendar to fetch all tasks whose due date
      * falls inside the displayed period.

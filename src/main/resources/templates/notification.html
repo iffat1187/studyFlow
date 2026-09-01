@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<div th:replace="~{layout :: layout(~{::section})}">
+
+    <section class="notification-page">
+
+        <!-- ============================
+             Page Header
+        ============================= -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    <i class="bi bi-bell"></i>
+                    Notifications
+                </h1>
+
+                <p>
+                    Your reminders, alerts and study updates.
+                </p>
+
+            </div>
+
+            <div class="page-header-actions">
+
+                <button type="button"
+                        class="btn btn-outline"
+                        id="notificationsMarkAll"
+                        th:if="${unreadCount > 0}">
+                    <i class="bi bi-check2-all" aria-hidden="true"></i>
+                    Mark all as read
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Notification Summary
+        ============================= -->
+
+        <div class="notification-summary" th:if="${unreadCount > 0}">
+            You have
+            <span class="notification-summary__count" th:text="${unreadCount}">3</span>
+            unread notification(s).
+        </div>
+
+
+        <!-- ============================
+             Notification List
+        ============================= -->
+
+        <div class="notification-list-page">
+
+            <ul class="notification-page-list" th:if="${!#lists.isEmpty(notifications)}">
+
+                <li th:each="n : ${notifications}"
+                    class="notification-page-item is-unread"
+                    th:classappend="${n.read()} ? 'is-read'"
+                    th:attr="data-notif-id=${n.id()},data-notif-read=${n.read()},data-notif-href=${n.href() != null ? n.href() : ''},data-notif-time=${n.createdAt()}">
+
+                    <span class="notification-item__icon">
+                        <i th:class="'bi ' + ${n.icon()}"></i>
+                    </span>
+
+                    <a class="notification-page-item__body" href="#">
+
+                        <span class="notification-page-item__title" th:text="${n.title()}">
+                            Notification title
+                        </span>
+
+                        <span class="notification-page-item__message" th:text="${n.message()}">
+                            Notification message.
+                        </span>
+
+                        <span class="notification-page-item__meta">
+                            <span class="notification-page-item__type" th:text="${n.typeLabel()}">
+                                type
+                            </span>
+                            <span class="notification-page-item__time"
+                                  th:text="${n.createdAt()}">
+                                date
+                            </span>
+                        </span>
+
+                    </a>
+
+                    <span class="notification-dot" th:if="${!n.read()}"></span>
+
+                </li>
+
+            </ul>
+
+            <!-- Empty State -->
+            <div class="notification-empty" th:if="${#lists.isEmpty(notifications)}">
+
+                <i class="bi bi-bell-slash"></i>
+
+                <h2>
+                    No notifications yet.
+                </h2>
+
+                <p>
+                    When reminders and updates arrive, they will show up here.
+                </p>
+
+                <a class="btn btn-primary" th:href="@{/tasks}">
+                    Go to Tasks
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+</body>
+
+</html>

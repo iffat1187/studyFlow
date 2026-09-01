@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<div th:replace="~{layout :: layout(~{::section})}">
+
+    <section class="notification-settings-page">
+
+        <!-- ============================
+             Page Header
+        ============================= -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    <i class="bi bi-gear"></i>
+                    Notifications Settings
+                </h1>
+
+                <p>
+                    Choose which in-app notifications you want to receive.
+                </p>
+
+            </div>
+
+        </div>
+
+        <form th:action="@{/notifications/settings}" method="post"
+              class="notification-settings-form">
+
+            <!-- CSRF token: required by Spring Security, kept enabled. -->
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}"/>
+
+            <!-- ============================
+                 TASKS
+            ============================= -->
+
+            <div class="settings-group">
+
+                <div class="settings-group__title">
+                    <i class="bi bi-list-check"></i>
+                    Task Notifications
+                </div>
+
+                <div class="settings-group__items">
+
+                    <label class="settings-row">
+                        <input type="checkbox"
+                               name="taskDueEnabled"
+                               value="true"
+                               th:checked="${prefs.taskDueEnabled()}">
+                        <span class="settings-row__text">
+                            <span class="settings-row__name">Tasks due today</span>
+                            <span class="settings-row__desc">Remind me when a task is due today.</span>
+                        </span>
+                        <span class="switch" aria-hidden="true">
+                            <span class="switch__thumb"></span>
+                        </span>
+                    </label>
+
+                    <label class="settings-row">
+                        <input type="checkbox"
+                               name="taskOverdueEnabled"
+                               value="true"
+                               th:checked="${prefs.taskOverdueEnabled()}">
+                        <span class="settings-row__text">
+                            <span class="settings-row__name">Overdue tasks</span>
+                            <span class="settings-row__desc">Notify me when a task is overdue.</span>
+                        </span>
+                        <span class="switch" aria-hidden="true">
+                            <span class="switch__thumb"></span>
+                        </span>
+                    </label>
+
+                </div>
+
+            </div>
+
+            <!-- ============================
+                 EXAMS
+            ============================= -->
+
+            <div class="settings-group">
+
+                <div class="settings-group__title">
+                    <i class="bi bi-mortarboard"></i>
+                    Exam Notifications
+                </div>
+
+                <div class="settings-group__items">
+
+                    <label class="settings-row">
+                        <input type="checkbox"
+                               name="examUpcomingEnabled"
+                               value="true"
+                               th:checked="${prefs.examUpcomingEnabled()}">
+                        <span class="settings-row__text">
+                            <span class="settings-row__name">Upcoming exams</span>
+                            <span class="settings-row__desc">Remind me when an exam is tomorrow.</span>
+                        </span>
+                        <span class="switch" aria-hidden="true">
+                            <span class="switch__thumb"></span>
+                        </span>
+                    </label>
+
+                    <label class="settings-row">
+                        <input type="checkbox"
+                               name="examTodayEnabled"
+                               value="true"
+                               th:checked="${prefs.examTodayEnabled()}">
+                        <span class="settings-row__text">
+                            <span class="settings-row__name">Exams today</span>
+                            <span class="settings-row__desc">Remind me when an exam is today.</span>
+                        </span>
+                        <span class="switch" aria-hidden="true">
+                            <span class="switch__thumb"></span>
+                        </span>
+                    </label>
+
+                </div>
+
+            </div>
+
+            <!-- ============================
+                 STUDY
+            ============================= -->
+
+            <div class="settings-group">
+
+                <div class="settings-group__title">
+                    <i class="bi bi-stopwatch"></i>
+                    Study Notifications
+                </div>
+
+                <div class="settings-group__items">
+
+                    <label class="settings-row">
+                        <input type="checkbox"
+                               name="studyReminderEnabled"
+                               value="true"
+                               th:checked="${prefs.studyReminderEnabled()}">
+                        <span class="settings-row__text">
+                            <span class="settings-row__name">Study reminders</span>
+                            <span class="settings-row__desc">Remind me to record a study session for the day.</span>
+                        </span>
+                        <span class="switch" aria-hidden="true">
+                            <span class="switch__thumb"></span>
+                        </span>
+                    </label>
+
+                    <label class="settings-row">
+                        <input type="checkbox"
+                               name="streakReminderEnabled"
+                               value="true"
+                               th:checked="${prefs.streakReminderEnabled()}">
+                        <span class="settings-row__text">
+                            <span class="settings-row__name">Study streak reminders</span>
+                            <span class="settings-row__desc">Remind me when my study streak is at risk.</span>
+                        </span>
+                        <span class="switch" aria-hidden="true">
+                            <span class="switch__thumb"></span>
+                        </span>
+                    </label>
+
+                </div>
+
+            </div>
+
+            <!-- ============================
+                 SYSTEM
+            ============================= -->
+
+            <div class="settings-group">
+
+                <div class="settings-group__title">
+                    <i class="bi bi-info-circle"></i>
+                    System
+                </div>
+
+                <div class="settings-group__items">
+
+                    <label class="settings-row">
+                        <input type="checkbox"
+                               name="systemEnabled"
+                               value="true"
+                               th:checked="${prefs.systemEnabled()}">
+                        <span class="settings-row__text">
+                            <span class="settings-row__name">System notifications</span>
+                            <span class="settings-row__desc">Important application-level notices.</span>
+                        </span>
+                        <span class="switch" aria-hidden="true">
+                            <span class="switch__thumb"></span>
+                        </span>
+                    </label>
+
+                </div>
+
+            </div>
+
+            <!-- ============================
+                 Save
+            ============================= -->
+
+            <div class="notification-settings-actions">
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                    Save Preferences
+                </button>
+
+                <a class="btn btn-outline" th:href="@{/notifications}">
+                    View Notifications
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+</body>
+
+</html>

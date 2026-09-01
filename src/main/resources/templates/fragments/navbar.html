@@ -58,16 +58,86 @@
 
             </div>
 
-            <!-- Notification -->
-            <button class="icon-button" title="Notifications">
+            <!-- Notification Bell + Dropdown -->
+            <div class="notification-menu" id="notificationMenu">
 
-                <i class="bi bi-bell"></i>
+                <button
+                        class="icon-button"
+                        id="notificationBell"
+                        type="button"
+                        title="Notifications"
+                        aria-haspopup="true"
+                        aria-expanded="false">
 
-                <span class="notification-badge">
-                    0
-                </span>
+                    <i class="bi bi-bell"></i>
 
-            </button>
+                    <span
+                            class="notification-badge"
+                            id="notificationBadge"
+                            th:if="${navbarUnreadCount > 0}"
+                            th:text="${navbarUnreadCount}">
+                        0
+                    </span>
+
+                </button>
+
+                <div class="notification-dropdown" id="notificationDropdown">
+
+                    <div class="notification-dropdown__header">
+
+                        <span class="notification-dropdown__title">Notifications</span>
+
+                        <button
+                                type="button"
+                                class="notification-dropdown__mark-all"
+                                id="notificationMarkAll">
+                            Mark all read
+                        </button>
+
+                    </div>
+
+                    <ul class="notification-list">
+                        <li
+                                th:each="n : ${navbarRecentNotifications}"
+                                class="notification-item"
+                                th:classappend="${!n.read()} ? 'is-unread'">
+                            <a
+                                    class="notification-item__link"
+                                    th:href="${n.href() != null ? n.href() : '/notifications'}"
+                                    th:attr="data-notif-id=${n.id()},data-notif-read=${n.read()},data-notif-href=${n.href() != null ? n.href() : ''},data-notif-time=${n.createdAt()}">
+
+                                <span class="notification-item__icon">
+                                    <i th:class="'bi ' + ${n.icon()}"></i>
+                                </span>
+
+                                <span class="notification-item__body">
+                                    <span class="notification-item__title" th:text="${n.title()}">
+                                        Notification title
+                                    </span>
+                                    <span class="notification-item__time" th:text="${n.typeLabel()}">
+                                        type
+                                    </span>
+                                </span>
+
+                                <span class="notification-item__dot" th:if="${!n.read()}"></span>
+
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div
+                            class="notification-dropdown__empty"
+                            th:if="${#lists.isEmpty(navbarRecentNotifications)}">
+                        No notifications yet.
+                    </div>
+
+                    <a class="notification-dropdown__view-all" th:href="@{/notifications}">
+                        View All Notifications
+                    </a>
+
+                </div>
+
+            </div>
 
             <!-- Theme Toggle (Future Feature) -->
             <button

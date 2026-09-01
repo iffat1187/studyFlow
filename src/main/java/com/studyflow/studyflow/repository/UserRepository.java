@@ -122,4 +122,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return the number of matching users
      */
     long countByEnabled(boolean enabled);
+
+    /**
+     * All active (enabled) users. Backs the scheduled notification job so
+     * generation always covers every enabled account without ever touching
+     * disabled ones.
+     *
+     * @return all enabled users
+     */
+    List<User> findByEnabledTrue();
 }
