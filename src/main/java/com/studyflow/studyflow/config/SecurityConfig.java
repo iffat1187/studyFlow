@@ -93,6 +93,8 @@ public class SecurityConfig {
                                 "/",
                                 "/register",
                                 "/login",
+                                "/forgot-password",
+                                "/reset-password",
                                 "/403",
                                 "/css/**",
                                 "/js/**",
