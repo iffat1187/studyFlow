@@ -163,6 +163,79 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findUpcomingIncompleteByUser(User user, LocalDate today);
 
     /**
+     * Count the tasks due on the given date belonging to subjects owned by the
+     * given user (completed or not). Aggregated in the database so the
+     * dashboard's "Today's Tasks" summary and progress bar never load the
+     * whole collection into memory.
+     *
+     * @param user  the owning user
+     * @param today the due date (usually today)
+     * @return the number of tasks due on that date for the user
+     */
+    long countBySubject_UserAndDueDate(User user, LocalDate today);
+
+    /**
+     * Count the tasks due on the given date with the given completion state,
+     * scoped to the owning user. Used together with
+     * {@link #countBySubject_UserAndDueDate} to produce the honest
+     * "X of Y completed" figure for today.
+     *
+     * @param user      the owning user
+     * @param today     the due date (usually today)
+     * @param completed the completion state to count
+     * @return the number of matching tasks
+     */
+    long countBySubject_UserAndDueDateAndCompleted(User user, LocalDate today, Boolean completed);
+
+    /**
+     * Count the user's incomplete tasks with a due date strictly before the
+     * given day (overdue). Database-side count scoped to the owning user, so
+     * the dashboard can show an honest overdue total without materializing
+     * every overdue task.
+     *
+     * @param user  the owning user
+     * @param today the current date (overdue means due before this date)
+     * @return the number of incomplete overdue tasks
+     */
+    long countBySubject_UserAndDueDateBeforeAndCompleted(User user, LocalDate today, Boolean completed);
+
+    /**
+     * The user's three most urgent incomplete overdue tasks (due strictly
+     * before today, most overdue first) for the dashboard's attention area.
+     * Scoped to the owning user via the subject chain; the cap happens in the
+     * database so the dashboard never pulls every overdue task.
+     *
+     * @param user  the owning user
+     * @param today the current date
+     * @return up to three incomplete overdue tasks, most-overdue first
+     */
+    List<Task> findTop3BySubject_UserAndDueDateBeforeAndCompletedFalseOrderByDueDateAscDueTimeAscIdAsc(User user, LocalDate today);
+
+    /**
+     * The user's three nearest incomplete tasks due on the following day (due
+     * date = today + 1), time then id, for the dashboard's "due tomorrow"
+     * preview. Scoped to the owning user via the subject chain.
+     *
+     * @param user     the owning user
+     * @param tomorrow tomorrow's date (tasks due on that date)
+     * @return up to three incomplete tasks due tomorrow, soonest first
+     */
+    List<Task> findTop3BySubject_UserAndDueDateAndCompletedFalseOrderByDueTimeAscIdAsc(User user, LocalDate tomorrow);
+
+    /**
+     * Per-subject task completion for the authenticated user. Aggregated in
+     * the database in one grouped query: rows of
+     * [subject.id, totalTasks, completedTasks]. Only subjects that own at
+     * least one task appear, and only the user's own tasks are considered.
+     *
+     * @param user the owning user
+     * @return rows of [subjectId (Long), totalTasks (Long), completedTasks (Long)]
+     */
+    @Query("SELECT t.subject.id, count(t), coalesce(sum(case when t.completed = true then 1L else 0L end), 0L) " +
+            "FROM Task t WHERE t.subject.user = :user GROUP BY t.subject.id")
+    List<Object[]> countTaskCompletionBySubjectForUser(User user);
+
+    /**
      * The user's incomplete tasks due today, soonest time first. Used by the
      * notification generation service for the Task Due rule; completed tasks
      * (which must never trigger a due/overdue notification) are excluded.

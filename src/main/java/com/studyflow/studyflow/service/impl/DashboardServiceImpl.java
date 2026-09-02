@@ -8,15 +8,18 @@ import com.studyflow.studyflow.dto.ExamDto;
 import com.studyflow.studyflow.dto.RecentStudySession;
 import com.studyflow.studyflow.dto.SetupStep;
 import com.studyflow.studyflow.dto.StudyProgress;
+import com.studyflow.studyflow.dto.StudyStreak;
 import com.studyflow.studyflow.dto.SubjectDto;
 import com.studyflow.studyflow.dto.SubjectStudySummary;
 import com.studyflow.studyflow.dto.UpcomingExam;
+import com.studyflow.studyflow.dto.UserSettingsDto;
 import com.studyflow.studyflow.entity.StudySession;
 import com.studyflow.studyflow.entity.StudySessionType;
 import com.studyflow.studyflow.entity.Subject;
 import com.studyflow.studyflow.entity.Task;
 import com.studyflow.studyflow.entity.Topic;
 import com.studyflow.studyflow.entity.User;
+import com.studyflow.studyflow.repository.ExamRepository;
 import com.studyflow.studyflow.repository.StudySessionRepository;
 import com.studyflow.studyflow.repository.TaskRepository;
 import com.studyflow.studyflow.repository.TopicRepository;
@@ -24,6 +27,7 @@ import com.studyflow.studyflow.repository.UserRepository;
 import com.studyflow.studyflow.service.DashboardService;
 import com.studyflow.studyflow.service.ExamService;
 import com.studyflow.studyflow.service.SubjectService;
+import com.studyflow.studyflow.service.UserSettingsService;
 import com.studyflow.studyflow.util.StudyTimeFormatter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,9 +42,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -50,12 +56,19 @@ import java.util.stream.Collectors;
  *
  * - the personalized greeting and date are derived from the server clock
  * - the displayed name comes from the authenticated user's record
+ * - the summary cards (subjects, today's tasks, upcoming exams, study
+ *   streak) carry only real, user-scoped numbers — never invented values
  * - the setup checklist is computed from data that actually exists
  *   (account creation always counts, subjects/exams/topics/tasks reflect real data)
  * - the upcoming exams section shows the user's real nearest exams via the
- *   ownership-aware {@link ExamService}
- * - topic previews and counts are aggregated through user-scoped queries
- * - today's and upcoming tasks come from user-scoped task queries
+ *   ownership-aware {@link ExamService}, and the exam summary total comes
+ *   from a user-scoped count query
+ * - topic previews and counts are aggregated through user-scoped queries,
+ *   and each subject card carries its real task-completion snapshot
+ * - today's, overdue, due-tomorrow and upcoming tasks come from user-scoped
+ *   task queries; today's progress is derived from the real due-today set
+ * - the study streak is computed from the user's real active study dates
+ *   (single distinct-date query, never in-memory filtering of all sessions)
  * - the subject snapshot shows ONLY the authenticated user's subjects via
  *   the ownership-aware {@link SubjectService}
  * - the Study Progress and Recent Study Sessions sections are aggregated
@@ -83,9 +96,11 @@ public class DashboardServiceImpl implements DashboardService {
     private final UserRepository userRepository;
     private final SubjectService subjectService;
     private final ExamService examService;
+    private final ExamRepository examRepository;
     private final StudySessionRepository studySessionRepository;
     private final TopicRepository topicRepository;
     private final TaskRepository taskRepository;
+    private final UserSettingsService userSettingsService;
 
     /**
      * Constructor injection of the repositories and existing services.
@@ -93,15 +108,19 @@ public class DashboardServiceImpl implements DashboardService {
     public DashboardServiceImpl(UserRepository userRepository,
                                 SubjectService subjectService,
                                 ExamService examService,
+                                ExamRepository examRepository,
                                 StudySessionRepository studySessionRepository,
                                 TopicRepository topicRepository,
-                                TaskRepository taskRepository) {
+                                TaskRepository taskRepository,
+                                UserSettingsService userSettingsService) {
         this.userRepository = userRepository;
         this.subjectService = subjectService;
         this.examService = examService;
+        this.examRepository = examRepository;
         this.studySessionRepository = studySessionRepository;
         this.topicRepository = topicRepository;
         this.taskRepository = taskRepository;
+        this.userSettingsService = userSettingsService;
     }
 
     @Override
@@ -138,13 +157,49 @@ public class DashboardServiceImpl implements DashboardService {
         boolean hasSubjectTopics = subjectTopics.stream()
                 .anyMatch(DashboardSubjectTopics::hasTopics);
 
-        // Today's and upcoming tasks: user-scoped, limited, incomplete-first.
-        List<DashboardTaskItem> todayTasks =
-                buildTodayTasks(user, today);
+        // Today's tasks: the user-scoped "due today" query returns the full
+        // set, so the true totals are derived from real rows BEFORE the
+        // display cap is applied. Progress is computed from these real counts.
+        List<Task> dueToday = user == null ? List.of()
+                : taskRepository.findDueTodayByUser(user, today);
+        int todayTaskCount = dueToday.size();
+        int completedTodayCount = (int) dueToday.stream()
+                .filter(t -> Boolean.TRUE.equals(t.getCompleted()))
+                .count();
+        int todayCompletedPercent = todayTaskCount > 0
+                ? (int) Math.round(completedTodayCount * 100.0 / todayTaskCount)
+                : 0;
+        List<DashboardTaskItem> todayTasks = dueToday.stream()
+                .limit(DASHBOARD_TASK_LIMIT)
+                .map(t -> DashboardTaskItem.fromEntity(t, today))
+                .collect(Collectors.toList());
+
+        // Upcoming tasks (after today): user-scoped, limited, incomplete-first.
         List<DashboardTaskItem> upcomingTasks =
                 buildUpcomingTasks(user, today);
-        int completedTodayCount = (int) todayTasks.stream()
-                .filter(DashboardTaskItem::completed).count();
+
+        // Attention area: incomplete overdue tasks and tasks due tomorrow.
+        List<DashboardTaskItem> overdueTasks = List.of();
+        long overdueCount = 0;
+        List<DashboardTaskItem> tomorrowTasks = List.of();
+        if (user != null) {
+            overdueCount = taskRepository.countBySubject_UserAndDueDateBeforeAndCompleted(user, today, Boolean.FALSE);
+            overdueTasks = taskRepository
+                    .findTop3BySubject_UserAndDueDateBeforeAndCompletedFalseOrderByDueDateAscDueTimeAscIdAsc(user, today)
+                    .stream()
+                    .map(t -> DashboardTaskItem.fromEntity(t, today))
+                    .collect(Collectors.toList());
+            tomorrowTasks = taskRepository
+                    .findTop3BySubject_UserAndDueDateAndCompletedFalseOrderByDueTimeAscIdAsc(user, today.plusDays(1))
+                    .stream()
+                    .map(t -> DashboardTaskItem.fromEntity(t, today))
+                    .collect(Collectors.toList());
+        }
+        boolean hasOverdueTasks = overdueCount > 0;
+        boolean hasTomorrowTasks = !tomorrowTasks.isEmpty();
+
+        // Study streak derived from the user's real active study dates.
+        StudyStreak studyStreak = buildStudyStreak(user);
 
         List<SetupStep> setupSteps = buildSetupSteps(
                 hasSubjects, hasExams, hasSubjectTopics, !todayTasks.isEmpty());
@@ -153,8 +208,17 @@ public class DashboardServiceImpl implements DashboardService {
                 .count();
 
         // Study sessions are aggregated per owning user via the subject
-        // chain, so only the authenticated user's sessions ever count.
-        StudyProgress studyProgress = buildStudyProgress(user, today);
+        // chain, so only the authenticated user's sessions ever count. The
+        // weekly goal comes from the user's own settings (single source of
+        // truth; defaults when the user has no settings row yet).
+        int weeklyGoalMinutes = UserSettingsDto.defaults().weeklyStudyGoalMinutes();
+        if (user != null) {
+            weeklyGoalMinutes = userSettingsService
+                    .getSettingsForUser(user.getEmail())
+                    .weeklyStudyGoalMinutes();
+        }
+
+        StudyProgress studyProgress = buildStudyProgress(user, today, weeklyGoalMinutes);
 
         return new DashboardData(
                 userName,
@@ -170,15 +234,24 @@ public class DashboardServiceImpl implements DashboardService {
                 hasSubjectTopics,
                 todayTasks,
                 !todayTasks.isEmpty(),
-                todayTasks.size(),
+                todayTaskCount,
                 completedTodayCount,
+                todayCompletedPercent,
+                overdueCount,
+                overdueTasks,
+                hasOverdueTasks,
+                tomorrowTasks,
+                hasTomorrowTasks,
+                tomorrowTasks.size(),
                 upcomingTasks,
                 !upcomingTasks.isEmpty(),
                 upcomingTasks.size(),
                 upcomingExams,
                 hasUpcomingExams,
                 upcomingExams.size(),
+                upcomingExamTotal(user, today),
                 upcomingExams.isEmpty() ? null : upcomingExams.get(0),
+                studyStreak,
                 setupSteps,
                 setupCompleted,
                 SETUP_TOTAL,
@@ -198,14 +271,22 @@ public class DashboardServiceImpl implements DashboardService {
      *
      * A missing account simply yields an empty progress object: the page
      * renders honest "0m" labels instead of fabricated numbers.
+     *
+     * @param weeklyGoalMinutes the user's weekly goal from their settings
+     *                          (single source of truth); the progress
+     *                          percentage is derived from real week minutes,
+     *                          never invented
      */
-    private StudyProgress buildStudyProgress(User user, LocalDate today) {
+    private StudyProgress buildStudyProgress(User user,
+                                             LocalDate today,
+                                             int weeklyGoalMinutes) {
         LocalDate weekStart = today.with(DayOfWeek.MONDAY);
 
         Map<LocalDate, Long> minutesByDate = new HashMap<>();
         long todayMinutes = 0;
         long weekMinutes = 0;
         long weekSessionCount = 0;
+        long totalMinutes = 0;
         List<RecentStudySession> recentSessions = new ArrayList<>();
         List<SubjectStudySummary> subjectSummaries = new ArrayList<>();
 
@@ -240,6 +321,10 @@ public class DashboardServiceImpl implements DashboardService {
                         StudyTimeFormatter.formatMinutes(((Number) row[3]).longValue())
                 ));
             }
+
+            // All-time study time: one user-scoped aggregation.
+            totalMinutes = nullSafeLong(
+                    studySessionRepository.sumDurationMinutesBySubject_User(user));
         }
 
         List<DayStudyMinutes> dailyMinutes =
@@ -248,6 +333,15 @@ public class DashboardServiceImpl implements DashboardService {
         boolean hasRecentSessions = !recentSessions.isEmpty();
         boolean hasSubjectSummaries = !subjectSummaries.isEmpty();
         boolean hasStudy = hasSubjectSummaries || weekSessionCount > 0;
+        boolean hasTotal = totalMinutes > 0;
+
+        // Honest goal progress: the percentage is the real week's minutes
+        // over the user's own goal. A goal is always positive (validated on
+        // save; the default is 300), so a zero/negative goal renders 0%
+        // instead of dividing by zero.
+        int weeklyGoalPercent = weeklyGoalMinutes > 0
+                ? (int) Math.round(weekMinutes * 100.0 / weeklyGoalMinutes)
+                : 0;
 
         return new StudyProgress(
                 StudyTimeFormatter.formatMinutes(todayMinutes),
@@ -258,7 +352,11 @@ public class DashboardServiceImpl implements DashboardService {
                 recentSessions,
                 hasRecentSessions,
                 subjectSummaries,
-                hasSubjectSummaries
+                hasSubjectSummaries,
+                StudyTimeFormatter.formatMinutes(weeklyGoalMinutes),
+                weeklyGoalPercent,
+                StudyTimeFormatter.formatMinutes(totalMinutes),
+                hasTotal
         );
     }
 
@@ -342,6 +440,7 @@ public class DashboardServiceImpl implements DashboardService {
         LocalDate today = LocalDate.now();
         long daysLeft = ChronoUnit.DAYS.between(today, exam.examDate());
         boolean isToday = exam.examDate().equals(today);
+        boolean isTomorrow = exam.examDate().equals(today.plusDays(1));
         return new UpcomingExam(
                 exam.id(),
                 exam.name(),
@@ -352,6 +451,7 @@ public class DashboardServiceImpl implements DashboardService {
                 exam.durationMinutes(),
                 daysLeft,
                 isToday,
+                isTomorrow,
                 urgencyLabel(daysLeft, isToday)
         );
     }
@@ -484,6 +584,8 @@ public class DashboardServiceImpl implements DashboardService {
 
         Map<Long, Long> countBySubjectId = new HashMap<>();
         Map<Long, List<String>> previewBySubjectId = new HashMap<>();
+        Map<Long, Long> totalTasksBySubject = new HashMap<>();
+        Map<Long, Long> doneTasksBySubject = new HashMap<>();
 
         if (user != null) {
             for (Object[] row : topicRepository.countTopicsPerSubjectForUser(user)) {
@@ -499,6 +601,12 @@ public class DashboardServiceImpl implements DashboardService {
                         .computeIfAbsent(subjectId, k -> new ArrayList<>())
                         .add(t.getName());
             }
+            // One grouped query gives every subject's real task completion.
+            for (Object[] row : taskRepository.countTaskCompletionBySubjectForUser(user)) {
+                Long subjectId = (Long) row[0];
+                totalTasksBySubject.put(subjectId, (Long) row[1]);
+                doneTasksBySubject.put(subjectId, (Long) row[2]);
+            }
         }
 
         List<DashboardSubjectTopics> result = new ArrayList<>(subjects.size());
@@ -509,6 +617,11 @@ public class DashboardServiceImpl implements DashboardService {
             List<String> limited = allPreviews.stream()
                     .limit(DASHBOARD_TOPIC_PREVIEW_LIMIT)
                     .collect(Collectors.toList());
+            long taskCount = totalTasksBySubject.getOrDefault(s.id(), 0L);
+            long doneCount = doneTasksBySubject.getOrDefault(s.id(), 0L);
+            int taskPercent = taskCount > 0
+                    ? (int) Math.round(doneCount * 100.0 / taskCount)
+                    : 0;
             result.add(new DashboardSubjectTopics(
                     s.id(),
                     s.name(),
@@ -516,22 +629,14 @@ public class DashboardServiceImpl implements DashboardService {
                     count,
                     count > 0,
                     limited,
-                    allPreviews.size() > DASHBOARD_TOPIC_PREVIEW_LIMIT
+                    allPreviews.size() > DASHBOARD_TOPIC_PREVIEW_LIMIT,
+                    taskCount,
+                    doneCount,
+                    taskPercent,
+                    taskCount > 0
             ));
         }
         return result;
-    }
-
-    /**
-     * Build today's tasks for the dashboard: incomplete first, limited.
-     */
-    private List<DashboardTaskItem> buildTodayTasks(User user, LocalDate today) {
-        if (user == null) return List.of();
-        return taskRepository.findDueTodayByUser(user, today)
-                .stream()
-                .limit(DASHBOARD_TASK_LIMIT)
-                .map(t -> DashboardTaskItem.fromEntity(t, today))
-                .collect(Collectors.toList());
     }
 
     /**
@@ -545,6 +650,48 @@ public class DashboardServiceImpl implements DashboardService {
                 .limit(DASHBOARD_TASK_LIMIT)
                 .map(t -> DashboardTaskItem.fromEntity(t, today))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * The user's current study streak in consecutive active days.
+     *
+     * Based on the real distinct dates on which the user recorded at least
+     * one positive-duration session (a single aggregated query, scoped to the
+     * owning user). Counting starts at today when today is already active,
+     * otherwise at yesterday — a streak is never broken mid-day just because
+     * the user has not studied yet. No streak is ever invented for an account
+     * with no activity.
+     */
+    private StudyStreak buildStudyStreak(User user) {
+        if (user == null) {
+            return new StudyStreak(0, false, false);
+        }
+        Set<LocalDate> active = new HashSet<>(
+                studySessionRepository.findDistinctActiveDatesBySubject_User(user));
+        if (active.isEmpty()) {
+            return new StudyStreak(0, false, false);
+        }
+        LocalDate today = LocalDate.now();
+        boolean activeToday = active.contains(today);
+        long days = 0;
+        LocalDate cursor = activeToday ? today : today.minusDays(1);
+        while (active.contains(cursor)) {
+            days++;
+            cursor = cursor.minusDays(1);
+        }
+        return new StudyStreak(days, activeToday, true);
+    }
+
+    /**
+     * The real total number of upcoming exams (today or later) owned by the
+     * user. Aggregated in the database, so the summary card shows the honest
+     * total even though the page only renders the nearest few.
+     */
+    private long upcomingExamTotal(User user, LocalDate today) {
+        if (user == null) {
+            return 0;
+        }
+        return examRepository.countBySubject_UserAndExamDateGreaterThanEqual(user, today);
     }
 
     /**

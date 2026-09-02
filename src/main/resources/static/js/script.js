@@ -212,10 +212,10 @@ Modules:
 
     /*
     =====================================================
-     5. Theme Toggle (Placeholder)
-     Toggle is wired up and persisted, but no light theme
-     styles exist yet. Add CSS rules for body[data-theme="light"]
-     later to enable the full theme.
+     5. Theme Toggle
+     Persists the choice in localStorage ("studyflow-theme")
+     and sets data-theme="light"/"dark" on <html>; the matching
+     palettes live in css/style.css ([data-theme="light"]).
     =====================================================
     */
 
@@ -258,7 +258,7 @@ Modules:
             localStorage.setItem("studyflow-theme", next);
 
             showToast(
-                next === "light" ? "Light mode coming soon" : "Dark mode enabled",
+                next === "light" ? "Light mode enabled" : "Dark mode enabled",
                 "info"
             );
 

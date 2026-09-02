@@ -77,7 +77,8 @@ or hard-coded on the client.
      task.js. On success the checkbox row is visually
      updated: the checkbox hides, a filled check icon
      appears, the row gets the is-completed class, and
-     the "X of Y done" count in the header is refreshed.
+     the "X of Y done" header count, the Today's Tasks
+     progress meter and the summary card are refreshed.
     =====================================================
     */
 
@@ -137,7 +138,8 @@ or hard-coded on the client.
                 progress.style.display = "none";
             }
 
-            // Refresh the "X of Y done" count in the Today's Tasks header
+            // Refresh the "X of Y done" count, progress meter and
+            // summary card in the Today's Tasks section
             refreshTodayTaskCount();
 
         } catch (err) {
@@ -157,17 +159,38 @@ or hard-coded on the client.
         if (!card) {
             return;
         }
-        const countEl = card.querySelector(".dash-card__count");
-        if (!countEl) {
-            return;
+
+        const all   = card.querySelectorAll(".dash-task-item");
+        const total = all.length;
+        const doneN = card.querySelectorAll(".dash-task-item.is-completed").length;
+        const percent = total > 0 ? Math.round((doneN * 100) / total) : 0;
+
+        const badge = document.getElementById("todayTaskCountBadge");
+        if (badge) {
+            badge.textContent = `${doneN} of ${total} done`;
         }
 
-        const all     = card.querySelectorAll(".dash-task-item");
-        const done    = card.querySelectorAll(".dash-task-item.is-completed");
-        const total   = all.length;
-        const doneN   = done.length;
+        const progressCount = document.querySelector(".dash-task-progress__count");
+        if (progressCount) {
+            progressCount.textContent = `${doneN} of ${total} completed`;
+        }
 
-        countEl.textContent = `${doneN} of ${total} done`;
+        const fill = document.getElementById("todayTaskProgressFill");
+        if (fill) {
+            fill.style.width = percent + "%";
+            fill.setAttribute("data-percent", percent);
+            const track = fill.closest(".dash-task-progress__track");
+            if (track) {
+                track.setAttribute("aria-valuenow", percent);
+            }
+        }
+
+        const summary = document.getElementById("summaryTasksValue");
+        if (summary) {
+            summary.textContent = `${doneN} / ${total}`;
+            summary.setAttribute("data-done", doneN);
+            summary.setAttribute("data-total", total);
+        }
     }
 
 

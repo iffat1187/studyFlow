@@ -1,6 +1,7 @@
 package com.studyflow.studyflow.security;
 
 import com.studyflow.studyflow.dto.AdminDashboardData;
+import com.studyflow.studyflow.dto.AdminSetupCard;
 import com.studyflow.studyflow.entity.User;
 import com.studyflow.studyflow.service.AdminDashboardService;
 import org.junit.jupiter.api.Test;
@@ -26,11 +27,15 @@ class AdminDashboardQueryIntegrationTest {
 
     @Test
     void dashboardData_isAggregatedFromRealDatabase() {
-        AdminDashboardData data = adminDashboardService.getDashboardData();
+        AdminDashboardData data = adminDashboardService.getDashboardData("admin-dashboard@example.com");
 
         assertNotNull(data);
         assertTrue(data.getTotalUsers() >= 0);
         assertTrue(data.getTotalSubjects() >= 0);
+        assertTrue(data.getTotalTopics() >= 0);
+        assertTrue(data.getTotalTasks() >= 0);
+        assertTrue(data.getTotalExams() >= 0);
+        assertTrue(data.getTotalStudySessions() >= 0);
         assertTrue(data.getNewUsersThisMonth() >= 0);
         assertTrue(data.getUserCount() >= 0);
         assertTrue(data.getAdminCount() >= 0);
@@ -52,6 +57,22 @@ class AdminDashboardQueryIntegrationTest {
         for (User user : data.getRecentUsers()) {
             assertNotNull(user.getName());
             assertNotNull(user.getEmail());
+        }
+
+        // One onboarding card per study module, each with real, non-negative
+        // counts and a usable existing route.
+        assertNotNull(data.getSetupCards());
+        assertEquals(5, data.getSetupCards().size());
+        for (AdminSetupCard card : data.getSetupCards()) {
+            assertNotNull(card.key());
+            assertNotNull(card.title());
+            assertNotNull(card.icon());
+            assertTrue(card.count() >= 0);
+            assertEquals(card.count() > 0, card.done());
+            assertNotNull(card.statusLabel());
+            assertNotNull(card.ctaLabel());
+            assertNotNull(card.ctaUrl());
+            assertTrue(card.ctaUrl().startsWith("/"));
         }
     }
 }

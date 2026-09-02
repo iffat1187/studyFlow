@@ -8,9 +8,10 @@ import java.time.LocalTime;
 /**
  * Read-only view of an upcoming exam rendered on the user dashboard.
  *
- * The urgency fields (daysLeft, isToday, urgencyLabel) are computed
- * server-side from the real exam date, so the server clock remains the
- * single source of truth — no client-side countdown, no hard-coded values.
+ * The urgency fields (daysLeft, isToday, isTomorrow, urgencyLabel) are
+ * computed server-side from the real exam date, so the server clock remains
+ * the single source of truth — no client-side countdown, no hard-coded
+ * values.
  */
 public record UpcomingExam(
         Long id,
@@ -22,6 +23,7 @@ public record UpcomingExam(
         Integer durationMinutes,
         long daysLeft,
         boolean isToday,
+        boolean isTomorrow,
         String urgencyLabel
 ) {
 }

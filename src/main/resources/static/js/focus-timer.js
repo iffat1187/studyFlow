@@ -654,8 +654,11 @@
         }
     });
 
-    // Initial paint: READY, 25:00.
-    setDuration(25);
+    // Initial paint: READY, default-focused duration. The duration defaults
+    // to the user's saved preference (rendered into the hidden input by the
+    // study-session page from UserSettings); 25 minutes is the fallback.
+    var initialDuration = parseInt(durationInput.value, 10);
+    setDuration(Number.isFinite(initialDuration) ? initialDuration : 25);
     render();
 
 })();

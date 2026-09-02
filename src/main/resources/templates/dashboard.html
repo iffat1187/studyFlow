@@ -59,6 +59,133 @@
 
 
         <!-- ============================
+             Summary Cards
+             (real, user-scoped numbers only)
+        ============================= -->
+
+        <section class="dash-summary" aria-label="Dashboard summary">
+
+            <!-- Total Subjects -->
+
+            <article class="summary-card">
+
+                <span class="summary-card__icon summary-card__icon--violet">
+                    <i class="bi bi-book-half" aria-hidden="true"></i>
+                </span>
+
+                <div class="summary-card__body">
+
+                    <small class="summary-card__label">Total Subjects</small>
+
+                    <strong class="summary-card__value" th:text="${data.subjectCount}">4</strong>
+
+                    <p class="summary-card__sub" th:if="${data.hasSubjects}"
+                       th:text="${data.subjectCount == 1 ? 'subject you are studying' : 'subjects you are studying'}">
+                        subjects you are studying
+                    </p>
+
+                    <p class="summary-card__sub" th:unless="${data.hasSubjects}">
+                        No subjects yet
+                    </p>
+
+                </div>
+
+            </article>
+
+            <!-- Today's Tasks -->
+
+            <article class="summary-card">
+
+                <span class="summary-card__icon summary-card__icon--green">
+                    <i class="bi bi-list-check" aria-hidden="true"></i>
+                </span>
+
+                <div class="summary-card__body">
+
+                    <small class="summary-card__label">Today's Tasks</small>
+
+                    <strong class="summary-card__value"
+                            id="summaryTasksValue"
+                            th:attr="data-total=${data.todayTaskCount}, data-done=${data.completedTodayCount}"
+                            th:text="${data.hasTodayTasks ? (data.completedTodayCount + ' / ' + data.todayTaskCount) : '0 / 0'}">
+                        2 / 4
+                    </strong>
+
+                    <p class="summary-card__sub" th:if="${data.hasTodayTasks}"
+                       th:text="${data.todayTaskCount == 1 ? '1 task due today' : data.todayTaskCount + ' tasks due today'}">
+                        4 tasks due today
+                    </p>
+
+                    <p class="summary-card__sub" th:unless="${data.hasTodayTasks}">
+                        No tasks due today
+                    </p>
+
+                </div>
+
+            </article>
+
+            <!-- Upcoming Exams -->
+
+            <article class="summary-card">
+
+                <span class="summary-card__icon summary-card__icon--amber">
+                    <i class="bi bi-calendar-event" aria-hidden="true"></i>
+                </span>
+
+                <div class="summary-card__body">
+
+                    <small class="summary-card__label">Upcoming Exams</small>
+
+                    <strong class="summary-card__value" th:text="${data.upcomingExamTotal}">3</strong>
+
+                    <p class="summary-card__sub" th:if="${data.hasUpcomingExams}"
+                       th:text="${data.upcomingExamTotal == 1 ? '1 exam scheduled' : data.upcomingExamTotal + ' exams scheduled'}">
+                        3 exams scheduled
+                    </p>
+
+                    <p class="summary-card__sub" th:unless="${data.hasUpcomingExams}">
+                        No upcoming exams
+                    </p>
+
+                </div>
+
+            </article>
+
+            <!-- Study Streak -->
+
+            <article class="summary-card">
+
+                <span class="summary-card__icon summary-card__icon--pink">
+                    <i class="bi bi-fire" aria-hidden="true"></i>
+                </span>
+
+                <div class="summary-card__body">
+
+                    <small class="summary-card__label">Study Streak</small>
+
+                    <strong class="summary-card__value" th:text="${data.studyStreak.days}">0</strong>
+
+                    <p class="summary-card__sub" th:if="${data.studyStreak.days == 1}">
+                        1 day in a row
+                    </p>
+
+                    <p class="summary-card__sub" th:if="${data.studyStreak.days > 1}"
+                       th:text="${data.studyStreak.days} + ' days in a row'">
+                        consecutive study days
+                    </p>
+
+                    <p class="summary-card__sub" th:if="${data.studyStreak.days == 0}">
+                        Start studying today
+                    </p>
+
+                </div>
+
+            </article>
+
+        </section>
+
+
+        <!-- ============================
              Getting Started / Setup
         ============================= -->
 
@@ -162,67 +289,131 @@
 
 
         <!-- ============================
-             Today's Focus | Upcoming Exams
+             Overdue & Up Next | Upcoming Exams
         ============================= -->
 
         <div class="dash-grid dash-grid--2">
 
-            <!-- Today's Focus -->
+            <!-- Overdue & Up Next -->
 
             <section class="dash-card fade-in" aria-labelledby="focusTitle">
 
                 <header class="dash-card__header">
 
                     <h2 id="focusTitle">
-                        <i class="bi bi-bullseye"></i>
-                        Today's Focus
+                        <i class="bi bi-bell"></i>
+                        Overdue & Up Next
                     </h2>
+
+                    <span class="dash-card__count dash-card__count--danger"
+                          th:if="${data.hasOverdueTasks}"
+                          th:text="${data.overdueCount} + ' overdue'">
+                        2 overdue
+                    </span>
 
                 </header>
 
                 <div class="dash-card__body">
 
-                    <div class="dash-empty" th:if="${!data.hasSubjects}">
-
-                        <span class="dash-empty__icon">
-                            <i class="bi bi-pencil"></i>
-                        </span>
-
-                        <h3>
-                            No study plan yet
-                        </h3>
-
-                        <p>
-                            Add your first subject to start building today's focus.
-                        </p>
-
-                        <a th:href="@{/subjects/new}" class="btn btn-outline">
-                            <i class="bi bi-plus-lg"></i>
-                            Add your first subject
-                        </a>
-
-                    </div>
-
-                    <div class="dash-empty" th:unless="${!data.hasSubjects}">
+                    <!-- Real all-clear state: no overdue, nothing tomorrow -->
+                    <div class="dash-empty" th:if="${!data.hasOverdueTasks and !data.hasTomorrowTasks}">
 
                         <span class="dash-empty__icon dash-empty__icon--success">
                             <i class="bi bi-emoji-smile"></i>
                         </span>
 
-                        <h3>
-                            You're all set for now
-                        </h3>
+                        <h3>All caught up</h3>
 
-                        <p>
-                            Pick a subject and make today's study time count.
-                        </p>
+                        <p>No overdue tasks and nothing is due tomorrow. Keep it up.</p>
 
-                        <a th:href="@{/subjects}" class="btn btn-outline">
-                            <i class="bi bi-book-half"></i>
-                            Browse subjects
+                        <a th:href="@{/tasks}" class="btn btn-outline">
+                            <i class="bi bi-list-check"></i>
+                            View all tasks
                         </a>
 
                     </div>
+
+                    <!-- Overdue tasks: real user-scoped data, named label -->
+                    <div th:if="${data.hasOverdueTasks}">
+
+                        <p class="dash-attention__hint">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Tasks past their due date need attention.
+                        </p>
+
+                        <ul class="dash-task-list dash-task-list--attention">
+
+                            <li class="dash-task-item is-overdue"
+                                th:each="task : ${data.overdueTasks}">
+
+                                <span class="dash-task-item__bar"
+                                      th:style="'background-color: ' + ${task.subjectColor}"></span>
+
+                                <div class="dash-task-item__main">
+                                    <strong class="dash-task-item__title" th:text="${task.title}">Submit report</strong>
+                                    <small class="dash-task-item__meta">
+                                        <span class="dash-task-item__subject" th:text="${task.subjectName}">Database</span>
+                                        <span class="dash-task-item__type badge"
+                                              th:text="${#strings.capitalizeWords(task.taskTypeName)}">Assignment</span>
+                                    </small>
+                                </div>
+
+                                <div class="dash-task-item__due">
+                                    <span class="dash-task-item__date is-overdue"
+                                          th:text="${task.statusLabel}">3 days overdue</span>
+                                </div>
+
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+                    <!-- Due tomorrow: real user-scoped data -->
+                    <div th:if="${data.hasTomorrowTasks}">
+
+                        <h3 class="study-subsection-title">
+                            <i class="bi bi-calendar2" aria-hidden="true"></i>
+                            Due tomorrow
+                        </h3>
+
+                        <ul class="dash-task-list dash-task-list--attention">
+
+                            <li class="dash-task-item is-due-tomorrow"
+                                th:each="task : ${data.tomorrowTasks}">
+
+                                <span class="dash-task-item__bar"
+                                      th:style="'background-color: ' + ${task.subjectColor}"></span>
+
+                                <div class="dash-task-item__main">
+                                    <strong class="dash-task-item__title" th:text="${task.title}">Read Chapter 6</strong>
+                                    <small class="dash-task-item__meta">
+                                        <span class="dash-task-item__subject" th:text="${task.subjectName}">Mathematics</span>
+                                        <span class="dash-task-item__type badge"
+                                              th:text="${#strings.capitalizeWords(task.taskTypeName)}">Revision</span>
+                                    </small>
+                                </div>
+
+                                <div class="dash-task-item__due">
+                                    <span class="dash-task-item__date is-due-tomorrow"
+                                          th:text="${task.dueTimeLabel != null ? task.dueTimeLabel : 'Tomorrow'}">9:00 AM</span>
+                                </div>
+
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+                    <a th:if="${data.hasOverdueTasks or data.hasTomorrowTasks}"
+                       th:href="@{/tasks}"
+                       class="dash-card__link dash-attention__all">
+
+                        View all tasks
+
+                        <i class="bi bi-arrow-right"></i>
+
+                    </a>
 
                 </div>
 
@@ -291,7 +482,7 @@
                         <div class="dash-next-exam__row">
 
                             <div class="dash-next-exam__date"
-                                 th:classappend="${data.nextExam.isToday ? ' is-today' : ''}">
+                                 th:classappend="${data.nextExam.isToday ? ' is-today' : ''} + ${data.nextExam.isTomorrow ? ' is-tomorrow' : ''}">
 
                                 <span class="dash-next-exam__day"
                                       th:text="${#temporals.format(data.nextExam.examDate, 'dd')}">28</span>
@@ -340,7 +531,7 @@
                             </div>
 
                             <span class="dash-urgency"
-                                  th:classappend="${data.nextExam.isToday ? ' dash-urgency--today' : ''}"
+                                  th:classappend="${data.nextExam.isToday ? ' dash-urgency--today' : ''} + ${data.nextExam.isTomorrow ? ' dash-urgency--tomorrow' : ''}"
                                   th:text="${data.nextExam.urgencyLabel}">
                                 6 days
                             </span>
@@ -358,7 +549,7 @@
                             th:if="${stat.index > 0}">
 
                             <span class="dash-exam-item__date"
-                                  th:classappend="${exam.isToday ? ' is-today' : ''}">
+                                  th:classappend="${exam.isToday ? ' is-today' : ''} + ${exam.isTomorrow ? ' is-tomorrow' : ''}">
 
                                 <span class="dash-exam-item__day"
                                       th:text="${#temporals.format(exam.examDate, 'dd')}">30</span>
@@ -382,7 +573,7 @@
                             </div>
 
                             <span class="dash-urgency"
-                                  th:classappend="${exam.isToday ? ' dash-urgency--today' : ''}"
+                                  th:classappend="${exam.isToday ? ' dash-urgency--today' : ''} + ${exam.isTomorrow ? ' dash-urgency--tomorrow' : ''}"
                                   th:text="${exam.urgencyLabel}">
                                 3 days
                             </span>
@@ -426,7 +617,9 @@
                     </h2>
 
                     <span class="dash-card__count"
+                          id="todayTaskCountBadge"
                           th:if="${data.hasTodayTasks}"
+                          th:attr="data-total=${data.todayTaskCount}, data-done=${data.completedTodayCount}"
                           th:text="${data.completedTodayCount} + ' of ' + ${data.todayTaskCount} + ' done'">
                         2 of 4 done
                     </span>
@@ -434,6 +627,37 @@
                 </header>
 
                 <div class="dash-card__body">
+
+                    <div class="dash-task-progress" th:if="${data.hasTodayTasks}">
+
+                        <div class="dash-task-progress__row">
+
+                            <span class="dash-task-progress__label">
+                                <i class="bi bi-bullseye" aria-hidden="true"></i>
+                                Today's Tasks Progress
+                            </span>
+
+                            <span class="dash-task-progress__count"
+                                  th:text="${data.completedTodayCount} + ' of ' + ${data.todayTaskCount} + ' completed'">
+                                2 of 4 completed
+                            </span>
+
+                        </div>
+
+                        <div class="dash-task-progress__track"
+                             role="progressbar"
+                             aria-valuemin="0"
+                             aria-valuemax="100"
+                             th:attr="aria-valuenow=${data.todayCompletedPercent}">
+
+                            <div class="dash-task-progress__fill"
+                                 id="todayTaskProgressFill"
+                                 th:attr="data-percent=${data.todayCompletedPercent}"
+                                 th:style="'width: ' + ${data.todayCompletedPercent} + '%'"></div>
+
+                        </div>
+
+                    </div>
 
                     <!-- Empty state: no subjects -->
                     <div class="dash-empty" th:if="${!data.hasSubjects}">
@@ -519,6 +743,16 @@
                         </li>
 
                     </ul>
+
+                    <a th:if="${data.hasTodayTasks}"
+                       th:href="@{/tasks}"
+                       class="dash-card__link dash-tasks__all">
+
+                        View all tasks
+
+                        <i class="bi bi-arrow-right"></i>
+
+                    </a>
 
                 </div>
 
@@ -610,6 +844,57 @@
                                 </strong>
 
                             </div>
+
+                            <div class="study-stat">
+
+                                <span class="study-stat__icon study-stat__icon--total">
+                                    <i class="bi bi-clock-history" aria-hidden="true"></i>
+                                </span>
+
+                                <span class="study-stat__label">Total Study Time</span>
+
+                                <strong class="study-stat__value" th:text="${data.studyProgress.totalLabel}">
+                                    12h 40m
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                        <!-- Weekly goal: real week minutes over the user's
+                             own goal from Settings (single source). -->
+
+                        <div class="study-goal">
+
+                            <div class="study-goal__row">
+
+                                <span class="study-goal__label">
+                                    <i class="bi bi-bullseye" aria-hidden="true"></i>
+                                    Weekly Goal
+                                </span>
+
+                                <span class="study-goal__value"
+                                      th:text="${data.studyProgress.weekLabel} + ' of ' + ${data.studyProgress.weeklyGoalLabel}">
+                                    2h 35m of 5h
+                                </span>
+
+                            </div>
+
+                            <div class="study-goal__track"
+                                 role="progressbar"
+                                 th:aria-valuenow="${data.studyProgress.weeklyGoalPercent}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+
+                                <div class="study-goal__fill"
+                                     th:style="'width: ' + (${data.studyProgress.weeklyGoalPercent} > 100 ? 100 : ${data.studyProgress.weeklyGoalPercent}) + '%'"></div>
+
+                            </div>
+
+                            <span class="study-goal__percent"
+                                  th:text="${data.studyProgress.weeklyGoalPercent} + '% of weekly goal'">
+                                52% of weekly goal
+                            </span>
 
                         </div>
 
@@ -739,6 +1024,147 @@
 
 
         <!-- ============================
+             My Subjects Snapshot
+        ============================= -->
+
+        <section class="dash-card fade-in" aria-labelledby="subjectsTitle">
+
+            <header class="dash-card__header">
+
+                <h2 id="subjectsTitle">
+                    <i class="bi bi-book-half"></i>
+                    My Subjects
+                </h2>
+
+                <a
+                        th:if="${data.subjectCount > 6}"
+                        th:href="@{/subjects}"
+                        class="dash-card__link">
+
+                    View all subjects
+
+                    <i class="bi bi-arrow-right"></i>
+
+                </a>
+
+            </header>
+
+            <div class="dash-card__body">
+
+                <!-- Empty state -->
+
+                <div class="dash-empty" th:if="${!data.hasSubjects}">
+
+                    <span class="dash-empty__icon">
+                        <i class="bi bi-journal-plus"></i>
+                    </span>
+
+                    <h3>
+                        No subjects yet
+                    </h3>
+
+                    <p>
+                        Add your first subject and take charge of your study plan.
+                    </p>
+
+                    <a th:href="@{/subjects/new}" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i>
+                        Add your first subject
+                    </a>
+
+                </div>
+
+                <!-- Subject snapshot grid with topic previews -->
+
+                <div class="dash-subjects" th:unless="${!data.hasSubjects}">
+
+                    <div
+                            class="dash-subject fade-in"
+                            th:each="topicInfo, stat : ${data.subjectTopics}"
+                            th:if="${stat.index < 6}">
+
+                        <span class="dash-subject__bar"
+                              th:classappend="${#strings.toLowerCase(topicInfo.subjectColor)}"></span>
+
+                        <div class="dash-subject__content">
+
+                            <div class="dash-subject__title-row">
+
+                                <h3 th:text="${topicInfo.subjectName}">Database</h3>
+
+                                <a class="dash-subject__topics-link"
+                                   th:href="@{/topics/subject/{id}(id=${topicInfo.subjectId})}">
+
+                                    View Topics
+
+                                    <i class="bi bi-arrow-right"></i>
+
+                                </a>
+
+                            </div>
+
+                            <p class="dash-subject__topics" th:if="${topicInfo.hasTopics}">
+                                <span class="dash-subject__count"
+                                      th:text="${topicInfo.topicCount} + (topicInfo.topicCount == 1 ? ' topic' : ' topics')">3 topics</span>
+                                <span class="dash-subject__preview" th:if="${!topicInfo.previewTopics.isEmpty()}">
+                                    —
+                                    <span th:each="topicName, tStat : ${topicInfo.previewTopics}"
+                                          th:text="${topicName} + (${!tStat.last} ? ', ' : '')">Normalization, Indexing</span>
+                                    <span th:if="${topicInfo.hasMoreTopics}" class="dash-subject__more">
+                                        …
+                                    </span>
+                                </span>
+                            </p>
+
+                            <p class="dash-subject__topics dash-subject__topics--empty" th:unless="${topicInfo.hasTopics}">
+                                No topics yet
+                            </p>
+
+                            <!-- Real per-subject task completion -->
+                            <div class="dash-subject__tasks" th:if="${topicInfo.hasTasks}">
+
+                                <div class="dash-subject__tasks-row">
+
+                                    <span class="dash-subject__tasks-label">Task completion</span>
+
+                                    <span class="dash-subject__tasks-count"
+                                          th:text="${topicInfo.completedTaskCount} + ' of ' + ${topicInfo.taskCount} + ' done'">
+                                        3 of 5 done
+                                    </span>
+
+                                </div>
+
+                                <div class="dash-subject__tasks-track"
+                                     role="progressbar"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100"
+                                     th:attr="aria-valuenow=${topicInfo.taskCompletionPercent}">
+
+                                    <div class="dash-subject__tasks-fill"
+                                         th:style="'width: ' + ${topicInfo.taskCompletionPercent} + '%'"></div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <span class="dash-subject__badge subject-badge"
+                              th:classappend="${#strings.toLowerCase(topicInfo.subjectColor)}"
+                              th:text="${topicInfo.subjectColor}">
+                            Purple
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ============================
              Recent Study Sessions
         ============================= -->
 
@@ -853,107 +1279,6 @@
 
 
         <!-- ============================
-             My Subjects Snapshot
-        ============================= -->
-
-        <section class="dash-card fade-in" aria-labelledby="subjectsTitle">
-
-            <header class="dash-card__header">
-
-                <h2 id="subjectsTitle">
-                    <i class="bi bi-book-half"></i>
-                    My Subjects
-                </h2>
-
-                <a
-                        th:if="${data.subjectCount > 6}"
-                        th:href="@{/subjects}"
-                        class="dash-card__link">
-
-                    View all subjects
-
-                    <i class="bi bi-arrow-right"></i>
-
-                </a>
-
-            </header>
-
-            <div class="dash-card__body">
-
-                <!-- Empty state -->
-
-                <div class="dash-empty" th:if="${!data.hasSubjects}">
-
-                    <span class="dash-empty__icon">
-                        <i class="bi bi-journal-plus"></i>
-                    </span>
-
-                    <h3>
-                        No subjects yet
-                    </h3>
-
-                    <p>
-                        Add your first subject and take charge of your study plan.
-                    </p>
-
-                    <a th:href="@{/subjects/new}" class="btn btn-primary">
-                        <i class="bi bi-plus-lg"></i>
-                        Add your first subject
-                    </a>
-
-                </div>
-
-                <!-- Subject snapshot grid with topic previews -->
-
-                <div class="dash-subjects" th:unless="${!data.hasSubjects}">
-
-                    <div
-                            class="dash-subject fade-in"
-                            th:each="topicInfo, stat : ${data.subjectTopics}"
-                            th:if="${stat.index < 6}">
-
-                        <span class="dash-subject__bar"
-                              th:classappend="${#strings.toLowerCase(topicInfo.subjectColor)}"></span>
-
-                        <div class="dash-subject__content">
-
-                            <h3 th:text="${topicInfo.subjectName}">Database</h3>
-
-                            <p class="dash-subject__topics" th:if="${topicInfo.hasTopics}">
-                                <span class="dash-subject__count"
-                                      th:text="${topicInfo.topicCount} + (topicInfo.topicCount == 1 ? ' topic' : ' topics')">3 topics</span>
-                                <span class="dash-subject__preview" th:if="${!topicInfo.previewTopics.isEmpty()}">
-                                    —
-                                    <span th:each="topicName, tStat : ${topicInfo.previewTopics}"
-                                          th:text="${topicName} + (${!tStat.last} ? ', ' : '')">Normalization, Indexing</span>
-                                    <span th:if="${topicInfo.hasMoreTopics}" class="dash-subject__more">
-                                        …
-                                    </span>
-                                </span>
-                            </p>
-
-                            <p class="dash-subject__topics dash-subject__topics--empty" th:unless="${topicInfo.hasTopics}">
-                                No topics yet
-                            </p>
-
-                        </div>
-
-                        <span class="dash-subject__badge subject-badge"
-                              th:classappend="${#strings.toLowerCase(topicInfo.subjectColor)}"
-                              th:text="${topicInfo.subjectColor}">
-                            Purple
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- ============================
              Quick Study Tools
         ============================= -->
 
@@ -1031,6 +1356,38 @@
                             <strong>Study Sessions</strong>
 
                             <small>Review your study history</small>
+
+                        </div>
+
+                    </a>
+
+                    <a th:href="@{/tasks/new}" class="dash-tool">
+
+                        <span class="dash-tool__icon dash-tool__icon--green">
+                            <i class="bi bi-list-check"></i>
+                        </span>
+
+                        <div class="dash-tool__text">
+
+                            <strong>Add Task</strong>
+
+                            <small>Plan a study task</small>
+
+                        </div>
+
+                    </a>
+
+                    <a th:href="@{/exams(add=true)}" class="dash-tool">
+
+                        <span class="dash-tool__icon dash-tool__icon--amber">
+                            <i class="bi bi-calendar-plus"></i>
+                        </span>
+
+                        <div class="dash-tool__text">
+
+                            <strong>Add Exam</strong>
+
+                            <small>Track an upcoming exam</small>
 
                         </div>
 

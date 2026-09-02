@@ -37,12 +37,15 @@
 
         }
 
+        const isLight =
+            localStorage.getItem("studyflow-theme") === "light";
+
         const theme = {
-            text: "#94A3B8",
-            grid: "rgba(255,255,255,.05)",
-            card: "#1E293B",
+            text: isLight ? "#64748B" : "#94A3B8",
+            grid: isLight ? "rgba(15,23,42,.10)" : "rgba(255,255,255,.05)",
+            card: isLight ? "#FFFFFF" : "#1E293B",
             violet: "#8B5CF6",
-            violetSoft: "rgba(139,92,246,.55)"
+            violetSoft: isLight ? "rgba(139,92,246,.25)" : "rgba(139,92,246,.55)"
         };
 
         // ------------------------------------------------------

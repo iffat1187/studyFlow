@@ -160,7 +160,12 @@
 
                     <div class="profile-avatar">
 
-                        <i class="bi bi-person-circle"></i>
+                        <img
+                                th:if="${currentProfileImageName != null}"
+                                th:src="@{/profile/picture/{file}(file=${currentProfileImageName})}"
+                                th:alt="'Profile picture'">
+
+                        <i th:unless="${currentProfileImageName != null}" class="bi bi-person-circle"></i>
 
                     </div>
 
@@ -188,12 +193,15 @@
 
                 </button>
 
-                <!--
-                    Profile dropdown.
-                    Only Logout is functional in this phase.
-                -->
-
                 <div class="profile-dropdown">
+
+                    <a class="profile-dropdown__link" th:href="@{/profile}">
+
+                        <i class="bi bi-person-circle"></i>
+
+                        <span>Profile</span>
+
+                    </a>
 
                     <form
                             class="profile-dropdown__form"

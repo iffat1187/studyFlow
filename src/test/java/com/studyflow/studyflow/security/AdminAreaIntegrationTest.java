@@ -2,7 +2,11 @@ package com.studyflow.studyflow.security;
 
 import com.studyflow.studyflow.entity.Role;
 import com.studyflow.studyflow.entity.User;
+import com.studyflow.studyflow.repository.ExamRepository;
+import com.studyflow.studyflow.repository.StudySessionRepository;
 import com.studyflow.studyflow.repository.SubjectRepository;
+import com.studyflow.studyflow.repository.TaskRepository;
+import com.studyflow.studyflow.repository.TopicRepository;
 import com.studyflow.studyflow.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +51,18 @@ class AdminAreaIntegrationTest {
     @MockitoBean
     private SubjectRepository subjectRepository;
 
+    @MockitoBean
+    private TopicRepository topicRepository;
+
+    @MockitoBean
+    private TaskRepository taskRepository;
+
+    @MockitoBean
+    private ExamRepository examRepository;
+
+    @MockitoBean
+    private StudySessionRepository studySessionRepository;
+
     private User buildUser(Long id, String name, String email, Role role) {
         return User.builder()
                 .id(id)
@@ -66,6 +82,10 @@ class AdminAreaIntegrationTest {
         when(userRepository.countUsersCreatedSince(any())).thenReturn(0L);
         when(userRepository.findTop5ByOrderByCreatedAtDesc()).thenReturn(List.of());
         when(subjectRepository.count()).thenReturn(0L);
+        when(topicRepository.count()).thenReturn(0L);
+        when(taskRepository.count()).thenReturn(0L);
+        when(examRepository.count()).thenReturn(0L);
+        when(studySessionRepository.count()).thenReturn(0L);
     }
 
     @Test

@@ -27,6 +27,7 @@ public record DashboardTaskItem(
         boolean dueTomorrow,
         String dueDateLabel,
         String dueTimeLabel,
+        String statusLabel,
         boolean completedInSession
 ) {
 
@@ -52,6 +53,20 @@ public record DashboardTaskItem(
 
         String timeLabel = (time != null) ? time.format(TIME_FMT) : null;
 
+        String statusLabel;
+        if (overdue && !done) {
+            long daysOverdue = java.time.temporal.ChronoUnit.DAYS.between(due, today);
+            statusLabel = daysOverdue == 1
+                    ? "1 day overdue"
+                    : daysOverdue + " days overdue";
+        } else if (dueToday) {
+            statusLabel = "Due today";
+        } else if (dueTomorrow) {
+            statusLabel = "Due tomorrow";
+        } else {
+            statusLabel = null;
+        }
+
         return new DashboardTaskItem(
                 task.getId(),
                 task.getTitle(),
@@ -68,6 +83,7 @@ public record DashboardTaskItem(
                 dueTomorrow,
                 dateLabel,
                 timeLabel,
+                statusLabel,
                 done
         );
     }

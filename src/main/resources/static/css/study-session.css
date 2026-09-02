@@ -73,7 +73,7 @@
     font-size:30px;
     font-weight:800;
     line-height:1.05;
-    color:#fff;
+    color:var(--text);
     letter-spacing:-1px;
 }
 
@@ -127,7 +127,7 @@
     font-size:13px;
     font-weight:600;
     color:var(--text-light);
-    background:rgba(255,255,255,.05);
+    background:var(--surface-tint);
     border:1px solid var(--border);
     padding:5px 12px;
     border-radius:var(--radius-pill);
@@ -226,7 +226,7 @@ body.session-modal-open{
 }
 
 .session-modal::-webkit-scrollbar-thumb{
-    background:rgba(255,255,255,.12);
+    background:var(--surface-tag);
     border-radius:var(--radius-pill);
     border:2px solid transparent;
     background-clip:content-box;
@@ -283,8 +283,8 @@ body.session-modal-open{
 }
 
 .session-modal-close:hover{
-    color:#fff;
-    background:rgba(255,255,255,.08);
+    color:var(--text);
+    background:var(--surface-strong);
 }
 
 .session-modal form{
@@ -312,7 +312,7 @@ body.session-modal-open{
 
 .session-modal input[type="date"],
 .session-modal input[type="time"]{
-    color-scheme:dark;
+    color-scheme:var(--color-scheme);
     background-color:var(--bg-input);
     color:var(--text);
 }
@@ -321,7 +321,7 @@ body.session-modal-open{
 .session-modal input[type="time"]::-webkit-calendar-picker-indicator{
     opacity:1;
     cursor:pointer;
-    filter:invert(.5);
+    filter:var(--calendar-filter);
     transition:filter var(--transition);
 }
 
@@ -337,7 +337,7 @@ body.session-modal-open{
     margin-bottom:26px;
     padding:20px;
     border-radius:var(--radius-lg);
-    background:rgba(255,255,255,.02);
+    background:var(--surface-soft);
     border:1px solid var(--border);
 }
 
@@ -613,7 +613,7 @@ body.session-modal-open{
 }
 
 .session-confirm-body strong{
-    color:#fff;
+    color:var(--text);
 }
 
 .session-confirm-actions{
@@ -646,7 +646,7 @@ body.session-modal-open{
 
 .study-session-page input[type="date"],
 .study-session-page input[type="time"]{
-    color-scheme:dark;
+    color-scheme:var(--color-scheme);
     background-color:var(--bg-input);
     color:var(--text);
 }

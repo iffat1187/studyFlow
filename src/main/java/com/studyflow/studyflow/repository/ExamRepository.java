@@ -91,6 +91,17 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
     boolean existsBySubject_User(User user);
 
     /**
+     * Count the user's upcoming exams (on or after the given day). Database-side
+     * count scoped to the owning user, so the dashboard summary card can show an
+     * honest "N upcoming" figure without materializing every exam row.
+     *
+     * @param user  the owning user
+     * @param today lower bound (inclusive) for upcoming exams
+     * @return the number of the user's upcoming exams
+     */
+    long countBySubject_UserAndExamDateGreaterThanEqual(User user, LocalDate today);
+
+    /**
      * Delete all exams belonging to a specific subject.
      * Used when deleting a subject to maintain referential integrity.
      *

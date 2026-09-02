@@ -20,6 +20,9 @@
             return;
         }
 
+        const isLight = localStorage.getItem("studyflow-theme") === "light";
+        const gridColor = isLight ? "rgba(15,23,42,.10)" : "rgba(255,255,255,.05)";
+
         const trendCanvas = document.getElementById("registrationTrendChart");
 
         if (trendCanvas) {
@@ -66,13 +69,13 @@
                     scales: {
 
                         x: {
-                            grid: { color: "rgba(255,255,255,.05)" },
+                            grid: { color: gridColor },
                             ticks: { color: "#94A3B8" }
                         },
 
                         y: {
                             beginAtZero: true,
-                            grid: { color: "rgba(255,255,255,.05)" },
+                            grid: { color: gridColor },
                             ticks: { color: "#94A3B8", precision: 0 }
                         }
 

@@ -80,6 +80,18 @@ public class User {
     private LocalDateTime createdAt;
 
     /**
+     * Stored profile picture filename (e.g. a generated safe UUID-based name).
+     *
+     * Only the generated file name is stored — never the original uploaded
+     * filename, never a filesystem path and never the image bytes. {@code null}
+     * means the user has no profile picture and the default avatar is shown.
+     * The physical file lives in the configured upload directory and is served
+     * through the owner-scoped {@code /profile/picture/{filename}} endpoint.
+     */
+    @Column(name = "profile_image_path")
+    private String profileImagePath;
+
+    /**
      * Subjects owned by this user.
      *
      * The owning side of the relationship is {@link Subject#getUser()},

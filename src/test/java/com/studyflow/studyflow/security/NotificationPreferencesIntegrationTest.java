@@ -211,11 +211,11 @@ class NotificationPreferencesIntegrationTest {
         // Detach so the entities are re-read (with their backdated rows).
         entityManager.clear();
 
-        assertEquals(3, notificationRepository.findAll().size());
+        assertEquals(3, notificationRepository.findByUserOrderByCreatedAtDesc(alice).size());
         int removed = retentionService.cleanupReadOlderThan(90);
         assertEquals(1, removed);
 
-        List<Notification> remaining = notificationRepository.findAll();
+        List<Notification> remaining = notificationRepository.findByUserOrderByCreatedAtDesc(alice);
         assertEquals(2, remaining.size());
         // The unread-old row is preserved regardless of age.
         assertTrue(remaining.stream().anyMatch(n -> !n.getRead()),

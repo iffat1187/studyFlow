@@ -13,8 +13,10 @@ import java.util.List;
  * Aggregated statistics backing the ADMIN dashboard.
  *
  * Every value is produced by the admin service layer from the
- * repositories — nothing is hard-coded. Task and Exam statistics
- * are intentionally absent because those modules do not exist yet.
+ * repositories — nothing is hard-coded. Platform totals are global
+ * database counts, while the {@code setupCards} are scoped to the
+ * authenticated admin's own user-owned records so one user's private
+ * data is never surfaced to another.
  */
 @Getter
 @Setter
@@ -32,6 +34,26 @@ public class AdminDashboardData {
      * Total number of subjects in the platform.
      */
     private long totalSubjects;
+
+    /**
+     * Total number of topics in the platform.
+     */
+    private long totalTopics;
+
+    /**
+     * Total number of tasks in the platform.
+     */
+    private long totalTasks;
+
+    /**
+     * Total number of exams in the platform.
+     */
+    private long totalExams;
+
+    /**
+     * Total number of study sessions logged in the platform.
+     */
+    private long totalStudySessions;
 
     /**
      * Number of users registered during the current calendar month.
@@ -82,4 +104,11 @@ public class AdminDashboardData {
      * The five most recently registered users.
      */
     private List<User> recentUsers;
+
+    /**
+     * Onboarding cards for the authenticated admin: state derived from the
+     * admin's own user-owned records (subjects, topics, tasks, exams and
+     * study sessions), never from another user's data.
+     */
+    private List<AdminSetupCard> setupCards;
 }

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<div th:replace="~{layout :: layout(~{::section})}">
+
+    <section class="settings-page">
+
+        <!-- ============================
+             Page Header
+        ============================= -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+                    <i class="bi bi-sliders"></i>
+                    Settings
+                </h1>
+
+                <p>
+                    Manage your study preferences.
+                </p>
+
+            </div>
+
+        </div>
+
+        <form th:action="@{/settings}"
+              th:object="${userSettingsDto}"
+              method="post"
+              class="settings-page__form">
+
+            <!-- CSRF token: required by Spring Security, kept enabled. -->
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}"/>
+
+            <!-- ============================
+                 Study Preferences
+            ============================= -->
+
+            <div class="settings-panel">
+
+                <div class="settings-panel__header">
+
+                    <i class="bi bi-stopwatch"></i>
+
+                    <div>
+
+                        <h2>
+                            Study Preferences
+                        </h2>
+
+                        <p>
+                            These defaults are pre-selected when you start a
+                            new Focus Timer or Study Session.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="settings-panel__body">
+
+                    <!-- Default Focus Duration -->
+
+                    <div class="form-group">
+
+                        <label for="defaultFocusDurationMinutes">
+                            Default Focus Duration
+                        </label>
+
+                        <span class="form-hint">
+                            Initial Focus Timer length. You can still change it
+                            each time you start a session.
+                        </span>
+
+                        <select id="defaultFocusDurationMinutes"
+                                class="form-control"
+                                th:field="*{defaultFocusDurationMinutes}">
+                            <option value="15">15</option>
+                            <option value="25">25</option>
+                            <option value="30">30</option>
+                            <option value="45">45</option>
+                            <option value="60">60</option>
+                        </select>
+
+                        <p class="field-error" th:if="${#fields.hasErrors('defaultFocusDurationMinutes')}"
+                           th:errors="*{defaultFocusDurationMinutes}">
+                            Default focus duration is invalid.
+                        </p>
+
+                    </div>
+
+                    <!-- Default Session Type -->
+
+                    <div class="form-group">
+
+                        <label for="defaultSessionType">
+                            Default Session Type
+                        </label>
+
+                        <span class="form-hint">
+                            Pre-selected type for new sessions and the Focus
+                            Timer.
+                        </span>
+
+                        <select id="defaultSessionType"
+                                class="form-control"
+                                th:field="*{defaultSessionType}">
+                            <option th:each="type : ${T(com.studyflow.studyflow.entity.StudySessionType).values()}"
+                                    th:value="${type}"
+                                    th:text="${#strings.capitalizeWords(#strings.toLowerCase(#strings.replace(type.name(), '_', ' ')))}">
+                            </option>
+                        </select>
+
+                        <p class="field-error" th:if="${#fields.hasErrors('defaultSessionType')}"
+                           th:errors="*{defaultSessionType}">
+                            Default session type is invalid.
+                        </p>
+
+                    </div>
+
+                    <!-- Weekly Study Goal -->
+
+                    <div class="form-group">
+
+                        <label for="weeklyStudyGoalMinutes">
+                            Weekly Study Goal
+                        </label>
+
+                        <span class="form-hint">
+                            How many minutes you aim to study each week. Shown
+                            as your goal on the dashboard.
+                        </span>
+
+                        <div class="input-with-suffix">
+
+                            <input type="number"
+                                   id="weeklyStudyGoalMinutes"
+                                   class="form-control"
+                                   th:field="*{weeklyStudyGoalMinutes}"
+                                   min="1"
+                                   max="10000"
+                                   step="15">
+
+                            <span class="input-with-suffix__suffix">
+                                minutes
+                            </span>
+
+                        </div>
+
+                        <p class="field-error" th:if="${#fields.hasErrors('weeklyStudyGoalMinutes')}"
+                           th:errors="*{weeklyStudyGoalMinutes}">
+                            Weekly study goal is invalid.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ============================
+                 Save
+            ============================= -->
+
+            <div class="settings-page__actions">
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                    Save Settings
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+</body>
+
+</html>

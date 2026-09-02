@@ -7,6 +7,7 @@ import com.studyflow.studyflow.exception.InvalidProfileDataException;
 import com.studyflow.studyflow.exception.UserNotFoundException;
 import com.studyflow.studyflow.repository.UserRepository;
 import com.studyflow.studyflow.service.impl.ProfileServiceImpl;
+import com.studyflow.studyflow.storage.ProfileImageStorage;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.AfterEach;
@@ -18,6 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,14 +54,20 @@ class ProfileServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private ProfileImageStorage imageStorage;
+
     private Validator validator;
+
+    private PasswordEncoder passwordEncoder;
 
     private ProfileService service;
 
     @BeforeEach
     void setUp() {
         validator = Validation.buildDefaultValidatorFactory().getValidator();
-        service = new ProfileServiceImpl(userRepository, validator);
+        service = new ProfileServiceImpl(userRepository, validator, imageStorage,
+                PasswordEncoderFactories.createDelegatingPasswordEncoder());
     }
 
     @AfterEach

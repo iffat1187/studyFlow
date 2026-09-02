@@ -1,0 +1,260 @@
+/* =============================================
+   StudyFlow - Profile Styles
+   Profile overview card, account information,
+   and edit-profile page layout.
+============================================= */
+
+/* ---------- Profile Overview Card ---------- */
+
+.profile-overview{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    padding:28px 30px;
+    margin-bottom:24px;
+}
+
+/* Scoped to the profile page so these rules do not collide with the
+   smaller .profile-avatar circle used by the top navbar (CSS loads after
+   style.css, so a bare .profile-avatar selector would hijack the navbar). */
+.profile-overview .profile-avatar{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    width:84px;
+    height:84px;
+    overflow:hidden;
+    font-size:44px;
+    color:var(--primary-light);
+    background:linear-gradient(135deg,rgba(139,92,246,.30),rgba(139,92,246,.06));
+    border:1px solid rgba(139,92,246,.35);
+    border-radius:50%;
+}
+
+.profile-overview .profile-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+}
+
+/* Navbar avatar keeps its own fixed compact size regardless of the
+   uploaded image's intrinsic dimensions. The wrapper is exactly 40x40 so
+   the default icon and an uploaded photo always occupy the same space. */
+.top-navbar .profile-avatar{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 40px;
+    width:40px;
+    height:40px;
+    min-width:40px;
+    min-height:40px;
+    max-width:40px;
+    max-height:40px;
+    overflow:hidden;
+    border-radius:50%;
+}
+
+.top-navbar .profile-avatar img{
+    width:40px;
+    height:40px;
+    min-width:40px;
+    min-height:40px;
+    max-width:40px;
+    max-height:40px;
+    object-fit:cover;
+    object-position:center;
+    border-radius:50%;
+    display:block;
+}
+
+.top-navbar .profile-avatar i{
+    font-size:38px;
+    line-height:1;
+}
+
+/* ---------- Profile Photo Actions ---------- */
+
+.profile-photo-actions{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+}
+
+.profile-photo-form{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.profile-photo-form__choose{
+    margin:0;
+    position:relative;
+    cursor:pointer;
+}
+
+.profile-photo-preview{
+    width:44px;
+    height:44px;
+    min-width:44px;
+    min-height:44px;
+    max-width:44px;
+    max-height:44px;
+    object-fit:cover;
+    object-position:center;
+    border-radius:50%;
+    border:1px solid var(--border);
+    display:none;
+}
+
+.profile-photo-message{
+    flex-basis:100%;
+    font-size:12.5px;
+    color:var(--danger);
+}
+
+.profile-photo-remove{
+    display:inline-block;
+}
+
+.profile-overview__text h2{
+    font-size:22px;
+    font-weight:800;
+    letter-spacing:-.5px;
+    color:var(--text);
+}
+
+.profile-overview__text p{
+    margin-top:4px;
+    font-size:14.5px;
+    color:var(--text-muted);
+}
+
+/* ---------- Account Information Card ---------- */
+
+.profile-card__header{
+    padding:18px 26px;
+    border-bottom:1px solid var(--border);
+}
+
+.profile-card__header h3{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:16px;
+    font-weight:700;
+}
+
+.profile-card__header h3 i{
+    font-size:18px;
+    color:var(--primary-light);
+}
+
+.profile-info-list{
+    margin:0;
+    padding:0;
+    list-style:none;
+}
+
+.profile-info-list li{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding:16px 26px;
+    border-bottom:1px solid var(--border);
+}
+
+.profile-info-list li:last-child{
+    border-bottom:none;
+}
+
+.profile-info-list__label{
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--text-muted);
+    white-space:nowrap;
+}
+
+.profile-info-list__value{
+    font-size:14.5px;
+    font-weight:600;
+    color:var(--text-light);
+    text-align:right;
+    word-break:break-word;
+}
+
+/* ---------- Edit Form ---------- */
+
+.profile-form-hint{
+    display:block;
+    margin-top:8px;
+    font-size:12.5px;
+    color:var(--text-muted);
+}
+
+/* ---------- Password Section ---------- */
+
+.profile-card__body{
+    padding:22px 26px;
+}
+
+.change-password-form .form-group{
+    margin-bottom:18px;
+}
+
+.change-password-form .form-group:last-of-type{
+    margin-bottom:0;
+}
+
+.password-field{
+    position:relative;
+}
+
+.password-field .form-control{
+    padding-right:42px;
+}
+
+.password-toggle{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:var(--text-muted);
+    font-size:16px;
+    padding:4px;
+    line-height:1;
+}
+
+.password-toggle:hover{
+    color:var(--text);
+}
+
+/* ---------- Responsive ---------- */
+
+@media(max-width:576px){
+
+    .profile-overview{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .profile-info-list li{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:6px;
+    }
+
+    .profile-info-list__value{
+        text-align:left;
+    }
+
+}

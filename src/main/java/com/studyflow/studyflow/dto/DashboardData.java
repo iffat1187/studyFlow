@@ -9,10 +9,13 @@ import java.util.List;
  * state. Topics and tasks are resolved through user-scoped repository
  * queries — one user can never observe another user's data.
  *
- * The {@code subjectTopics} list carries per-subject topic counts and
- * a small name preview, {@code todayTasks} and {@code upcomingTasks}
- * hold the user's actionable task items, and the remaining fields
- * deliver exam, study, and setup-checklist state from existing modules.
+ * {@code subjectTopics} carries per-subject topic counts, a small name
+ * preview and the subject's task-completion snapshot. {@code todayTasks},
+ * {@code overdueTasks}, {@code tomorrowTasks} and {@code upcomingTasks}
+ * hold the user's actionable task items in their respective groups, and
+ * {@code studyStreak} is the user's real consecutive study-day count. The
+ * remaining fields deliver exam, study, and setup-checklist state from
+ * existing modules.
  */
 public record DashboardData(
         String userName,
@@ -30,13 +33,22 @@ public record DashboardData(
         boolean hasTodayTasks,
         int todayTaskCount,
         int completedTodayCount,
+        int todayCompletedPercent,
+        long overdueCount,
+        List<DashboardTaskItem> overdueTasks,
+        boolean hasOverdueTasks,
+        List<DashboardTaskItem> tomorrowTasks,
+        boolean hasTomorrowTasks,
+        int tomorrowTaskCount,
         List<DashboardTaskItem> upcomingTasks,
         boolean hasUpcomingTasks,
         int upcomingTaskCount,
         List<UpcomingExam> upcomingExams,
         boolean hasUpcomingExams,
         long upcomingExamCount,
+        long upcomingExamTotal,
         UpcomingExam nextExam,
+        StudyStreak studyStreak,
         List<SetupStep> setupSteps,
         int setupCompleted,
         int setupTotal,

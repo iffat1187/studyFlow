@@ -3,11 +3,13 @@ package com.studyflow.studyflow.controller;
 import com.studyflow.studyflow.dto.StudySessionDto;
 import com.studyflow.studyflow.dto.StudySessionTimerRequest;
 import com.studyflow.studyflow.dto.TopicDto;
+import com.studyflow.studyflow.dto.UserSettingsDto;
 import com.studyflow.studyflow.entity.StudySessionType;
 import com.studyflow.studyflow.service.StudySessionService;
 import com.studyflow.studyflow.service.SubjectService;
 import com.studyflow.studyflow.service.TimerSaveIdempotencyGuard;
 import com.studyflow.studyflow.service.TopicService;
+import com.studyflow.studyflow.service.UserSettingsService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -54,6 +56,7 @@ public class StudySessionController {
     private final SubjectService subjectService;
     private final TopicService topicService;
     private final TimerSaveIdempotencyGuard timerSaveGuard;
+    private final UserSettingsService userSettingsService;
 
     /**
      * Constructor Injection.
@@ -61,11 +64,13 @@ public class StudySessionController {
     public StudySessionController(StudySessionService studySessionService,
                                   SubjectService subjectService,
                                   TopicService topicService,
-                                  TimerSaveIdempotencyGuard timerSaveGuard) {
+                                  TimerSaveIdempotencyGuard timerSaveGuard,
+                                  UserSettingsService userSettingsService) {
         this.studySessionService = studySessionService;
         this.subjectService = subjectService;
         this.topicService = topicService;
         this.timerSaveGuard = timerSaveGuard;
+        this.userSettingsService = userSettingsService;
     }
 
     /**
@@ -86,12 +91,14 @@ public class StudySessionController {
         String userEmail = authentication.getName();
 
         List<StudySessionDto> sessions = studySessionService.getAllSessions(userEmail);
+        UserSettingsDto settings = userSettingsService.getSettingsForUser(userEmail);
 
         model.addAttribute("sessions", sessions);
         model.addAttribute("sessionGroups", groupSessionsByMonth(sessions));
         model.addAttribute("subjects", subjectService.getAllSubjects(userEmail));
         model.addAttribute("topicsBySubject", userTopicsBySubject(userEmail));
-        model.addAttribute("studySessionDto", defaultStudySessionDto(null));
+        model.addAttribute("studySessionDto", defaultStudySessionDto(null, settings.defaultSessionType()));
+        model.addAttribute("userSettings", settings);
         model.addAttribute("showSessionModal", Boolean.TRUE.equals(add));
         model.addAttribute("today", LocalDate.now());
 
@@ -115,12 +122,14 @@ public class StudySessionController {
         String userEmail = authentication.getName();
 
         List<StudySessionDto> sessions = studySessionService.getAllSessions(userEmail);
+        UserSettingsDto settings = userSettingsService.getSettingsForUser(userEmail);
 
         model.addAttribute("sessions", sessions);
         model.addAttribute("sessionGroups", groupSessionsByMonth(sessions));
         model.addAttribute("subjects", subjectService.getAllSubjects(userEmail));
         model.addAttribute("topicsBySubject", userTopicsBySubject(userEmail));
-        model.addAttribute("studySessionDto", defaultStudySessionDto(subjectId));
+        model.addAttribute("studySessionDto", defaultStudySessionDto(subjectId, settings.defaultSessionType()));
+        model.addAttribute("userSettings", settings);
         model.addAttribute("showSessionModal", true);
         model.addAttribute("today", LocalDate.now());
 
@@ -398,10 +407,12 @@ public class StudySessionController {
 
     /**
      * A blank Create Study Session form: today's date, a 60-minute default
-     * duration and FOCUS as the default type. No pre-filled subject, so the
+     * duration and the user's preferred default session type (from their
+     * Settings; FOCUS when no setting exists). No pre-filled subject, so the
      * user makes an explicit choice.
      */
-    private StudySessionDto defaultStudySessionDto(Long subjectId) {
+    private StudySessionDto defaultStudySessionDto(Long subjectId,
+                                                   StudySessionType defaultSessionType) {
         return new StudySessionDto(
                 null,
                 subjectId,
@@ -412,7 +423,7 @@ public class StudySessionController {
                 null,
                 null,
                 60,
-                StudySessionType.FOCUS,
+                defaultSessionType,
                 ""
         );
     }

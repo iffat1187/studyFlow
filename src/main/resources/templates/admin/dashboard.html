@@ -84,6 +84,74 @@
             <div class="admin-kpi">
 
                 <span class="admin-kpi__icon admin-kpi__icon--sky">
+                    <i class="bi bi-journal-text"></i>
+                </span>
+
+                <div class="admin-kpi__body">
+
+                    <span class="admin-kpi__label">Total Topics</span>
+
+                    <strong class="admin-kpi__value"
+                            th:text="${data.totalTopics}">0</strong>
+
+                </div>
+
+            </div>
+
+            <div class="admin-kpi">
+
+                <span class="admin-kpi__icon">
+                    <i class="bi bi-check2-square"></i>
+                </span>
+
+                <div class="admin-kpi__body">
+
+                    <span class="admin-kpi__label">Total Tasks</span>
+
+                    <strong class="admin-kpi__value"
+                            th:text="${data.totalTasks}">0</strong>
+
+                </div>
+
+            </div>
+
+            <div class="admin-kpi">
+
+                <span class="admin-kpi__icon admin-kpi__icon--sky">
+                    <i class="bi bi-calendar-event"></i>
+                </span>
+
+                <div class="admin-kpi__body">
+
+                    <span class="admin-kpi__label">Total Exams</span>
+
+                    <strong class="admin-kpi__value"
+                            th:text="${data.totalExams}">0</strong>
+
+                </div>
+
+            </div>
+
+            <div class="admin-kpi">
+
+                <span class="admin-kpi__icon admin-kpi__icon--amber">
+                    <i class="bi bi-clock-history"></i>
+                </span>
+
+                <div class="admin-kpi__body">
+
+                    <span class="admin-kpi__label">Total Study Sessions</span>
+
+                    <strong class="admin-kpi__value"
+                            th:text="${data.totalStudySessions}">0</strong>
+
+                </div>
+
+            </div>
+
+            <div class="admin-kpi">
+
+                <span class="admin-kpi__icon admin-kpi__icon--sky">
                     <i class="bi bi-person-plus-fill"></i>
                 </span>
 
@@ -127,6 +195,61 @@
 
                     <strong class="admin-kpi__value"
                             th:text="${data.activeCount}">0</strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================
+             Complete Your StudyFlow onboarding
+             Scoped to the authenticated admin's own records.
+        ============================= -->
+
+        <div class="admin-card admin-onboarding">
+
+            <div class="admin-card__header">
+
+                <h2 class="admin-card__title">
+
+                    <i class="bi bi-rocket-takeoff"></i>
+
+                    Complete Your StudyFlow
+
+                </h2>
+
+            </div>
+
+            <p class="admin-onboarding__note">
+                Your personal workspace &mdash; these steps belong to your account,
+                so your setup stays private. Add your first subject, then organize it
+                with topics, tasks and exams as you go.
+            </p>
+
+            <div class="admin-setup-grid">
+
+                <div class="admin-setup-card"
+                     th:each="card : ${data.setupCards}"
+                     th:classappend="${card.done} ? 'admin-setup-card--done' : ''">
+
+                    <span class="admin-setup-card__icon">
+                        <i th:class="'bi ' + ${card.icon}"></i>
+                    </span>
+
+                    <div class="admin-setup-card__body">
+
+                        <h3 class="admin-setup-card__title" th:text="${card.title}">Subjects</h3>
+
+                        <span class="admin-setup-card__status"
+                              th:text="${card.statusLabel}">Not started</span>
+
+                    </div>
+
+                    <a class="admin-setup-card__cta"
+                       th:href="@{${card.ctaUrl}}"
+                       th:text="${card.ctaLabel}">Add Your First Subject</a>
 
                 </div>
 

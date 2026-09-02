@@ -671,6 +671,7 @@
                                     <option value="">Select session type</option>
                                     <option th:each="type : ${T(com.studyflow.studyflow.entity.StudySessionType).values()}"
                                             th:value="${type}"
+                                            th:selected="${userSettings != null and type.name() == userSettings.defaultSessionType.name()}"
                                             th:text="${#strings.capitalizeWords(#strings.toLowerCase(#strings.replace(type.name(), '_', ' ')))}">
                                     </option>
                                 </select>
@@ -702,7 +703,10 @@
 
                             <div class="duration-control">
 
-                                <input type="hidden" data-focus-timer-duration value="25">
+                                <input type="hidden"
+                                       data-focus-timer-duration
+                                       th:value="${userSettings != null ? userSettings.defaultFocusDurationMinutes() : 25}"
+                                       value="25">
 
                                 <div class="duration-stepper">
 
@@ -713,7 +717,9 @@
                                         <i class="bi bi-dash"></i>
                                     </button>
 
-                                    <span class="duration-display" data-focus-timer-duration-display>25 min</span>
+                                    <span class="duration-display"
+                                          data-focus-timer-duration-display
+                                          th:text="${userSettings != null ? userSettings.defaultFocusDurationMinutes() + ' min' : '25 min'}">25 min</span>
 
                                     <button type="button"
                                             class="duration-btn"

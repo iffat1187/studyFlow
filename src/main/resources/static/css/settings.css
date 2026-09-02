@@ -1,0 +1,108 @@
+/* =====================================================
+   StudyFlow Settings Page (Study Preferences)
+===================================================== */
+
+.settings-page__form{
+    max-width:680px;
+}
+
+/* ---- Panel (section card) ---- */
+
+.settings-panel{
+    border-radius:var(--radius-md);
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    overflow:hidden;
+    animation:fadeIn .5s ease;
+}
+
+.settings-panel__header{
+    display:flex;
+    align-items:flex-start;
+    gap:16px;
+    padding:22px 24px;
+    border-bottom:1px solid var(--border);
+    background:rgba(139,92,246,.06);
+}
+
+.settings-panel__header > i{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:42px;
+    height:42px;
+    flex-shrink:0;
+    font-size:19px;
+    color:var(--primary-light);
+    background:linear-gradient(135deg,rgba(139,92,246,.24),rgba(139,92,246,.05));
+    border:1px solid rgba(139,92,246,.30);
+    border-radius:var(--radius-md);
+}
+
+.settings-panel__header h2{
+    font-size:18px;
+    font-weight:700;
+    letter-spacing:-.3px;
+    color:var(--text);
+}
+
+.settings-panel__header p{
+    margin-top:6px;
+    font-size:13.5px;
+    line-height:1.6;
+    color:var(--text-muted);
+}
+
+.settings-panel__body{
+    padding:26px 24px 14px;
+}
+
+/* ---- Field hint ---- */
+
+.form-hint{
+    display:block;
+    margin-bottom:10px;
+    font-size:12.5px;
+    line-height:1.6;
+    color:var(--text-muted);
+}
+
+/* ---- Input with trailing suffix (e.g. "minutes") ---- */
+
+.input-with-suffix{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.input-with-suffix .form-control{
+    flex:1;
+    min-width:0;
+}
+
+.input-with-suffix__suffix{
+    flex-shrink:0;
+    padding:14px 12px;
+    font-size:14px;
+    font-weight:600;
+    color:var(--text-muted);
+    background:var(--bg-input);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+}
+
+/* ---- Actions ---- */
+
+.settings-page__actions{
+    display:flex;
+    gap:12px;
+    margin-top:24px;
+}
+
+@media (max-width:640px){
+
+    .settings-page__actions{
+        flex-wrap:wrap;
+    }
+
+}

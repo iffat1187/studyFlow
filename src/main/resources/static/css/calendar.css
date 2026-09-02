@@ -116,7 +116,7 @@
 }
 
 .cal-filter:hover{
-    color:#fff;
+    color:var(--text);
     border-color:rgba(139,92,246,.5);
 }
 
@@ -152,7 +152,7 @@
 .cal-filter-subject select:focus{
     outline:none;
     border-color:rgba(139,92,246,.5);
-    color:#fff;
+    color:var(--text);
 }
 
 .cal-filter-subject > i{
@@ -203,7 +203,7 @@
     display:grid;
     grid-template-columns:repeat(7,1fr);
     border-bottom:1px solid var(--border);
-    background:rgba(255,255,255,.02);
+    background:var(--surface-soft);
 }
 
 .cal-weekday{
@@ -241,7 +241,7 @@
 }
 
 .cal-day-cell.is-outside{
-    background:rgba(15,23,42,.45);
+    background:var(--sunken-bg);
 }
 
 .cal-day-cell.is-outside .cal-day-num{
@@ -455,7 +455,7 @@
     display:grid;
     grid-template-columns:64px repeat(7,1fr);
     border-bottom:1px solid var(--border);
-    background:rgba(255,255,255,.02);
+    background:var(--surface-soft);
 }
 
 .cal-week-head__corner{
@@ -531,7 +531,7 @@
     left:0;
     right:0;
     height:1px;
-    background:rgba(255,255,255,.04);
+    background:var(--surface-tint);
 }
 
 .cal-timed-event{

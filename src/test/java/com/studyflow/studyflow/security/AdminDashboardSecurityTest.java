@@ -2,7 +2,11 @@ package com.studyflow.studyflow.security;
 
 import com.studyflow.studyflow.entity.Role;
 import com.studyflow.studyflow.entity.User;
+import com.studyflow.studyflow.repository.ExamRepository;
+import com.studyflow.studyflow.repository.StudySessionRepository;
 import com.studyflow.studyflow.repository.SubjectRepository;
+import com.studyflow.studyflow.repository.TaskRepository;
+import com.studyflow.studyflow.repository.TopicRepository;
 import com.studyflow.studyflow.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
@@ -48,6 +53,18 @@ class AdminDashboardSecurityTest {
     @MockitoBean
     private SubjectRepository subjectRepository;
 
+    @MockitoBean
+    private TopicRepository topicRepository;
+
+    @MockitoBean
+    private TaskRepository taskRepository;
+
+    @MockitoBean
+    private ExamRepository examRepository;
+
+    @MockitoBean
+    private StudySessionRepository studySessionRepository;
+
     private User buildUser(Long id, String name, String email, Role role, LocalDateTime createdAt) {
         return User.builder()
                 .id(id)
@@ -60,8 +77,15 @@ class AdminDashboardSecurityTest {
     }
 
     private void stubRealisticDashboardData() {
+        // Platform totals.
         when(userRepository.count()).thenReturn(5L);
         when(subjectRepository.count()).thenReturn(12L);
+        when(topicRepository.count()).thenReturn(40L);
+        when(taskRepository.count()).thenReturn(60L);
+        when(examRepository.count()).thenReturn(15L);
+        when(studySessionRepository.count()).thenReturn(25L);
+
+        // User activity for the charts / recent-users table.
         when(userRepository.countUsersByRole())
                 .thenReturn(List.of(
                         new Object[]{Role.USER, 4L},
@@ -78,6 +102,16 @@ class AdminDashboardSecurityTest {
                         buildUser(2L, "Alice", "alice@example.com", Role.USER, LocalDateTime.parse("2026-04-10T09:15:00")),
                         buildUser(1L, "Bob", "bob@example.com", Role.ADMIN, LocalDateTime.parse("2026-03-05T14:00:00"))
                 ));
+
+        // The authenticated admin's own onboarding records.
+        when(userRepository.findByEmail("admin@example.com"))
+                .thenReturn(Optional.of(buildUser(9L, "Root Admin", "admin@example.com",
+                        Role.ADMIN, LocalDateTime.parse("2026-01-01T08:00:00"))));
+        when(subjectRepository.countByUser(any(User.class))).thenReturn(12L);
+        when(topicRepository.countBySubject_User(any(User.class))).thenReturn(18L);
+        when(taskRepository.countBySubject_User(any(User.class))).thenReturn(22L);
+        when(examRepository.countBySubject_User(any(User.class))).thenReturn(4L);
+        when(studySessionRepository.countBySubject_User(any(User.class))).thenReturn(9L);
     }
 
     @Test
@@ -101,12 +135,55 @@ class AdminDashboardSecurityTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(">5</strong>")))
                 .andExpect(content().string(containsString(">12</strong>")))
+                .andExpect(content().string(containsString(">40</strong>")))
+                .andExpect(content().string(containsString(">60</strong>")))
+                .andExpect(content().string(containsString(">15</strong>")))
+                .andExpect(content().string(containsString(">25</strong>")))
                 .andExpect(content().string(containsString("Alice")))
                 .andExpect(content().string(containsString("alice@example.com")))
                 .andExpect(content().string(containsString("ADMIN")))
                 .andExpect(content().string(containsString("USER")))
                 .andExpect(content().string(containsString("roleCounts: [4,1]")))
                 .andExpect(content().string(containsString("trendCounts: [2,3]")));
+    }
+
+    @Test
+    void onboarding_reflectsAdminOwnData() throws Exception {
+        stubRealisticDashboardData();
+
+        mockMvc.perform(get("/admin/dashboard")
+                        .with(user("admin@example.com").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Complete Your StudyFlow")))
+                // Admin's own records drive the "done" state and real counts.
+                .andExpect(content().string(containsString("18 added")))
+                .andExpect(content().string(containsString("22 added")))
+                .andExpect(content().string(containsString("9 added")))
+                // Manage CTAs render once data exists, and reuse existing routes.
+                .andExpect(content().string(containsString("Manage Subjects")))
+                .andExpect(content().string(containsString("Manage Topics")))
+                .andExpect(content().string(containsString("Manage Exams")))
+                .andExpect(content().string(containsString("View Study Sessions")));
+    }
+
+    @Test
+    void onboarding_fallsBackToNotStarted_withoutAdminRecord() throws Exception {
+        // No admin record: cards must stay in the "not started" state.
+        stubRealisticDashboardData();
+        when(userRepository.findByEmail("admin@example.com")).thenReturn(Optional.empty());
+        when(subjectRepository.countByUser(any(User.class))).thenReturn(0L);
+        when(topicRepository.countBySubject_User(any(User.class))).thenReturn(0L);
+        when(taskRepository.countBySubject_User(any(User.class))).thenReturn(0L);
+        when(examRepository.countBySubject_User(any(User.class))).thenReturn(0L);
+        when(studySessionRepository.countBySubject_User(any(User.class))).thenReturn(0L);
+
+        mockMvc.perform(get("/admin/dashboard")
+                        .with(user("admin@example.com").roles("ADMIN")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Add Your First Subject")))
+                .andExpect(content().string(containsString("Add Your First Exam")))
+                .andExpect(content().string(containsString("Log Your First Study Session")))
+                .andExpect(content().string(not(containsString("18 added"))));
     }
 
     @Test

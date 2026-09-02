@@ -13,6 +13,12 @@ import java.util.List;
  * The week is defined from the start of the current week through today
  * (Monday rule), so {@link #todayLabel()} is always part of
  * {@link #weekLabel()}.
+ *
+ * The weekly goal comes from the user's own {@code UserSettings} record
+ * (single source of truth, shared with the Focus Timer defaults). It is
+ * purely descriptive: the goal value is real settings data and
+ * {@link #weeklyGoalPercent()} is derived from the week's real minutes, so
+ * the dashboard never invents progress for a user without a goal.
  */
 public record StudyProgress(
         String todayLabel,
@@ -23,6 +29,10 @@ public record StudyProgress(
         List<RecentStudySession> recentSessions,
         boolean hasRecentSessions,
         List<SubjectStudySummary> subjectSummaries,
-        boolean hasSubjectSummaries
+        boolean hasSubjectSummaries,
+        String weeklyGoalLabel,
+        int weeklyGoalPercent,
+        String totalLabel,
+        boolean hasTotal
 ) {
 }

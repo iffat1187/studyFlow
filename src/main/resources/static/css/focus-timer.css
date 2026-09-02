@@ -73,7 +73,7 @@
     padding:18px 20px;
     margin-bottom:24px;
     border-radius:var(--radius-lg);
-    background:rgba(255,255,255,.02);
+    background:var(--surface-soft);
     border:1px solid var(--border);
 }
 
@@ -127,7 +127,7 @@
 
 .focus-timer-ring-track{
     fill:none;
-    stroke:rgba(255,255,255,.08);
+    stroke:var(--border);
     stroke-width:10;
 }
 
@@ -144,7 +144,7 @@
     font-weight:800;
     letter-spacing:-1.5px;
     font-variant-numeric:tabular-nums;
-    color:#fff;
+    color:var(--text);
     line-height:1;
     z-index:1;
 }
@@ -228,7 +228,7 @@
 .focus-timer-complete strong{
     display:block;
     font-size:15px;
-    color:#fff;
+    color:var(--text);
 }
 
 .focus-timer-complete span{
